@@ -55,6 +55,10 @@ erreichbar sein.
 
 Die Liste soll ausserdem entsprechend der Aufgabenkategorien gegliedert sein.
 
+### Features ###
+
+* show available autotool tasks
+
 
 Iteration 4
 -----------
