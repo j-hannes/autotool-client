@@ -11,15 +11,25 @@ Instanziierung) sollte hier bereits vermittelt sein._
 * Uebungsaufgaben = konfigurierte Aufgaben
 
 
+Entwicklungsprozess
+===================
+
+Die Software wird in folgenden Schritten entwickelt:
+
+Die Planung der Software erfolgt Schritt fuer Schritt in Iterationen. Fuer jede
+Iteration wird ein Feature umgesetzt, was in mehreren Tasks erfolgen kann.
+
+
 Iteration 1
 -----------
 
-Bereitstellen des Server-Prozesses, Zugang zur Startseite
+Erstellen der Basis-Infrastruktur (Server-Prozess)
 
-Ein Webserver kann gestartet werden und ist per HTTP erreichbar. Ein GET-Anfrage
-auf eine entsprechende URL (Root-Domain) liefert eine fehlerfreie Antwort (200
-OK) sowie einen kurzen, textuellen Inhalt (noch kein HTML) der Startseite der
-Anwendung.
+Die Anwendung wird als Snap-Webanwendung umgesetzt, welche einen HTTP-Webserver
+umfasst. Dieser kann gestartet werden und ist per HTTP erreichbar. Ein
+GET-Anfrage auf eine entsprechende URL (Root-Domain) liefert eine fehlerfreie
+Antwort (200 OK) sowie einen kurzen, textuellen Inhalt (noch kein HTML) der
+Startseite der Anwendung.
 
 ### Features ###
 
@@ -32,8 +42,8 @@ Iteration 2
 *Laden statischer Inhalte, Einbinden des Bootstrap-Frameworks*
 
 Die Bootstrap CSS- und JavaScript-Bibliothek (von Twitter) ist in die Startseite
-eingebunden. Der Inhalt der Startseite kann nun in HTML verfasst und optisch
-gestaltet werden (minimaler Aufwand).
+eingebunden. Der Inhalt der Startseite ist in HTML verfasst und optisch
+gestaltet (minimaler Aufwand).
 
 ### Features ###
 
