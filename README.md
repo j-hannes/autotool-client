@@ -20,7 +20,7 @@ Die Planung der Software erfolgt Schritt fuer Schritt in Iterationen. Fuer jede
 Iteration wird ein Feature umgesetzt, was in mehreren Tasks erfolgen kann.
 
 
-Feature 1
+Iteration 1
 -----------
 
 Erstellen der Basis-Infrastruktur (Server-Prozess)
