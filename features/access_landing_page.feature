@@ -4,6 +4,10 @@ Feature: Access landing page
   which is callable via a HTTP request.
 
   Scenario Outline: Everything is working smoothly
+
+    The server process is running and can be reached from the command line via
+    the program cURL.
+
     Given the server is up and running on <url>:<port>
      When I curl <url>:<port>
      Then I get the response header "200 OK"
