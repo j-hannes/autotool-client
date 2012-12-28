@@ -22,11 +22,11 @@ Then /^I have one task names (\w+) in my task list$/ do |taskname|
   pending # express the regexp above with the code you wish you had
 end
 
-Given /^the server is up and running on (\w+):(\d\d\d\d)$/ do |url, port|
+Given /^the server is up and running on (\w+):(\d\d\d\d)$/ do |host, port|
   pending # express the regexp above with the code you wish you had
 end
 
-When /^I enter (\w+):(\d\d\d\d) in my browser$/ do |url, port|
+When /^I enter (\w+):(\d\d\d\d) in my browser$/ do |host, port|
   pending # express the regexp above with the code you wish you had
 end
 
@@ -50,7 +50,7 @@ Given /^the server is up and running on http:\/\/localhost:(\d+)$/ do |arg1|
   pending # express the regexp above with the code you wish you had
 end
 
-When /^I curl http:\/\/localhost:(\d+)$/ do |arg1|
+When /^I run the command curl (\w+):(\d\d\d\d)$/ do |host, port|
   pending # express the regexp above with the code you wish you had
 end
 

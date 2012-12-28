@@ -8,11 +8,11 @@ Feature: Access landing page
     The server process is running and can be reached from the command line via
     the program cURL.
 
-    Given the server is up and running on <url>:<port>
-     When I curl <url>:<port>
+    Given the server is up and running on <host>:<port>
+     When I run the command curl <host>:<port>
      Then I get the response header "200 OK"
       And I get the body "autotool landing page" 
 
   Examples:
-      | url              | port |
+      | host             | port |
       | http://localhost | 8000 |

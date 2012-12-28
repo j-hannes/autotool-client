@@ -14,7 +14,7 @@ Feature:
 
   Scenario Outline: Create a task with a specific name
     When I create a task with name <taskname>
-    Then I have one task names <taskname> in my task list
+    Then I have one task named <taskname> in my task list
 
   Examples:
     | taskname |

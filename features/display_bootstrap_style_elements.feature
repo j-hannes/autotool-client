@@ -1,5 +1,7 @@
 Feature: Display bootstrap style elements
 
+  # This is not a business requirement., but rather a technology question.
+
   For quick prototyping we want to use the Bootstrap CSS framework from Twitter.
   Therefore the according CSS and JavaScript files have to be includes as static
   ressources in every served page.
