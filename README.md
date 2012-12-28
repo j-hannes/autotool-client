@@ -1,27 +1,62 @@
 Synopsis
 ========
 
-Der Kern der Anwendung ist das Erstellen von seminarbegleitenden
+Zweck der Anwendung ist das Erstellen von seminarbegleitenden
 Uebungsaufgaben, welche dann von Studenten geloest werden sollen.
 
 _Hintergrund ueber das Funktionieren von Autotool-Aufgaben (Konfiguration,
-Instanziierung) sollte hier bereits vermittelt sein._
+Instanziierung) sollte hier bereits vermittelt sein, ebenso der Hintergrund und
+die Kernfunktionalitaeten._
+
+Glossar
+-------
 
 * Aufgaben = vom Autotool
 * Uebungsaufgaben = konfigurierte Aufgaben
+* Assignment = gestellte Uebungsaufgaben (Kurs, Abgabetermin)
+* Instanz = personalisierte Assignment
+* Loesung = Loesung einer Instanz
 
 
 Entwicklungsprozess
 ===================
 
-Die Software wird in folgenden Schritten entwickelt:
+Da die Software von nur einer Person erstellt wird, die Spezifikation, Entwurf
+sowie Implementierung allein umsetzt, eignet sich hier eine agile
+Entwicklungsmethode. Dokumentation kann dabei eher knapp ausfallen, aber
+dennoch vollstaendig, da das Projekt im Rahmen einer Masterarbeit stattfindet
+und darin in einem eigenen Kapitel erlaeutert wird.
 
-Die Planung der Software erfolgt Schritt fuer Schritt in Iterationen. Fuer jede
-Iteration wird ein Feature umgesetzt, was in mehreren Tasks erfolgen kann.
+Die Entwicklung erfolgt in Iterationen, wobei mit einer moeglichst einfachen
+Variante der Software begonnen wird (minimale Funktionalitaet) und dann in
+jeder Iteration eine weitere Funktionalitaet hinzugefuegt wird.
+
+Zum Beispiel wird in der ersten Iteration nur das Erstellen von Uebungsaufgaben
+umgesetzt. Damit ist der eigentliche Zweck der Anwendung zwar noch nicht
+erfuellt, aber die Anwendung bietet schon eine Funktionalitaet, welche
+eigenstaendig genutzt werden kann. Die naechste Iterationbeihaltet dann das
+Loesen der Aufgaben, eine naechste koennte dann das Authentifizieren von
+Nutzern beinhalten, eine weitere das Kurssystem, usw.
+
+Diese Methode nennt man agil, da versucht wird, zu jedem Zeitpunkt eine
+lauffaehige Version verfuegbar zu haben, die dann Schritt fuer Schritt
+erweitert werden kann. Ausserdem koennen einzelne Iterationen auch kurzfristig
+gewonnenen Erkenntnisse bzw. Aenderungen des urspruenglichen Plans beinhalten.
+Damit kann der Entwicklungsprozess flexibler gestaltet, und auf notwendige
+Aenderungen 'agiler' reagiert werden.
+
+Jede Iteration wird wiederum in einzelne Tasks unterteilt, welche selbst eine
+Erweiterung der Anwendung darstellen, die einen kleinen Bestandteil an
+Funktionalitaet (Feature) hinzufuegen, wobei die Anwendung vor und nach jedem
+Task trotzdem noch lauffaehig bleibt.
 
 
 Iteration 1
 -----------
+
+_TODO: Iterationen ueberarbeiten, zum Beispiel Iteration 1 und 2
+zusammenfassen, weitere Iterationen ebenfalls aktualisieren (wie oben
+beschrieben). -> Dabei die Iterationen in Tasks unterteilen._
 
 Erstellen der Basis-Infrastruktur (Server-Prozess)
 

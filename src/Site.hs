@@ -24,12 +24,19 @@ import           Heist
 import qualified Heist.Interpreted as I
 ------------------------------------------------------------------------------
 import           Application
+import           Controller.Task
 
+
+------------------------------------------------------------------------------
+-- | 
 
 ------------------------------------------------------------------------------
 -- | The application's routes.
 routes :: [(ByteString, Handler App App ())]
-routes = [("", serveDirectory "static")]
+routes = [
+    ("/select_task", handleTaskTree)
+  , ("",             serveDirectory "static")
+  ]
 
 
 ------------------------------------------------------------------------------
