@@ -29,7 +29,7 @@ type SpliceBinder = HeistState AppHandler -> HeistState AppHandler
 -- | The location of the template file in the /snaplets/heist/templates
 -- folder.
 taskTreeTemplate :: ByteString
-taskTreeTemplate = "select_task"
+taskTreeTemplate = "task/select"
 
 
 ------------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 
   <div class="well">
     <a class="btn btn-primary"
-       href="/select_task">
+       href="/task/select">
       Create a new task
     </a>
   </div>
