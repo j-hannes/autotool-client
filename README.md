@@ -3,6 +3,7 @@ Synopsis
 
 Zweck der Anwendung ist das Erstellen von seminarbegleitenden
 Uebungsaufgaben, welche dann von Studenten geloest werden sollen.
+_Uebungsaufgaben fuer was?_
 
 _Hintergrund ueber das Funktionieren von Autotool-Aufgaben (Konfiguration,
 Instanziierung) sollte hier bereits vermittelt sein, ebenso der Hintergrund und
@@ -13,8 +14,8 @@ Glossar
 
 * Aufgaben = vom Autotool
 * Uebungsaufgaben = konfigurierte Aufgaben
-* Assignment = gestellte Uebungsaufgaben (Kurs, Abgabetermin)
-* Instanz = personalisierte Assignment
+* Assignment = gestellte Uebungsaufgaben (Kurs, Abgabetermin) _Uebersetzung?_
+* Instanz = personalisiertes Assignment
 * Loesung = Loesung einer Instanz
 
 
@@ -50,6 +51,39 @@ Erweiterung der Anwendung darstellen, die einen kleinen Bestandteil an
 Funktionalitaet (Feature) hinzufuegen, wobei die Anwendung vor und nach jedem
 Task trotzdem noch lauffaehig bleibt.
 
+
+Iteratonen:
+-----------
+
+<!--
+  Eine Iteration stellt einen Erweiterungszyklus der Anwendung dar.
+
+  Dabei sollte ueberlegt werden, was der kleinst moeglichste Nutzen der
+  Anwendung sein koennte. Dieser wird als erste Iteration gewaehlt. Dann wird
+  die Anwendung Iteration fuer Iteration um Funktionalitaeten erweitert.
+  
+  Es ist moeglich, eine nullte Iteration als Basis zu waehlen, welche die
+  Initialisierung und evtl. erstellung der zu Grunde liegenden Infrastruktur
+  beinhaltet.
+
+  Iterationen selbst sind in Tasks untergliedert. Vor und nach einem Task
+  sollte jeweils eine lauffaehige Version des Programmes Vorliegen. Nach einer
+  Iteration soll das Programm um eine weitere Funktionalitaet ergaenzt sein.
+  
+-->
+
+00. Initialisierung
+    * Erstellen des Grundgeruestes (Skeleton) der Anwendung
+      - ...
+    * Initialisieren des Repositories
+      - ...
+    * Entfernen nicht benoetigten Codes
+      - ...
+    * Einfacher Start-Bildschirm (landing page)
+      - ...
+
+01. Erstellen einer Aufgabe
+    * Aufgabenbaum
 
 Iteration 1
 -----------
