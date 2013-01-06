@@ -19,6 +19,7 @@ import           Snap.Snaplet.Heist
 import           Application
 import           Autotool.Client.Interface.Direct
 import           Autotool.Client.Types.TaskTree
+import           Utils.TaskReader (getAutotoolTask)
 import qualified View.Task as View
 
 
@@ -38,8 +39,9 @@ handleTaskTree = do
 -- | 
 handleTaskConfig :: AppHandler ()
 handleTaskConfig = do
-    nme  <- fmap BS.unpack $ fromMaybe "error taskname" <$> getParam "taskname"
-    heistLocal (I.bindString "taskName" $ T.pack nme) $ render "forms/taskConfig"
+    name <- fmap BS.unpack $ fromMaybe "no taskname" <$> getParam "taskname"
+    task <- liftIO $ getAutotoolTask name 
+    heistLocal (I.bindString "taskName" $ T.pack $ show task) $ render "forms/taskConfig"
 
 
 ------------------------------------------------------------------------------
