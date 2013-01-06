@@ -3,11 +3,16 @@
 ------------------------------------------------------------------------------
 -- | Controller for creating tasks.
 module Controller.Task
-    ( handleTaskTree
+    ( handleTaskConfig
+    , handleTaskTree
     ) where
 
 ------------------------------------------------------------------------------
+import qualified Data.ByteString.Char8 as BS
+import           Data.ByteString (ByteString)
+import           Data.Maybe
 import qualified Data.Text as T
+import qualified Heist.Interpreted as I
 import           Snap
 import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
@@ -27,6 +32,14 @@ handleTaskTree = do
     heistLocal
       (View.bindTaskTreeSplice taskTree)
       (render View.taskTreeTemplate)
+
+
+------------------------------------------------------------------------------
+-- | 
+handleTaskConfig :: AppHandler ()
+handleTaskConfig = do
+    nme  <- fmap BS.unpack $ fromMaybe "error taskname" <$> getParam "taskname"
+    heistLocal (I.bindString "taskName" $ T.pack nme) $ render "forms/taskConfig"
 
 
 ------------------------------------------------------------------------------

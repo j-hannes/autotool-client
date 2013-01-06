@@ -34,8 +34,9 @@ import           Controller.Task
 -- | The application's routes.
 routes :: [(ByteString, Handler App App ())]
 routes = [
-    ("/task/select", handleTaskTree)
-  , ("",             serveDirectory "static")
+    ("/task/select",              handleTaskTree)
+  , ("/task/configure/:taskname", handleTaskConfig)
+  , ("",                          serveDirectory "static")
   ]
 
 
