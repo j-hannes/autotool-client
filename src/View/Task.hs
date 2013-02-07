@@ -4,17 +4,21 @@
 -- |
 module View.Task
     ( bindTaskTreeSplice
+    , bindFormSplices
     , taskTreeTemplate
+    , taskFormTemplate
+    , taskDescriptionSplice
     ) where
 
 ------------------------------------------------------------------------------
-import           Data.ByteString (ByteString)
-import qualified Data.ByteString.Char8 as BS
-import           Data.Text (Text)
-import qualified Data.Text as T
+import           Data.ByteString                (ByteString)
+import qualified Data.ByteString.Char8          as BS
+import           Data.List                      (intersperse)
+import           Data.Text                      (Text)
+import qualified Data.Text                      as T
 import           Heist
 import           Heist.Interpreted
-import qualified Text.XmlHtml as X
+import qualified Text.XmlHtml                   as X
 ------------------------------------------------------------------------------
 import           Application
 import           Autotool.Client.Types.TaskTree
@@ -33,10 +37,64 @@ taskTreeTemplate = "task/select"
 
 
 ------------------------------------------------------------------------------
+-- | The location of the template file in the /snaplets/heist/templates/forms
+-- folder.
+taskFormTemplate :: String
+taskFormTemplate = "taskConfig"
+
+
+------------------------------------------------------------------------------
 -- | Binds a splice to the handlers heist state which renders a list of task
 -- trees into a html template.
 bindTaskTreeSplice :: [TaskTree] -> SpliceBinder
 bindTaskTreeSplice = bindSplice "taskTrees" . mapSplices renderTaskTree
+
+
+------------------------------------------------------------------------------
+-- | Binds a splice to the handlers heist state which renders a list of task
+-- trees into a html template.
+bindFormSplices :: String
+                -> String
+                -> [(String, String)]
+                -> Maybe String
+                -> SpliceBinder 
+bindFormSplices name desc doc err =
+    bindSplices
+      [ ("task-name",          textSplice $ T.pack name)
+      , ("task-description",   taskDescriptionSplice desc)
+      , ("task-documentation", taskDocumentationSplice doc)
+      , ("verification-error", verificationErrorSplice err)
+      ]
+
+
+------------------------------------------------------------------------------
+-- | Renders a error message into a bootstrap error window.
+verificationErrorSplice :: Maybe String -> Splice AppHandler
+verificationErrorSplice Nothing       = return [X.TextNode ""]
+verificationErrorSplice (Just errMsg) = return [X.Element "pre" [
+                                            ("class", "alert alert-warning")
+                                          ] [
+                                            X.TextNode $ T.pack errMsg
+                                          ]]
+
+
+------------------------------------------------------------------------------
+-- | A splice that renders a list of tuples (linktext, url) into multiple 'a'
+-- tags, spearated by a ' | ' separator.
+taskDocumentationSplice :: [(String, String)] -> Splice AppHandler
+taskDocumentationSplice linkList =
+    return . intersperse separator $ map createLink linkList
+  where
+    separator = X.TextNode " | "
+
+
+------------------------------------------------------------------------------
+-- | Transform a tuple of a text and an url into an html link tag.
+createLink :: (String, String) -> X.Node
+createLink (text, url)= X.Element "a" attributes [linkTextNode]
+  where
+    attributes = [("href", T.pack url), ("target", "_blank")]
+    linkTextNode = X.TextNode $ T.pack text
 
 
 ------------------------------------------------------------------------------
@@ -53,24 +111,9 @@ renderCategory name taskTrees =
     runChildrenWith splices
   where
     splices =
-      [ ("element",      categorySplice)  -- singleTagNode "category")
+      [ ("element",      singleTagNode "category")
       , ("categoryName", textSplice $ T.pack name)
       , ("subTrees",     mapSplices renderTaskTree taskTrees)]
-
-categorySplice = return [
-      X.Element "div" [("class", "tag")] [
-        X.Element "span" [("class", "category")] [
-          X.Element "categoryName" [] []
-        ]
-      , X.Element "ul" [] [
-          X.Element "subTrees" [] [
-            X.Element "li" [] [
-              X.Element "element" [] []
-            ]
-          ]
-        ]
-      ]
-    ]
 
 
 ------------------------------------------------------------------------------
@@ -80,16 +123,8 @@ renderTasklink name =
     runChildrenWith splices
   where
     splices =
-      [ ("element",  taskSplice)  -- singleTagNode "task")
+      [ ("element",  singleTagNode "task")
       , ("taskName", textSplice $ T.pack name)]
-
-taskSplice = return [
-      X.Element "div" [("class", "ta")] [
-        X.Element "a" [("href", "/task/configure/${taskName}")] [
-          X.Element "taskName" [] []
-        ]
-      ]
-    ]
 
 
 ------------------------------------------------------------------------------

@@ -52,6 +52,11 @@ span.category {
   font-size: 11px;
 }
 
+.docs p {
+  padding-top: 5px;
+  margin-bottom: 0px;
+}
+
 /*** FORMS ******************************************************************/
 
 ul.alert-error {

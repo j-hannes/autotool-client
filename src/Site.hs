@@ -9,32 +9,24 @@ module Site
   ) where
 
 ------------------------------------------------------------------------------
-import           Control.Applicative
-import           Data.ByteString (ByteString)
-import           Data.Maybe
-import qualified Data.Text as T
-import           Snap.Core
-import           Snap.Snaplet
-import           Snap.Snaplet.Auth
-import           Snap.Snaplet.Auth.Backends.JsonFile
-import           Snap.Snaplet.Heist
-import           Snap.Snaplet.Session.Backends.CookieSession
-import           Snap.Util.FileServe
+import           Data.ByteString       (ByteString)
+import           Data.Monoid
 import           Heist
-import qualified Heist.Interpreted as I
+import           Snap
+import           Snap.Snaplet.Heist
+import           Snap.Util.FileServe
 ------------------------------------------------------------------------------
 import           Application
-import           Controller.Task
+import           Controller.TaskConfig (handleTaskConfig)
+import           Controller.TaskTree   (handleTaskTree)
 
-
-------------------------------------------------------------------------------
--- | 
 
 ------------------------------------------------------------------------------
 -- | The application's routes.
 routes :: [(ByteString, Handler App App ())]
 routes = [
-    ("/task/select",              handleTaskTree)
+    ("/",                         ifTop $ render "index")
+  , ("/task/select",              handleTaskTree)
   , ("/task/configure/:taskname", handleTaskConfig)
   , ("",                          serveDirectory "static")
   ]
@@ -44,7 +36,8 @@ routes = [
 -- | The application initializer.
 app :: SnapletInit App App
 app = makeSnaplet "app" "An snaplet example application." Nothing $ do
-    h <- nestSnaplet "" heist $ heistInit "templates"
+    h <- nestSnaplet "" heist $ heistInit' "templates" config
     addRoutes routes
     return $ App h
-
+  where
+    config = mempty { hcInterpretedSplices = defaultInterpretedSplices }
