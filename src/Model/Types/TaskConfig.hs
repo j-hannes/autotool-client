@@ -12,11 +12,12 @@ module Model.Types.TaskConfig
 import           Data.Time
 
 import           Autotool.Client.Types.ScoringOrder
+import           Model.Indexable
 import           Model.Types.Assignment
 
 
 data TaskConfig = TaskConfig
-    { id            :: Maybe Int
+    { tcid          :: Maybe Int
     , title         :: String
     , name          :: String
     , signature     :: String
@@ -24,3 +25,8 @@ data TaskConfig = TaskConfig
     , created       :: UTCTime
     , assignments   :: [Assignment]  -- ???
     } deriving (Read, Show)
+
+
+instance Indexable TaskConfig where
+  iid = tcid
+  setId taskconfig idVal = taskconfig { tcid = Just idVal }

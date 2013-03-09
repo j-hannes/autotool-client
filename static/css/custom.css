@@ -1,7 +1,6 @@
 /*** FIXES ******************************************************************/
 
-.navbar-fixed-top {
-  position: static;
+.navbar-static-top {
   margin-bottom: 18px;
 }
 
@@ -77,7 +76,7 @@ ul.alert-error {
 }
 
 .date-field-year {
-  width: 30px;
+  width: 35px;
 }
 
 .some-vertical-space {

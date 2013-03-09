@@ -21,7 +21,7 @@ import           Application            (AppHandler)
 import qualified Autotool.Client        as Autotool
 import           Autotool.Client.Types.ScoringOrder (ScoringOrder)
 import qualified Autotool.Mock          as AutotoolMock
-import qualified Model.Adapter.Json.TaskConfig as Database
+import           Model.Adapter.File
 import           Model.Types.TaskConfig (TaskConfig (TaskConfig))
 import qualified Model.Types.TaskConfig as TaskConfig
 import           Utils.Form             (renderForm, notEmpty)
@@ -31,11 +31,9 @@ import qualified View.Task              as View
 ------------------------------------------------------------------------------
 -- | Handler that renders the task config form when called via GET request and
 -- processes the form input date when called via POST request. Therefore the
--- autotool backend server is asked for task specific data like
---
--- * initial config
--- * config documentation
--- * task description
+-- autotool backend server is asked for task specific data. If the word 'mock'
+-- is attached to the url query string, then a mocked task config is returned
+-- (can be used when not in reach of the autotool server).
 --
 handleTaskConfig :: AppHandler ()
 handleTaskConfig = do
@@ -48,10 +46,9 @@ handleTaskConfig = do
     method GET (handleForm name cfg doc Nothing)
       <|> method POST (handleFormSubmit name)
 
-
 -- +------+ - 1) [DONE] convert this controller to use the new autotool client 
 -- | TODO | - 2) [DONE] implement form submission
--- +------+ - 3) create an easy storing process for task configs
+-- +------+ - 3) [DONE] create an easy storing process for task configs
 
 
 ------------------------------------------------------------------------------
@@ -139,7 +136,7 @@ createTask taskname tasktitle signature so = do
     now <- liftIO $ getCurrentTime
 
     let task = TaskConfig {
-        TaskConfig.id          = Nothing
+        TaskConfig.tcid        = Nothing
       , TaskConfig.title       = tasktitle
       , TaskConfig.name        = taskname
       , TaskConfig.signature   = signature
@@ -148,7 +145,8 @@ createTask taskname tasktitle signature so = do
       , TaskConfig.assignments = []
       }
     
-    liftIO $ Database.createTask task
+    _ <- liftIO $ create "taskconfig" task
+    --writeBS $ BS.pack $ show task
     
-    redirect "/"
+    redirect "/tutor"
 

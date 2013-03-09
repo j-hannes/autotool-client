@@ -1,14 +1,17 @@
 TODO
 ====
 
+* create page to create a course + groups
+* make courses and tasks connectable
+* plan mail to Roberto
 * update feature files
 * update documentation
-* plan mail to Roberto
 
 
 DONE
 ====
 
+* ~~save a created task config (somehow)~~
 * ~~create mock for single task configuration (similar to task tree mock)~~
 * ~~configure cabal package~~
 * ~~clean up task controller~~
@@ -21,3 +24,9 @@ DONE
 * ~~start with 004 (take over from old project - should go quick!)~~
 * ~~update bootstrap version~~
 * ~~update jquery version~~
+
+
+REJECTED
+========
+
+* use HTML base from Initializr

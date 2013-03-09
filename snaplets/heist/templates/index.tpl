@@ -1,12 +1,24 @@
 <apply template="base">
-  <div class="hero-unit">
-    <h1>autotool</h1>
+  <bind tag="header">
+    <div class="navbar navbar-static-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">autotool'</a>
+          <ul class="nav">
+            <li><a href="/tutor">Tutor</a></li>
+            <li><a href="#">Student</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </bind>
+
+  <div class="container">
+    <div class="hero-unit">
+      <h1>autotool'</h1>
+    </div>
   </div>
 
-  <div class="well">
-    <a class="btn btn-primary"
-       href="/task/select">
-      Create a new task
-    </a>
-  </div>
+  <bind tag="footer">
+  </bind>
 </apply>

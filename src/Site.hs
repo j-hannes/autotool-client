@@ -17,6 +17,9 @@ import           Snap.Snaplet.Heist
 import           Snap.Util.FileServe
 ------------------------------------------------------------------------------
 import           Application
+import           Controller.Assignment (handleAssignTask)
+import           Controller.Course     (handleCourseForm)
+import           Controller.Tutor      (handleTutor)
 import           Controller.TaskConfig (handleTaskConfig)
 import           Controller.TaskTree   (handleTaskTree)
 
@@ -26,6 +29,9 @@ import           Controller.TaskTree   (handleTaskTree)
 routes :: [(ByteString, Handler App App ())]
 routes = [
     ("/",                         ifTop $ render "index")
+  , ("/tutor",                    handleTutor)
+  , ("/course/create",            handleCourseForm)
+  , ("/assign_task",              handleAssignTask)
   , ("/task/select",              handleTaskTree)
   , ("/task/configure/:taskname", handleTaskConfig)
   , ("",                          serveDirectory "static")
