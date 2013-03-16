@@ -142,7 +142,6 @@ createTask taskname tasktitle signature so = do
       , TaskConfig.signature   = signature
       , TaskConfig.scoring     = so
       , TaskConfig.created     = now
-      , TaskConfig.assignments = []
       }
     
     _ <- liftIO $ create "taskconfig" task

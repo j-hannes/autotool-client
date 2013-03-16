@@ -112,3 +112,15 @@ ul.alert-error {
   padding-bottom: 35px;
   margin-bottom: 20px;
 }
+
+table td.center, table th.center {
+  text-align: center;
+}
+
+.vertical-space {
+  height: 30px;
+}
+
+.table {
+  margin-bottom: 0;
+}

@@ -23,7 +23,6 @@ data TaskConfig = TaskConfig
     , signature     :: String
     , scoring       :: ScoringOrder
     , created       :: UTCTime
-    , assignments   :: [Assignment]  -- ???
     } deriving (Read, Show)
 
 

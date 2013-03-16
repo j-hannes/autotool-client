@@ -7,6 +7,7 @@ data Course = Course {
     cid             :: Maybe Int
   , courseName      :: String
   , semester        :: String
+  , capacity        :: Int
   , enrollmentBegin :: Maybe UTCTime
   , enrollmentEnd   :: Maybe UTCTime
   , passCriteria    :: Double

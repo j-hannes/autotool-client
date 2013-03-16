@@ -11,17 +11,6 @@
       </div>
     </div>
 
-    <!--
-    <div class="well">
-      <b>
-        Aufgabenstellung
-      </b>
-      <p>
-        <taskDescription />
-      </p>
-    </div>
-    -->
-
     <div class="well control-group form-horizontal">
       <label class="control-label" for="form.name">
         Titel

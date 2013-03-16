@@ -2,6 +2,11 @@
   <div class="navbar-inner">
     <div class="container">
       <a class="brand" href="/tutor">autotool'</a>
+      <ul class="nav">
+        <li><a href="#">WS12</a></li>
+        <li class="active"><a href="#">SS13</a></li>
+        <li><a href="#">WS13</a></li>
+      </ul>
       <ul class="nav pull-right">
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">

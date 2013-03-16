@@ -10,6 +10,7 @@ module Controller.Tutor
 -- import qualified Data.ByteString.Char8 as BS
 import           Data.Maybe                    (fromJust, fromMaybe)
 import qualified Data.Text                     as T
+import           Data.Time                     (getCurrentTime)
 ------------------------------------------------------------------------------
 import           Heist.Interpreted             (Splice)
 import qualified Heist.Interpreted             as I
@@ -34,34 +35,55 @@ handleTutor = ifTop $ do
     taskConfigs <- liftIO $ restoreAll "taskconfig"
     assignments <- liftIO $ restoreAll "assignment"
     let splices = [
-            ("courses",     I.mapSplices renderCourseRow courses)
-          , ("taskConfigs", I.mapSplices (renderTaskConfigRow assignments) taskConfigs)
+            ("courses",     I.mapSplices
+                              (renderCourseRow assignments) 
+                              courses)
+          , ("taskConfigs", I.mapSplices
+                              (renderTaskConfigRow assignments)
+                              taskConfigs)
           ]
     heistLocal (I.bindSplices splices) $ render "tutor/index"
 
 
 ------------------------------------------------------------------------------
 -- |
-renderCourseRow :: Course -> Splice AppHandler
-renderCourseRow course =
-    I.runChildrenWith splices
+renderCourseRow :: Course -> [Assignment] -> Splice AppHandler
+renderCourseRow course assignments = do
+    time <- liftIO getCurrentTime
+    let enrollment = compareToNow time (Course.enrollmentBegin course)
+                                       (Course.enrollmentEnd course)
+    I.runChildrenWith (splices enrollment)
   where
-    splices =
+    splices enrollment =
       [ ("courseId",        I.textSplice cid)
       , ("courseName",      I.textSplice cname)
-      , ("courseSemester",  I.textSplice csemester)
-      , ("enrollmentBegin", I.textSplice cenrbeg)
-      , ("enrollmentEnd",   I.textSplice cenrend)
+      , ("enrollment",      I.textSplice $ T.pack enrollment)
       , ("students",        I.textSplice cstudents)
+      , ("capacity",        I.textSplice ccapacity)
+      , ("assignedtasks",   I.mapSplices
+                              (renderAssignentRow $ filter (Assignment.courseId . ((==) Course.cid course) assignments))
       ]
-    cid'      = fromJust $ Course.cid course
-    cid       = T.pack . show $ cid'
-    cname     = T.pack                          $ Course.courseName      course
-    csemester = T.pack                          $ Course.semester        course
-    cenrbeg   = T.pack . fromMaybe "n/a" $ fmap show $ Course.enrollmentBegin course
-    cenrend   = T.pack . fromMaybe "n/a" $ fmap show $ Course.enrollmentEnd   course
-    cstudents = T.pack . show $ 42
+    cid'        = fromJust $ Course.cid course
+    cid         = T.pack . show $ cid'
+    cname       = T.pack        $ Course.courseName course
+    cstudents   = T.pack . show $ 23
+    ccapacity   = T.pack . show $ Course.capacity course
 
+renderAssignmentRow assignment = do
+    taskConfigs <- liftIO
+    I.runChildrenWith splices
+  where
+    splices = [
+      ("taskname", I.TextSplice )
+    ]
+
+compareToNow _   Nothing      _          = "offen"
+compareToNow _   _            Nothing    = "offen"
+compareToNow now (Just begin) (Just end)
+    | now < begin = (show begin) ++ " - " ++ (show end)
+    | now < end = "noch bis " ++ (show end)
+    | otherwise = "vorbei seit " ++ (show end)
+    
 
 ------------------------------------------------------------------------------
 -- |
