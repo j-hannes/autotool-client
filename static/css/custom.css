@@ -1,0 +1,143 @@
+/*** FIXES ******************************************************************/
+
+.navbar-static-top {
+  margin-bottom: 18px;
+}
+
+
+/*** GENERAL ****************************************************************/
+
+body > .container {
+  padding-bottom: 20px;
+}
+
+footer {
+  width: 100%;
+  border-top: 1px solid #ccc;
+  text-align: center;
+  padding-top: 3px;
+}
+
+
+/*** HOME *******************************************************************/
+
+#index {
+  padding-top: 10px;
+}
+
+
+/*** TASK LIST **************************************************************/
+
+span.category {
+  font-weight: bold;
+}
+
+
+/*** SOLVE TASK *************************************************************/
+
+#task-example {
+  width: 99%;
+  height: 300px;
+  background: lightblue;
+  font-family: Monospace;
+  font-size: 11px;
+}
+
+#task-config {
+  width: 99%;
+  height: 200px;
+  /*background: lightblue;*/
+  font-family: Monospace;
+  font-size: 11px;
+}
+
+.docs p {
+  padding-top: 5px;
+  margin-bottom: 0px;
+}
+
+/*** FORMS ******************************************************************/
+
+ul.alert-error {
+  list-style-type: none;
+  margin: 0px 0px 20px;
+}
+
+.white {
+  background: white;
+}
+
+.number-field {
+  width: 30px;
+}
+
+.date-field {
+  width: 16px;
+}
+
+.date-field-year {
+  width: 35px;
+}
+
+.some-vertical-space {
+  display: inline-block;
+  width: 20px;
+}
+
+#login-form .btn, #registration-form .btn {
+  clear: both;
+  margin-top: 20px;
+}
+
+#login-form input {
+  display: block;
+}
+
+#login-form .checky {
+  float: left;
+  margin-right: 5px;
+}
+
+#task-form h3 {
+  margin: 15px 0px 5px;
+}
+
+#task-form .button-row {
+  margin-top: 10px;
+}
+
+.hero-unit {
+  margin-top: 20px;
+  padding-top: 20px;
+  padding-bottom: 35px;
+  margin-bottom: 20px;
+}
+
+table td.center, table th.center {
+  text-align: center;
+}
+
+.vertical-space {
+  height: 30px;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.select-student a {
+  display: block;
+  text-decoration: none;
+}
+.select-student h1 {
+  text-align: center;
+}
+
+.select-student .hero-unit {
+  cursor: pointer;
+}
+
+.select-student .hero-unit:hover {
+  background: #e5e5e5;
+  color: #268bd2;
+}

@@ -6,9 +6,9 @@
 module Application where
 
 ------------------------------------------------------------------------------
-import Control.Lens
-import Snap.Snaplet
-import Snap.Snaplet.Heist
+import           Control.Lens
+import           Snap.Snaplet
+import           Snap.Snaplet.Heist
 
 ------------------------------------------------------------------------------
 data App = App

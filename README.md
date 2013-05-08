@@ -1,25 +1,104 @@
 Synopsis
 ========
 
-Der Kern der Anwendung ist das Erstellen von seminarbegleitenden
+Zweck der Anwendung ist das Erstellen von seminarbegleitenden
 Uebungsaufgaben, welche dann von Studenten geloest werden sollen.
+_Uebungsaufgaben fuer was?_
 
 _Hintergrund ueber das Funktionieren von Autotool-Aufgaben (Konfiguration,
-Instanziierung) sollte hier bereits vermittelt sein._
+Instanziierung) sollte hier bereits vermittelt sein, ebenso der Hintergrund und
+die Kernfunktionalitaeten._
+
+Glossar
+-------
 
 * Aufgaben = vom Autotool
 * Uebungsaufgaben = konfigurierte Aufgaben
+* Assignment = gestellte Uebungsaufgaben (Kurs, Abgabetermin) _Uebersetzung?_
+* Instanz = personalisiertes Assignment
+* Loesung = Loesung einer Instanz
 
+
+Entwicklungsprozess
+===================
+
+Da die Software von nur einer Person erstellt wird, die Spezifikation, Entwurf
+sowie Implementierung allein umsetzt, eignet sich hier eine agile
+Entwicklungsmethode. Dokumentation kann dabei eher knapp ausfallen, aber
+dennoch vollstaendig, da das Projekt im Rahmen einer Masterarbeit stattfindet
+und darin in einem eigenen Kapitel erlaeutert wird.
+
+Die Entwicklung erfolgt in Iterationen, wobei mit einer moeglichst einfachen
+Variante der Software begonnen wird (minimale Funktionalitaet) und dann in
+jeder Iteration eine weitere Funktionalitaet hinzugefuegt wird.
+
+Zum Beispiel wird in der ersten Iteration nur das Erstellen von Uebungsaufgaben
+umgesetzt. Damit ist der eigentliche Zweck der Anwendung zwar noch nicht
+erfuellt, aber die Anwendung bietet schon eine Funktionalitaet, welche
+eigenstaendig genutzt werden kann. Die naechste Iterationbeihaltet dann das
+Loesen der Aufgaben, eine naechste koennte dann das Authentifizieren von
+Nutzern beinhalten, eine weitere das Kurssystem, usw.
+
+Diese Methode nennt man agil, da versucht wird, zu jedem Zeitpunkt eine
+lauffaehige Version verfuegbar zu haben, die dann Schritt fuer Schritt
+erweitert werden kann. Ausserdem koennen einzelne Iterationen auch kurzfristig
+gewonnenen Erkenntnisse bzw. Aenderungen des urspruenglichen Plans beinhalten.
+Damit kann der Entwicklungsprozess flexibler gestaltet, und auf notwendige
+Aenderungen 'agiler' reagiert werden.
+
+Jede Iteration wird wiederum in einzelne Tasks unterteilt, welche selbst eine
+Erweiterung der Anwendung darstellen, die einen kleinen Bestandteil an
+Funktionalitaet (Feature) hinzufuegen, wobei die Anwendung vor und nach jedem
+Task trotzdem noch lauffaehig bleibt.
+
+
+Iteratonen:
+-----------
+
+<!--
+  Eine Iteration stellt einen Erweiterungszyklus der Anwendung dar.
+
+  Dabei sollte ueberlegt werden, was der kleinst moeglichste Nutzen der
+  Anwendung sein koennte. Dieser wird als erste Iteration gewaehlt. Dann wird
+  die Anwendung Iteration fuer Iteration um Funktionalitaeten erweitert.
+  
+  Es ist moeglich, eine nullte Iteration als Basis zu waehlen, welche die
+  Initialisierung und evtl. erstellung der zu Grunde liegenden Infrastruktur
+  beinhaltet.
+
+  Iterationen selbst sind in Tasks untergliedert. Vor und nach einem Task
+  sollte jeweils eine lauffaehige Version des Programmes Vorliegen. Nach einer
+  Iteration soll das Programm um eine weitere Funktionalitaet ergaenzt sein.
+  
+-->
+
+00. Initialisierung
+    * Erstellen des Grundgeruestes (Skeleton) der Anwendung
+      - ...
+    * Initialisieren des Repositories
+      - ...
+    * Entfernen nicht benoetigten Codes
+      - ...
+    * Einfacher Start-Bildschirm (landing page)
+      - ...
+
+01. Erstellen einer Aufgabe
+    * Aufgabenbaum
 
 Iteration 1
 -----------
 
-Bereitstellen des Server-Prozesses, Zugang zur Startseite
+_TODO: Iterationen ueberarbeiten, zum Beispiel Iteration 1 und 2
+zusammenfassen, weitere Iterationen ebenfalls aktualisieren (wie oben
+beschrieben). -> Dabei die Iterationen in Tasks unterteilen._
 
-Ein Webserver kann gestartet werden und ist per HTTP erreichbar. Ein GET-Anfrage
-auf eine entsprechende URL (Root-Domain) liefert eine fehlerfreie Antwort (200
-OK) sowie einen kurzen, textuellen Inhalt (noch kein HTML) der Startseite der
-Anwendung.
+Erstellen der Basis-Infrastruktur (Server-Prozess)
+
+Die Anwendung wird als Snap-Webanwendung umgesetzt, welche einen HTTP-Webserver
+umfasst. Dieser kann gestartet werden und ist per HTTP erreichbar. Ein
+GET-Anfrage auf eine entsprechende URL (Root-Domain) liefert eine fehlerfreie
+Antwort (200 OK) sowie einen kurzen, textuellen Inhalt (noch kein HTML) der
+Startseite der Anwendung.
 
 ### Features ###
 
@@ -32,8 +111,8 @@ Iteration 2
 *Laden statischer Inhalte, Einbinden des Bootstrap-Frameworks*
 
 Die Bootstrap CSS- und JavaScript-Bibliothek (von Twitter) ist in die Startseite
-eingebunden. Der Inhalt der Startseite kann nun in HTML verfasst und optisch
-gestaltet werden (minimaler Aufwand).
+eingebunden. Der Inhalt der Startseite ist in HTML verfasst und optisch
+gestaltet (minimaler Aufwand).
 
 ### Features ###
 

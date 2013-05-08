@@ -1,0 +1,72 @@
+* three different layers:
+
+    +-----------------------------+
+    |   Data Abstraction Layer    |
+    +-----------------------------+
+    |  Object Relationship Layer  |
+    +-----------------------------+
+    |   Data Persistence Layer    |
+    +-----------------------------+
+
+1) DAL
+
+Course:
+  - id
+  - name
+  - semester
+  - enrollment
+
+
+2) ORL
+
+Course:
+  - tutorId
+  - groupIds
+  - assignmentIds
+
+
+3) DPL
+
+* read from persistent storage
+  - all courses
+  - one specific course (by Id)
+
+* write to persistent storage
+  - new course
+  - replace course (by Id)
+
+* delete from persistent storage
+  - all courses
+  - one specific course (by Id)
+
+* query functions
+  - get the tutor for course
+  - get all groups for course
+  - get all assignments for course
+
+
+4) remote querying
+
+get all students for course
+
+    1 - get all groups for course
+          ( 1 - get all groups )
+          ( 2 - filter courseId group == courseId course )
+          ( 2 - filter groupId group `elem` groupIds course )
+    2 - for each group
+        1 - get all students for group
+    3 - concatenate result
+
+
+get highscore for course
+
+    1 - get all assignments for course
+    2 - for each assignment
+        1 - get all taskinstances for assignement
+        2 - for each taskinstance
+            - get the student
+            - get all solutions
+            - scores = zip (score solutions) (repeat student)
+            - (max score, taskinstance)
+        3 - group by students
+    3 - concatenate result
