@@ -1,0 +1,11 @@
+
+
+
+forM_ getCourses ( \(courseId, course) ->
+  course.submissionTime
+  getPassedStudentPercentageForCourse courseId
+  forM_ (getGroupsForCourse courseId) ( \(groupId, group) ->
+    group.name
+    group.capacity
+    getEnrollmentsForGroup groupId
+

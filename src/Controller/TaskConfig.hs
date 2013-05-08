@@ -21,9 +21,7 @@ import           Application            (AppHandler)
 import qualified Autotool.Client        as Autotool
 import           Autotool.Client.Types.ScoringOrder (ScoringOrder)
 import qualified Autotool.Mock          as AutotoolMock
-import           Model.Adapter.File
-import           Model.Types.TaskConfig (TaskConfig (TaskConfig))
-import qualified Model.Types.TaskConfig as TaskConfig
+import           Model.Adapter.File.Task as Task
 import           Utils.Form             (renderForm, notEmpty)
 import qualified View.Task              as View
 
@@ -45,10 +43,6 @@ handleTaskConfig = do
                                 else Autotool.getInitialTaskConfig name
     method GET (handleForm name cfg doc Nothing)
       <|> method POST (handleFormSubmit name)
-
--- +------+ - 1) [DONE] convert this controller to use the new autotool client 
--- | TODO | - 2) [DONE] implement form submission
--- +------+ - 3) [DONE] create an easy storing process for task configs
 
 
 ------------------------------------------------------------------------------
@@ -127,24 +121,10 @@ handleFormVerification taskname = do
 -- | Create a new task from the entered data.
 createTask :: String -> String -> String -> ScoringOrder -> AppHandler ()
 createTask taskname tasktitle signature so = do
-    {-
-    user    <- getUser
-    let (Just uid) = fmap User.id user
-        conf       = Config (name task) (config task) (show $ sig task)
-    -}
-
+    userId <- return 1  -- FIXME
     now <- liftIO $ getCurrentTime
-
-    let task = TaskConfig {
-        TaskConfig.tcid        = Nothing
-      , TaskConfig.title       = tasktitle
-      , TaskConfig.name        = taskname
-      , TaskConfig.signature   = signature
-      , TaskConfig.scoring     = so
-      , TaskConfig.created     = now
-      }
     
-    _ <- liftIO $ create "taskconfig" task
+    _ <- liftIO $ Task.create userId tasktitle taskname signature so now
     --writeBS $ BS.pack $ show task
     
     redirect "/tutor"

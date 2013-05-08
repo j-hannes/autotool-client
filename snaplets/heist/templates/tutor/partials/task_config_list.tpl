@@ -1,5 +1,3 @@
-<h3>verfügbare Aufgaben</h3>
-
 <form>
   <table class="table table-bordered table-striped">
     <thead>
@@ -12,12 +10,12 @@
       </tr>
     </thead>
     <tbody>
-      <taskConfigs>
+      <tasks>
         <tr>
           <td>
-            <a href="#taskConfigDetailsModal_${taskConfigId}">
+            <!--<a href="#taskConfigDetailsModal_${taskConfigId}">-->
               <taskConfigName />
-            </a>
+            <!--</a>-->
           </td>
           <td><taskType /></td>
           <td><dateCreated /></td>
@@ -28,7 +26,7 @@
             </a>
           </td>
         </tr>
-      </taskConfigs>
+      </tasks>
     </tbody>
   </table>
 </form>

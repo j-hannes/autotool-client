@@ -1,2 +1,0 @@
-Assignment {aid = Just 2, courseId = 4, taskId = 6, status = Mandatory, start = 2013-03-11 19:35:14 UTC, end = 2013-03-28 19:35:14 UTC}
-Assignment {aid = Just 1, courseId = 6, taskId = 6, status = Mandatory, start = 2013-03-04 19:11:04 UTC, end = 2013-03-13 19:11:04 UTC}

@@ -5,27 +5,30 @@
 -- a task instance which contains task description, documentation, example
 -- solution etc.
 --
-module Model.Types.TaskConfig
-    ( TaskConfig (..)
-    ) where
+module Model.Types.Task where
 
 import           Data.Time
 
 import           Autotool.Client.Types.ScoringOrder
 import           Model.Indexable
-import           Model.Types.Assignment
 
 
-data TaskConfig = TaskConfig
-    { tcid          :: Maybe Int
-    , title         :: String
-    , name          :: String
-    , signature     :: String
-    , scoring       :: ScoringOrder
-    , created       :: UTCTime
+data Task = Task {
+    -- ^ Identifier
+      taskId           :: Integer
+
+    -- ^ Relations
+    , taskTutorId      :: Integer
+
+    -- ^ Attributes
+    , taskName         :: String
+    , taskType         :: String
+    , taskSignature    :: String
+    , taskScoringOrder :: ScoringOrder
+    , taskCreated      :: UTCTime
     } deriving (Read, Show)
 
 
-instance Indexable TaskConfig where
-  iid = tcid
-  setId taskconfig idVal = taskconfig { tcid = Just idVal }
+instance Indexable Task where
+  iid = taskId
+  setId taskconfig idVal = taskconfig { taskId = idVal }

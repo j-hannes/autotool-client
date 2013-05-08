@@ -7,7 +7,6 @@ module View.Task
     , bindFormSplices
     , taskTreeTemplate
     , taskFormTemplate
-    , taskDescriptionSplice
     ) where
 
 ------------------------------------------------------------------------------

@@ -124,3 +124,20 @@ table td.center, table th.center {
 .table {
   margin-bottom: 0;
 }
+
+.select-student a {
+  display: block;
+  text-decoration: none;
+}
+.select-student h1 {
+  text-align: center;
+}
+
+.select-student .hero-unit {
+  cursor: pointer;
+}
+
+.select-student .hero-unit:hover {
+  background: #e5e5e5;
+  color: #268bd2;
+}

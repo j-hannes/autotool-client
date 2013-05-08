@@ -6,14 +6,19 @@ module Model.Types.Assignment
 import           Data.Time (UTCTime)
 import           Model.Indexable
 
-data Assignment = Assignment
-  { aid      :: Maybe Int
-  , courseId :: Int
-  , taskId   :: Int
-  , status   :: Status
-  , start    :: UTCTime
-  , end      :: UTCTime
-  } deriving (Read, Show)
+data Assignment = Assignment {
+    -- ^ Identifier
+    assignmentId       :: Integer
+
+    -- ^ Relations
+  , assignmentCourseId :: Integer
+  , assignmentTaskId   :: Integer
+
+    -- ^ Attributes
+  , assignmentStatus   :: Status
+  , assignmentStart    :: UTCTime
+  , assignmentEnd      :: UTCTime
+  } deriving (Eq, Read, Show)
 
 data Status = Mandatory
             | Optional
@@ -21,5 +26,5 @@ data Status = Mandatory
 
 
 instance Indexable Assignment where
-  iid = aid
-  setId assn idVal = assn { aid = Just idVal }
+  iid = assignmentId
+  setId assn idVal = assn { assignmentId = idVal }

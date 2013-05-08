@@ -16,7 +16,7 @@
 
     <div class="control-group">
       <dfLabel class="control-label" ref="task">
-        Task
+        Aufgabe
       </dfLabel>
       <div class="controls">
         <dfInputSelect ref="task" />

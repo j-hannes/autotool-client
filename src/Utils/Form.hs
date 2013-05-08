@@ -14,16 +14,13 @@ module Utils.Form
 
 ------------------------------------------------------------------------------
 import           Data.ByteString       (ByteString)
-import qualified Data.ByteString.Char8 as BS
 import           Data.Text             (Text)
 import qualified Data.Text             as T
 import           Data.Time.Clock
 import           Data.Time.Format
-import           Snap
 import           Snap.Snaplet.Heist
 import           System.Locale (defaultTimeLocale)
 import           Text.Digestive.Heist
-import           Text.Digestive.Form
 import           Text.Digestive.View
 ------------------------------------------------------------------------------
 import           Application

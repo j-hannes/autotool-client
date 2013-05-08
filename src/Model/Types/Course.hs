@@ -4,16 +4,21 @@ import           Data.Time
 import           Model.Indexable
 
 data Course = Course {
-    cid             :: Maybe Int
-  , courseName      :: String
-  , semester        :: String
-  , capacity        :: Int
-  , enrollmentBegin :: Maybe UTCTime
-  , enrollmentEnd   :: Maybe UTCTime
-  , passCriteria    :: Double
-  } deriving (Read, Show)
+    -- ^ Identifier
+    courseId             :: Integer
+
+    -- ^ Relations
+  , courseTutorId        :: Integer
+
+    -- ^ Attributes
+  , courseName           :: String
+  , courseSemester       :: String
+  , courseEnrollmentFrom :: Maybe UTCTime
+  , courseEnrollmentTo   :: Maybe UTCTime
+  , coursePassCriteria   :: Double
+  } deriving (Eq, Ord, Read, Show)
 
 
 instance Indexable Course where
-  iid = cid
-  setId course idVal = course { cid = Just idVal }
+  iid = courseId
+  setId course idVal = course { courseId = idVal }

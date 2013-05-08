@@ -1,0 +1,8 @@
+passrate = do
+  assignmentIds   <- fmap assignmentId
+                      $ getAssignmentsByCourseId
+                      $ courseId course
+  taskInstanceIds <- fmap taskInstanceId
+                      $ forM assignmentIds getTaskInstancesById
+  
+}

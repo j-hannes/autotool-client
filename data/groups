@@ -1,0 +1,4 @@
+Group {groupId = 4, groupCourseId = 2, groupDescription = "Montags 15.30 Uhr + Freitags 11.00 Uhr", groupCapacity = 22}
+Group {groupId = 3, groupCourseId = 2, groupDescription = "Montags 7.30 Uhr + Mittwochs 18.45 Uhr", groupCapacity = 22}
+Group {groupId = 2, groupCourseId = 1, groupDescription = "Montags 15.30 Uhr + Freitags 11.00 Uhr", groupCapacity = 24}
+Group {groupId = 1, groupCourseId = 1, groupDescription = "Montags 17.15 Uhr + Donnerstags 7.30 Uhr", groupCapacity = 24}

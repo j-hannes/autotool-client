@@ -1,6 +1,0 @@
-Course {cid = Just 6, courseName = "Leerkurs", semester = "SS13", capacity = 24, enrollmentBegin = Nothing, enrollmentEnd = Nothing, passCriteria = 0.0}
-Course {cid = Just 5, courseName = "Verdrehungstest", semester = "SS13", capacity = 48, enrollmentBegin = Just 2013-03-20 08:38:44 UTC, enrollmentEnd = Just 2013-02-28 08:38:44 UTC, passCriteria = 0.0}
-Course {cid = Just 4, courseName = "Celine's class", semester = "SS13", capacity = 24, enrollmentBegin = Just 2013-02-15 08:00:00 UTC, enrollmentEnd = Just 2013-02-15 20:00:00 UTC, passCriteria = 50.0}
-Course {cid = Just 3, courseName = "BazKurs", semester = "SS13", capacity = 24, enrollmentBegin = Just 2013-02-13 21:49:45 UTC, enrollmentEnd = Just 2013-01-04 21:49:45 UTC, passCriteria = 100.0}
-Course {cid = Just 2, courseName = "Barkurs", semester = "SS13", capacity = 24, enrollmentBegin = Just 2013-02-13 21:49:19 UTC, enrollmentEnd = Nothing, passCriteria = 50.0}
-Course {cid = Just 1, courseName = "Fookurs", semester = "SS13", capacity = 48, enrollmentBegin = Nothing, enrollmentEnd = Nothing, passCriteria = 0.0}

@@ -19,7 +19,12 @@ import           Snap.Util.FileServe
 import           Application
 import           Controller.Assignment (handleAssignTask)
 import           Controller.Course     (handleCourseForm)
+import           Controller.Enrollment (handleEnrollment, showEnrollments)
+import           Controller.Tasks      (showTaskList)
 import           Controller.Tutor      (handleTutor)
+import           Controller.Student    (handleStudent)
+import           Controller.Student    (handleStudentSelection)
+import           Controller.Solution   (showSolveTaskForm)
 import           Controller.TaskConfig (handleTaskConfig)
 import           Controller.TaskTree   (handleTaskTree)
 
@@ -28,13 +33,19 @@ import           Controller.TaskTree   (handleTaskTree)
 -- | The application's routes.
 routes :: [(ByteString, Handler App App ())]
 routes = [
-    ("/",                         ifTop $ render "index")
-  , ("/tutor",                    handleTutor)
-  , ("/course/create",            handleCourseForm)
-  , ("/assign_task",              handleAssignTask)
-  , ("/task/select",              handleTaskTree)
-  , ("/task/configure/:taskname", handleTaskConfig)
-  , ("",                          serveDirectory "static")
+    ("/",                                         ifTop $ render "index")
+  , ("/tutor",                                    handleTutor)
+  , ("/tutor/tasks",                              showTaskList)
+  , ("/student/select",                           handleStudentSelection)
+  , ("/student/:studentId",                       handleStudent)
+  , ("/student/:studentId/enroll/:groupId",       handleEnrollment)
+  , ("/student/:studentId/enrollments",           showEnrollments)
+  , ("/student/:studentId/solve/:taskInstanceId", showSolveTaskForm)
+  , ("/course/create",                            handleCourseForm)
+  , ("/assign_task",                              handleAssignTask)
+  , ("/task/select",                              handleTaskTree)
+  , ("/task/configure/:taskname",                 handleTaskConfig)
+  , ("",                                          serveDirectory "static")
   ]
 
 

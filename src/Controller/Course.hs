@@ -7,20 +7,18 @@ module Controller.Course
   ) where
 
 ------------------------------------------------------------------------------
-import           Data.Maybe
 import           Data.Text (Text)
 import qualified Data.Text as T
 import           Data.Time
-import           Data.Time.Clock
 import           Snap
 import           System.Locale
-import           Text.Digestive.Form
+import           Text.Digestive.Form (Form, (.:), check, stringRead, text)
 import           Text.Digestive.Snap
 ------------------------------------------------------------------------------
 import           Application
-import           Model.Adapter.File
-import           Model.Types.Course (Course (Course))
-import qualified Model.Types.Course as Course
+import qualified Model.Adapter.File.Course as Course
+import qualified Model.Adapter.File.Group  as Group
+import           Model.Types.Course
 --import qualified Model.User as User
 import           Utils.Form
 
@@ -44,10 +42,14 @@ convertToText = T.pack . formatTime defaultTimeLocale "%d/%m/%Y %H:%M:%S"
 ------------------------------------------------------------------------------
 -- | Data required in the course form.
 data CourseFormData = CourseFormData
-  { courseName          :: Text
-  , enrollmentOpening   :: Text
-  , enrollmentDeadline  :: Text
-  , passCriteria        :: Double
+  { formCourseName          :: Text
+  , formEnrollmentOpening   :: Text
+  , formEnrollmentDeadline  :: Text
+  , formPassCriteria        :: Double
+  , group1Name              :: Text
+  , group1Capacity          :: Int
+  , group2Name              :: Text
+  , group2Capacity          :: Int
   } deriving (Show)
 
 
@@ -57,24 +59,22 @@ data CourseFormData = CourseFormData
 -- TODO Submit a user information message into the session that can then be
 -- displayed on the main page instead of displaying a separate page.
 createCourse :: CourseFormData -> AppHandler ()
-createCourse cfd = do
-    -- user       <- getUser
-    -- (Just uid) <- return (fmap User.id user)
-    let eo = convertDate . enrollmentOpening
-        ed = convertDate . enrollmentDeadline
-        course = Course {
-        Course.cid             = Nothing
-      , Course.courseName      = T.unpack $ courseName cfd
-      , Course.semester        = "SS13"
-      , Course.enrollmentBegin = eo cfd
-      , Course.enrollmentEnd   = ed cfd
-      , Course.passCriteria    = passCriteria cfd
-      }
-
-    _ <- liftIO $  create "course" course
-
+createCourse cfd =
+    liftIO (Course.create tid name sem enrStart enrEnd pc) >>= \course ->
+    liftIO (Group.create  (courseId course) g1n g1c)       >>
+    liftIO (Group.create  (courseId course) g2n g2c)       >>
     redirect "/tutor"
-
+  where
+    tid      = 1
+    name     = T.unpack    $ formCourseName         cfd
+    sem      = "SS13"
+    enrStart = convertDate $ formEnrollmentOpening  cfd
+    enrEnd   = convertDate $ formEnrollmentDeadline cfd
+    pc       =               formPassCriteria       cfd
+    g1n      = T.unpack    $ group1Name             cfd
+    g1c      =               group1Capacity         cfd
+    g2n      = T.unpack    $ group2Name             cfd
+    g2c      =               group2Capacity         cfd
 
 ------------------------------------------------------------------------------
 -- | Digestive course form.
@@ -85,7 +85,10 @@ courseForm time = CourseFormData
     <*> "enrollmentDeadline"  .: (text Nothing)
     <*> "passCriteria"        .: check assignInvalidMsg isPercent
                                  (stringRead "incorrect number" $ Just 0)
-
+    <*> "group1Name"          .: (text Nothing)
+    <*> "group1Capacity"      .: (stringRead "incorrect number" Nothing)
+    <*> "group2Name"          .: (text Nothing)
+    <*> "group2Capacity"      .: (stringRead "incorrect number" Nothing)
 
 ------------------------------------------------------------------------------
 -- | Check against a valid percentage.

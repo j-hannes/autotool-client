@@ -6,7 +6,7 @@
           <a class="brand" href="/">autotool'</a>
           <ul class="nav">
             <li><a href="/tutor">Tutor</a></li>
-            <li><a href="#">Student</a></li>
+            <li><a href="/student/select">Student</a></li>
           </ul>
         </div>
       </div>

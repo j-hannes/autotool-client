@@ -4,7 +4,6 @@ module Model.Adapter.File
   ) where
 
 ------------------------------------------------------------------------------
-import           Data.Maybe
 import           System.IO hiding (hGetContents)
 import           System.IO.Strict (hGetContents)
 ------------------------------------------------------------------------------
@@ -14,7 +13,7 @@ import           Model.Indexable
 ------------------------------------------------------------------------------
 -- | Returns the filepath to a specific data file.
 datafile :: String -> String
-datafile name = "data/" ++ name ++ "s.json"
+datafile name = "data/" ++ name
 
 
 ------------------------------------------------------------------------------
@@ -28,7 +27,7 @@ create name record = do
     handle <- openFile (datafile name) WriteMode
     hPutStr handle . unlines $ map show newRecords
     hClose handle
-    return newRecord
+    return $ newRecord
 
 
 ------------------------------------------------------------------------------
@@ -44,9 +43,9 @@ restoreAll name = do
 ------------------------------------------------------------------------------
 -- | Return the highest found index (id) + 1 from a list of indexable data
 -- types.
-getNextId :: (Indexable a) => Int -> [a] -> Int
+getNextId :: (Indexable a) => Integer -> [a] -> Integer
 getNextId n [] = n + 1
-getNextId n (x:xs) | isJust i && fromJust i > n = getNextId (fromJust i) xs
-                   | otherwise                  = getNextId n xs        
+getNextId n (x:xs) | i > n     = getNextId i xs
+                   | otherwise = getNextId n xs        
                    where
                      i = iid x

@@ -1,0 +1,2 @@
+Course {courseId = 2, courseTutorId = 1, courseName = "Fookurs", courseSemester = "SS13", courseEnrollmentFrom = Just 2013-05-07 18:15:57 UTC, courseEnrollmentTo = Just 2013-05-17 19:15:57 UTC, coursePassCriteria = 20.0}
+Course {courseId = 1, courseTutorId = 1, courseName = "Compilerbau", courseSemester = "SS13", courseEnrollmentFrom = Just 2013-05-04 18:00:00 UTC, courseEnrollmentTo = Just 2013-05-07 05:00:00 UTC, coursePassCriteria = 65.0}

@@ -7,26 +7,21 @@ module Controller.Assignment
     ) where
 
 ------------------------------------------------------------------------------
-import qualified Data.ByteString.Char8         as BS
 import           Data.Maybe                    (fromJust)
 import           Data.Text                     (Text)
 import qualified Data.Text                     as T
-import           Data.Time                     (UTCTime)
-import           Snap                          (liftIO, (<$>), (<*>), writeBS,
-                                                redirect)
+import           Snap                          (liftIO, (<$>), (<*>), redirect)
 import           Text.Digestive.Form           (Form, choice, text, (.:),
                                                 check)
 import           Text.Digestive.Snap           (runForm)
 ------------------------------------------------------------------------------
 import           Application
-import           Model.Adapter.File
-import           Model.Types.Assignment        (Assignment(Assignment),
-                                                Status(..))
-import qualified Model.Types.Assignment        as Assignment
-import           Model.Types.Course            (Course)
-import qualified Model.Types.Course            as Course
-import           Model.Types.TaskConfig        (TaskConfig)
-import qualified Model.Types.TaskConfig        as Task
+import qualified Model.Adapter.File.Assignment as Assignment
+import qualified Model.Adapter.File.Course     as Course
+import qualified Model.Adapter.File.Task       as Task
+import           Model.Types.Assignment
+import           Model.Types.Course
+import           Model.Types.Task
 import           Utils.Form                    (renderForm, convertDate)
 
 
@@ -34,35 +29,35 @@ import           Utils.Form                    (renderForm, convertDate)
 -- | Handler to assign a task to a course.
 handleAssignTask :: AppHandler ()
 handleAssignTask = do
-  courses <- liftIO $ restoreAll "course"
-  tasks   <- liftIO $ restoreAll "taskconfig"
-  let courseIds = map (tupleIdName Course.cid Course.courseName) courses
-      taskIds   = map (tupleIdName Task.tcid Task.title) tasks
+  courses <- liftIO $ Course.getAllByTutorId 1
+  tasks   <- liftIO $ Task.getAllByTutorId 1
+  let courseIds = map (tupleIdName courseId courseName) courses
+      taskIds   = map (tupleIdName taskId taskName) tasks
   (view, assignData) <- runForm "form" (assignForm courseIds taskIds)
   maybe (renderForm "tutor/forms/assignment" view) createAssignment assignData
 
 
 ------------------------------------------------------------------------------
 -- | Converts an object that has id and name attributes into a tuple of those.
-tupleIdName :: (a -> Maybe Int) -> (a -> String) -> a -> (Int, Text)
-tupleIdName idFn nameFn obj = (fromJust $ idFn obj, T.pack $ nameFn obj)
+tupleIdName :: (a -> Integer) -> (a -> String) -> a -> (Integer, Text)
+tupleIdName idFn nameFn obj = (idFn obj, T.pack $ nameFn obj)
 
 
 ------------------------------------------------------------------------------
 -- | Data type for assignment form.
 data AssignmentData = AssignmentData
-  { courseId :: Int
-  , taskId :: Int
-  , status :: Status
-  , start :: Text
-  , end :: Text
+  { formCourseId :: Integer
+  , formTaskId   :: Integer
+  , formStatus   :: Status
+  , formStart    :: Text
+  , formEnd      :: Text
   } deriving (Show)
 
 
 ------------------------------------------------------------------------------
 -- | The form to create an assignment, filles with courses and tasks to
 -- select.
-assignForm :: [(Int, Text)] -> [(Int, Text)]
+assignForm :: [(Integer, Text)] -> [(Integer, Text)]
            -> Form Text AppHandler AssignmentData
 assignForm courses tasks = AssignmentData
     <$> "course" .: choice courses Nothing
@@ -73,7 +68,10 @@ assignForm courses tasks = AssignmentData
   where
     status' = [(Mandatory, "Pflicht"), (Optional, "Zusatz")]
 
+missingStartDateMsg :: Text
 missingStartDateMsg = "Bitte ein Startzeitpunkt angeben."
+
+missingEndDateMsg :: Text
 missingEndDateMsg = "Bitte einen Endzeitpunkt angeben."
 
 notEmpty :: Text -> Bool
@@ -82,17 +80,11 @@ notEmpty t = t /= ""
 ------------------------------------------------------------------------------
 -- | Create an assignment if all teh data is collected.
 createAssignment :: AssignmentData -> AppHandler()
-createAssignment ad = do
-
-    let assignment = Assignment {
-            Assignment.aid = Nothing
-          , Assignment.courseId = courseId ad
-          , Assignment.taskId = taskId ad
-          , Assignment.status = status ad
-          , Assignment.start = fromJust . convertDate $ start ad
-          , Assignment.end = fromJust . convertDate $ end ad
-          }
-    
-    _ <- liftIO $ create "assignment" assignment
-  
-    redirect "/tutor"
+createAssignment ad =
+    liftIO (Assignment.create cid tid sts start end) >> redirect "/tutor"
+  where
+    cid   =                          formCourseId ad
+    tid   =                          formTaskId   ad
+    sts   =                          formStatus   ad
+    start = fromJust . convertDate $ formStart    ad
+    end   = fromJust . convertDate $ formEnd      ad

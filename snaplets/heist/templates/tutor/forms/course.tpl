@@ -78,6 +78,46 @@
       </div>
     </div>
 
+    <h3>Übungsgruppe 1</h3>
+
+    <div class="control-group">
+      <dfLabel class="control-label" ref="group1Name">
+        Beschreibung
+      </dfLabel>
+      <div class="controls">
+        <dfInputText ref="group1Name" />
+      </div>
+    </div>
+
+    <div class="control-group">
+      <dfLabel class="control-label" ref="group1Capacity">
+        Max. Studenten
+      </dfLabel>
+      <div class="controls">
+        <dfInputText class="input-mini" ref="group1Capacity" />
+      </div>
+    </div>
+
+    <h3>Übungsgruppe 2</h3>
+
+    <div class="control-group">
+      <dfLabel class="control-label" ref="group2Name">
+        Beschreibung
+      </dfLabel>
+      <div class="controls">
+        <dfInputText ref="group2Name" />
+      </div>
+    </div>
+
+    <div class="control-group">
+      <dfLabel class="control-label" ref="group2Capacity">
+        Max. Studenten
+      </dfLabel>
+      <div class="controls">
+        <dfInputText class="input-mini" ref="group2Capacity" />
+      </div>
+    </div>
+
     <a class="btn"
        href="/tutor">zurück</a>
     <dfInputSubmit class="btn btn-primary" value="erstellen" />
