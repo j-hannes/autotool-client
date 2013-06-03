@@ -10,6 +10,7 @@ module Site
 
 ------------------------------------------------------------------------------
 import           Data.ByteString       (ByteString)
+import           Data.IORef            (newIORef)
 import           Data.Monoid
 import           Heist
 import           Snap
@@ -54,7 +55,14 @@ routes = [
 app :: SnapletInit App App
 app = makeSnaplet "app" "An snaplet example application." Nothing $ do
     h <- nestSnaplet "" heist $ heistInit' "templates" config
+    c <- liftIO $ newIORef []
+    g <- liftIO $ newIORef []
+    e <- liftIO $ newIORef []
+    t <- liftIO $ newIORef []
+    a <- liftIO $ newIORef []
+    i <- liftIO $ newIORef []
+    s <- liftIO $ newIORef []
     addRoutes routes
-    return $ App h
+    return $ App h c g e t a i s
   where
     config = mempty { hcInterpretedSplices = defaultInterpretedSplices }

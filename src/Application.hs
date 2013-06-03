@@ -7,12 +7,28 @@ module Application where
 
 ------------------------------------------------------------------------------
 import           Control.Lens
+import           Data.IORef
 import           Snap.Snaplet
 import           Snap.Snaplet.Heist
 
+import           Model.Types.Assignment
+import           Model.Types.Course
+import           Model.Types.Enrollment
+import           Model.Types.Group
+import           Model.Types.Solution
+import           Model.Types.Task
+import           Model.Types.TaskInstance
+
 ------------------------------------------------------------------------------
 data App = App
-    { _heist :: Snaplet (Heist App)
+    { _heist         :: Snaplet (Heist App)
+    , _courses       :: IORef [Course]
+    , _groups        :: IORef [Group]
+    , _enrollments   :: IORef [Enrollment]
+    , _tasks         :: IORef [Task]
+    , _assignments   :: IORef [Assignment]
+    , _taskInstances :: IORef [TaskInstance]
+    , _solutions     :: IORef [Solution]
     }
 
 makeLenses ''App
