@@ -7,7 +7,7 @@
       </ul>
       <ul class="nav pull-right">
         <li>
-          <a href="/student/enrollments">
+          <a href="/student/${studentId}/enrollments">
             Einschreibung
           </a>
         </li>

@@ -5,7 +5,7 @@
     <groups>
       <div class="span6">
         <p class="lead"><groupDescription /></p>
-        <a href="/student/enroll/${groupId}"
+        <a href="/student/${studentId}/enroll/${groupId}"
            role="button"
            class="btn btn-primary">Einschreiben</a>
       </div>

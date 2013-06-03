@@ -17,7 +17,7 @@ import           Data.Time                     (getCurrentTime)
 import           Heist.Interpreted             (Splice)
 import qualified Heist.Interpreted             as I
 import           Snap                          (liftIO, (<$>), redirect)
-import           Snap                          (getParam)
+import           Snap                          (getParam) -- , writeText)
 import           Snap.Snaplet.Heist            (heistLocal, render)
 ------------------------------------------------------------------------------
 import           Application
@@ -43,7 +43,8 @@ showEnrollments = do
   courses <- liftIO $ forM (nub $ map groupCourseId groups) Course.getById
   let courseGroups = map (\c -> (c, filter (\g -> groupCourseId g == courseId c) groups)) courses
   let splices = [
-          ("courseGroups", I.mapSplices renderCourseGroup courseGroups)
+          ("studentId",    I.textSplice . T.pack $ show studentId)
+        , ("courseGroups", I.mapSplices renderCourseGroup courseGroups)
         ]  
   heistLocal (I.bindSplices splices) $ render "student/pages/enrollment"
 
@@ -71,5 +72,4 @@ handleEnrollment =
     BS.unpack <$> fromMaybe "0" <$> getParam "groupId" >>= \gid   ->
     liftIO getCurrentTime                              >>= \ time ->
     liftIO (Enrollment.create (read gid) studentId time)  >>
-    redirect "/student/enrollments"
-  where
+    redirect (BS.pack ("/student/" ++ show studentId))
