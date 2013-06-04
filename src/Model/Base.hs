@@ -16,69 +16,69 @@ import Model.Types
 ------------------------------------------------------------------------------
 -- simple accessor functions
 
-getAssignmentsByCourseId :: Integer -> AppHandler [Assignment]
+getAssignmentsByCourseId :: CourseId -> AppHandler [Assignment]
 getAssignmentsByCourseId cid = do
   assignments <- Adapter.getAssignments
   return $ filter (\a -> assignmentCourseId a == cid) assignments
 
-getAssignmentsForCourse :: Integer -> AppHandler [Assignment]
+getAssignmentsForCourse :: CourseId -> AppHandler [Assignment]
 getAssignmentsForCourse cid = do
   assignments <- Adapter.getAssignments
   return $ filter (\a -> assignmentCourseId a == cid) assignments
 
-getCourse :: Integer -> AppHandler Course
+getCourse :: CourseId -> AppHandler Course
 getCourse cid = do
   courses <- Adapter.getCourses
   return $ head $ filter (\c -> courseId c == cid) courses
 
-getCourses :: [Integer] -> AppHandler [Course]
+getCourses :: [CourseId] -> AppHandler [Course]
 getCourses cids = do
   courses <- Adapter.getCourses
   return $ filter (\c -> courseId c `elem` cids) courses
 
-getCoursesExcept :: [Integer] -> AppHandler [Course]
+getCoursesExcept :: [CourseId] -> AppHandler [Course]
 getCoursesExcept cids = do
   courses <- Adapter.getCourses
   return $ filter (\c -> not $ courseId c `elem` cids) courses
 
-getGroups :: [Integer] -> AppHandler [Group]
+getGroups :: [GroupId] -> AppHandler [Group]
 getGroups cids = do
   groups <- Adapter.getGroups
   return $ filter (\c -> groupId c `elem` cids) groups
 
-getCoursesByTutorId :: Integer -> AppHandler [Course]
+getCoursesByTutorId :: TutorId -> AppHandler [Course]
 getCoursesByTutorId tid = do
   courses <- Adapter.getCourses
   return $ filter (\c -> courseTutorId c == tid) courses
 
-getSolutionsByTaskInstanceId :: Integer -> AppHandler [Solution]
+getSolutionsByTaskInstanceId :: TaskInstanceId -> AppHandler [Solution]
 getSolutionsByTaskInstanceId tid = do
   solutions <- Adapter.getSolutions
   return $ filter (\c -> solutionTaskInstanceId c == tid) solutions
 
-getTaskInstanceById :: Integer -> AppHandler TaskInstance
+getTaskInstanceById :: TaskInstanceId -> AppHandler TaskInstance
 getTaskInstanceById tiid = do
   taskInstances <- Adapter.getTaskInstances
   return $ head $ filter (\t -> taskInstanceId t == tiid) taskInstances
 
-getTaskInstanceForTask :: Integer -> Integer -> AppHandler (Maybe TaskInstance)
+getTaskInstanceForTask :: TaskId -> StudentId -> AppHandler (Maybe TaskInstance)
 getTaskInstanceForTask tid sid = do
   taskInstances <- Adapter.getTaskInstances
   let ti' = filter (\ti -> taskInstanceTaskId ti == tid &&
                            taskInstanceStudentId ti == sid) taskInstances
   if null ti' then return Nothing else return $ Just $ head ti'
 
-getTask :: Integer -> AppHandler Task
+getTask :: TaskId -> AppHandler Task
 getTask tid = do
   tasks <- Adapter.getTasks
   return $ head $ filter (\t -> taskId t == tid) tasks
 
-getTasks :: [Integer] -> AppHandler [Task]
+getTasks :: [TaskId] -> AppHandler [Task]
 getTasks tids = do
   tasks <- Adapter.getTasks
   return $ filter (\t -> taskId t `elem` tids) tasks
 
-getTasksByTutorId :: Integer -> AppHandler [Task]
+getTasksByTutorId :: TutorId -> AppHandler [Task]
 getTasksByTutorId tid = do
   tasks <- Adapter.getTasks
   return $ filter (\t -> taskTutorId t == tid) tasks
@@ -87,12 +87,12 @@ getTasksByTutorId tid = do
 ------------------------------------------------------------------------------
 -- complex accessor functions
 
-getCoursesByStudentId :: Integer -> AppHandler [Course]
+getCoursesByStudentId :: StudentId -> AppHandler [Course]
 getCoursesByStudentId sid = do
     groups <- Model.Base.getGroupsByStudentId sid
     Model.Base.getCourses $ map groupCourseId groups
 
-getGroupBundlesByStudentId :: Integer -> AppHandler [GroupBundle]
+getGroupBundlesByStudentId :: StudentId -> AppHandler [GroupBundle]
 getGroupBundlesByStudentId sid = do
     groups <- Model.Base.getGroupsByStudentId sid
     forM groups filterGroups
@@ -107,7 +107,7 @@ getGroupBundlesByStudentId sid = do
       taskInstance <- Model.Base.getCachedTaskInstance task sid
       return (assignment, task, taskInstance)
 
-getCourseBundlesByTutorId :: Integer -> AppHandler [CourseBundle]
+getCourseBundlesByTutorId :: TutorId -> AppHandler [CourseBundle]
 getCourseBundlesByTutorId tid = do
     courses <- Model.Base.getCoursesByTutorId tid
     forM courses filterCourses
@@ -120,13 +120,13 @@ getCourseBundlesByTutorId tid = do
       task <- getTask (assignmentTaskId assignment)
       return (assignment, task)
 
-getGroupsByStudentId :: Integer -> AppHandler [Group]
+getGroupsByStudentId :: StudentId -> AppHandler [Group]
 getGroupsByStudentId sid = do
     enrollments <- Adapter.getEnrollments
     let e' = filter (\e -> enrollmentStudentId e == sid) enrollments
     Model.Base.getGroups $ map enrollmentGroupId e'
 
-getTasksWithAssignmentCount :: Integer -> AppHandler [(Task, Int)]
+getTasksWithAssignmentCount :: TutorId -> AppHandler [(Task, Int)]
 getTasksWithAssignmentCount tid = do
     tasks       <- Adapter.getTasks
     let t' = filter (\t -> taskTutorId t == tid) tasks
@@ -137,7 +137,7 @@ getTasksWithAssignmentCount tid = do
       let a' = filter (\a -> assignmentTaskId a == taskId task) assignments
       return (task, length a')
 
-getCoursesWithEnrollableGroups :: Integer -> AppHandler [(Course, [Group])]
+getCoursesWithEnrollableGroups :: StudentId -> AppHandler [(Course, [Group])]
 getCoursesWithEnrollableGroups sid = do
     courses  <- Model.Base.getCoursesByStudentId sid
     courses' <- Model.Base.getCoursesExcept (map courseId courses)
@@ -148,7 +148,7 @@ getCoursesWithEnrollableGroups sid = do
       let g' = filter (\g -> groupCourseId g == courseId course) groups
       return (course, g')
 
-getCachedTaskInstance :: Task -> Integer -> AppHandler TaskInstance
+getCachedTaskInstance :: Task -> StudentId -> AppHandler TaskInstance
 getCachedTaskInstance task sid = do
   loadedTaskInstance <- Model.Base.getTaskInstanceForTask (taskId task) sid
   if isJust loadedTaskInstance
@@ -162,38 +162,38 @@ getCachedTaskInstance task sid = do
 ------------------------------------------------------------------------------
 -- create functions
 
-createAssignment :: Integer -> Integer -> Status -> UTCTime -> UTCTime
+createAssignment :: CourseId -> TaskId -> Status -> UTCTime -> UTCTime
                  -> AppHandler Assignment
 createAssignment cid tid sts start end =
     Adapter.createAssignment $ Assignment 0 cid tid sts start end
 
-createCourse :: Integer -> String -> String -> Maybe UTCTime -> Maybe UTCTime
+createCourse :: TutorId -> String -> String -> Maybe UTCTime -> Maybe UTCTime
              -> Double -> AppHandler Course
 createCourse tid name sem enrStart enrEnd pass =
     Adapter.createCourse $ Course 0 tid name sem enrStart enrEnd pass
 
-createEnrollment :: Integer -> Integer -> UTCTime -> AppHandler Enrollment
+createEnrollment :: GroupId -> StudentId -> UTCTime -> AppHandler Enrollment
 createEnrollment gid sid time =
     Adapter.createEnrollment $ Enrollment 0 gid sid time
 
-createGroup :: Integer -> String -> Int -> AppHandler Group
+createGroup :: CourseId -> String -> Int -> AppHandler Group
 createGroup cid desc cap =
     Adapter.createGroup $ Group 0 cid desc cap
 
-createSolution :: Integer -> String -> String -> Maybe Result -> UTCTime
+createSolution :: TaskInstanceId -> String -> String -> Maybe Result -> UTCTime
                -> AppHandler Solution
 createSolution tid cont eval res time =
     Adapter.createSolution $ Solution 0 tid cont eval res time
 
-createTask :: Integer -> String -> String -> String -> ScoringOrder -> UTCTime
+createTask :: TutorId -> String -> String -> String -> ScoringOrder -> UTCTime
            -> AppHandler Task
 createTask tid name ttpe sig so time =
     Adapter.createTask $ Task 0 tid name ttpe sig so time
 
-createTaskInstance :: Integer -> Integer -> String -> String -> String
+createTaskInstance :: TaskId -> StudentId -> String -> String -> String
                    -> String -> AppHandler TaskInstance
-createTaskInstance tid uid desc sol doc sig =
-    Adapter.createTaskInstance $ TaskInstance 0 tid uid desc doc sol sig 
+createTaskInstance tid sid desc sol doc sig =
+    Adapter.createTaskInstance $ TaskInstance 0 tid sid desc doc sol sig 
 
 
 ------------------------------------------------------------------------------

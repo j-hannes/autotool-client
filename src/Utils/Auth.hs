@@ -8,13 +8,15 @@ module Utils.Auth
 ------------------------------------------------------------------------------
 import qualified Data.ByteString.Char8 as BS
 import           Data.Maybe            (fromMaybe)
-
-import           Application
+------------------------------------------------------------------------------
 import           Snap                  ((<$>), getParam)
+------------------------------------------------------------------------------
+import           Application
+import           Model.Types
 
 ------------------------------------------------------------------------------
 -- | 
-getStudentId :: AppHandler Integer
+getStudentId :: AppHandler StudentId
 getStudentId = do
     studentId <- BS.unpack <$> fromMaybe "0" <$> getParam "studentId"
     return $ read studentId

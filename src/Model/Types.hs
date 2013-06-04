@@ -4,20 +4,21 @@ import Data.Time (UTCTime)
 import Autotool.Client.Types.ScoringOrder
 import Model.Indexable
 
-
 ------------------------------------------------------------------------------
 -- |
 data Assignment = Assignment {
     -- ^ Identifier
-    assignmentId       :: Integer
+    assignmentId       :: AssignmentId
     -- ^ Relations
-  , assignmentCourseId :: Integer
-  , assignmentTaskId   :: Integer
+  , assignmentCourseId :: CourseId
+  , assignmentTaskId   :: TaskId
     -- ^ Attributes
   , assignmentStatus   :: Status
   , assignmentStart    :: UTCTime
   , assignmentEnd      :: UTCTime
   } deriving (Eq, Read, Show)
+
+type AssignmentId = Integer
 
 data Status = Mandatory
             | Optional
@@ -32,9 +33,9 @@ instance Indexable Assignment where
 -- |
 data Course = Course {
     -- ^ Identifier
-    courseId             :: Integer
+    courseId             :: CourseId
     -- ^ Relations
-  , courseTutorId        :: Integer
+  , courseTutorId        :: TutorId
     -- ^ Attributes
   , courseName           :: String
   , courseSemester       :: String
@@ -43,6 +44,7 @@ data Course = Course {
   , coursePassCriteria   :: Double
   } deriving (Eq, Ord, Read, Show)
 
+type CourseId = Integer
 
 instance Indexable Course where
   iid = courseId
@@ -53,13 +55,15 @@ instance Indexable Course where
 -- |
 data Enrollment = Enrollment {
     -- ^ Identifier
-    enrollmentId        :: Integer
+    enrollmentId        :: EnrollmentId
     -- ^ Relations
-  , enrollmentGroupId   :: Integer
-  , enrollmentStudentId :: Integer
+  , enrollmentGroupId   :: GroupId
+  , enrollmentStudentId :: StudentId
     -- ^ Attributes
   , enrollmentTime      :: UTCTime
   } deriving (Eq, Read, Show)
+
+type EnrollmentId = Integer
 
 instance Indexable Enrollment where
   iid = enrollmentId
@@ -70,13 +74,15 @@ instance Indexable Enrollment where
 -- |
 data Group = Group {
     -- ^ Identifier
-    groupId             :: Integer
+    groupId             :: GroupId
     -- ^ Relations
-  , groupCourseId       :: Integer
+  , groupCourseId       :: CourseId
     -- ^ Attributes
   , groupDescription    :: String
   , groupCapacity       :: Int
   } deriving (Eq, Ord, Read, Show)
+
+type GroupId = Integer
 
 instance Indexable Group where
   iid = groupId
@@ -87,15 +93,17 @@ instance Indexable Group where
 -- |
 data Solution = Solution {
     -- ^ Identifier
-      solutionId             :: Integer
+      solutionId             :: SolutionId
     -- ^ Relations
-    , solutionTaskInstanceId :: Integer
+    , solutionTaskInstanceId :: TaskInstanceId
     -- ^ Attributes
     , solutionContent        :: String
     , solutionEvaluation     :: String
     , solutionResult         :: Maybe Result
     , solutionSubmission     :: UTCTime
     } deriving (Read, Show)
+
+type SolutionId = Integer
 
 data Result = Result {
       score :: Int
@@ -111,9 +119,9 @@ instance Indexable Solution where
 -- |
 data Task = Task {
     -- ^ Identifier
-      taskId           :: Integer
+      taskId           :: TaskId
     -- ^ Relations
-    , taskTutorId      :: Integer
+    , taskTutorId      :: TutorId
     -- ^ Attributes
     , taskName         :: String
     , taskType         :: String
@@ -122,6 +130,7 @@ data Task = Task {
     , taskCreated      :: UTCTime
     } deriving (Read, Show)
 
+type TaskId = Integer
 
 instance Indexable Task where
   iid = taskId
@@ -132,10 +141,10 @@ instance Indexable Task where
 -- |
 data TaskInstance = TaskInstance {
     -- ^ Identifier
-    taskInstanceId        :: Integer
+    taskInstanceId        :: TaskInstanceId
     -- ^ Relations
-  , taskInstanceTaskId    :: Integer
-  , taskInstanceStudentId :: Integer
+  , taskInstanceTaskId    :: TaskId
+  , taskInstanceStudentId :: StudentId
     -- ^ Attributes
   , taskInstanceDescription   :: String
   , taskInstanceDocumentation :: String
@@ -143,14 +152,20 @@ data TaskInstance = TaskInstance {
   , taskInstanceSignature     :: String
   } deriving (Eq, Read, Show)
 
+type TaskInstanceId = Integer
 
 instance Indexable TaskInstance where
   iid = taskInstanceId
   setId assn idVal = assn { taskInstanceId = idVal }
 
+------------------------------------------------------------------------------
+-- | User data types have not been implemented yet.
+type TutorId   = Integer
+type StudentId = Integer
+
 
 ------------------------------------------------------------------------------
--- |
+-- | Bundle types.
 type CourseBundle     = (Course, [(Assignment, Task)])
 type GroupBundle      = (Group, Course, [AssignmentBundle])
 type AssignmentBundle = (Assignment, Task, TaskInstance)
