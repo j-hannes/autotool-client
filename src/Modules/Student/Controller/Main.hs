@@ -2,7 +2,7 @@
 
 ------------------------------------------------------------------------------
 -- | Controller for the student page.
-module Controller.Student
+module Modules.Student.Controller.Main
     ( handleStudent
     , handleStudentSelection
     ) where
@@ -10,7 +10,7 @@ module Controller.Student
 ------------------------------------------------------------------------------
 import           Data.Maybe                    (fromJust, isJust)
 import qualified Data.Text                     as T
-import           Data.Time                     (getCurrentTime)
+import           Data.Time                     (UTCTime, getCurrentTime)
 ------------------------------------------------------------------------------
 import           Autotool.Client               as Autotool
 import           Heist.Interpreted             (Splice)
@@ -19,9 +19,9 @@ import           Snap                          (ifTop, liftIO)
 import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
 import           Application                   (AppHandler)
+import qualified Model.Base                    as Model
 import qualified Model.Adapter.File.Assignment as Assignment
 import qualified Model.Adapter.File.Course     as Course
-import qualified Model.Adapter.File.Group      as Group
 import qualified Model.Adapter.File.Task       as Task
 import qualified Model.Adapter.File.TaskInstance as TaskInstance
 import           Model.Types.Assignment
@@ -42,38 +42,42 @@ handleStudentSelection = do
 -- | Renders the landing page with an overview of the tasks.
 handleStudent :: AppHandler ()
 handleStudent = ifTop $ do
-    studentId <- getStudentId
-    groups <- liftIO $ Group.getAllByStudentId studentId  -- uid
+    sid    <- getStudentId
+    now    <- getCurrentTime
+    groups <- Model.getGroupsCompleteByStudentId sid
     let splices = [
-            ("studentId", I.textSplice . T.pack $ show studentId)
-          , ("groups", I.mapSplices (renderGroupRow studentId) groups) 
+            ("studentId", I.textSplice . T.pack $ show sid)
+          , ("groups",    I.mapSplices (renderGroups sid) groups) 
           ]
     heistLocal (I.bindSplices splices) $ render "student/index"
 
 
 ------------------------------------------------------------------------------
--- |
-renderGroupRow :: Integer -> Group -> Splice AppHandler
-renderGroupRow studentId group = do
-    course      <- liftIO $ Course.getById (groupCourseId group)
-    assignments <- liftIO $ Assignment.getAllByCourseId (courseId course)
-    let splices = [
-            ("groupDescription",
-                I.textSplice . T.pack $ groupDescription group)
-          , ("groupId",
-                I.textSplice . T.pack . show $ groupId group)
-          , ("courseName",
-                I.textSplice . T.pack $ courseName course)
-          , ("passCriteria",
-                I.textSplice . T.pack . show $ coursePassCriteria course)
-          , ("assignments",
-                I.mapSplices (renderAssignmentRow studentId) assignments)
-          ]
-    I.runChildrenWith splices
+-- | Splice that is mapped over the <groups> tag to render group related
+-- details into the template.
+renderGroups :: (Group, Course, [(Assignment, Task, TaskInstance)]) -> UTCTime
+             -> Splice AppHandler
+renderGroups (group, course, assignments) now =
+    I.runChildrenWith [
+        ("groupDescription", groupNameSplice)
+      , ("groupId",          groupIdSplice)
+      , ("courseName",       courseNameSplice)
+      , ("passCriteria",     passCriteriaSplice)
+      , ("assignments",      assignmentsSplice)
+      ]
+  where
+    groupNameSplice    = I.textSplice . T.pack        $ groupDescription group
+    groupIdSplice      = I.textSplice . T.pack . show $ groupId group
+    courseNameSplice   = I.textSplice . T.pack        $ courseName course
+    passCriteriaSplice = I.textSplice . T.pack . show $ coursePassCriteria course
+    assignmentsSplice  = I.mapSplices (renderAssignments now) assignments
 
 
-renderAssignmentRow :: Integer -> Assignment -> Splice AppHandler
-renderAssignmentRow studentId assignment = do
+------------------------------------------------------------------------------
+-- | Splice that is mapped over the <assignments> tag to render assignment
+-- related details into the template.
+renderAssignments :: Integer -> Assignment -> Splice AppHandler
+renderAssignments studentId assignment = do
   task <- liftIO . Task.getById $ assignmentTaskId assignment
   taskInstance <- liftIO $ getCachedTaskInstance task studentId
   time <- liftIO getCurrentTime

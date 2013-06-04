@@ -2,13 +2,13 @@
 
 ------------------------------------------------------------------------------
 -- | Controller for creating and managing courses.
-module Controller.Course
+module Modules.Tutor.Controller.Course
   ( handleCourseForm
   ) where
 
 ------------------------------------------------------------------------------
-import           Data.Text (Text)
-import qualified Data.Text as T
+import           Data.Text           (Text)
+import qualified Data.Text           as T
 import           Data.Time
 import           Snap
 import           System.Locale
@@ -16,10 +16,8 @@ import           Text.Digestive.Form (Form, (.:), check, stringRead, text)
 import           Text.Digestive.Snap
 ------------------------------------------------------------------------------
 import           Application
-import qualified Model.Adapter.File.Course as Course
-import qualified Model.Adapter.File.Group  as Group
+import qualified Model.Base          as Model
 import           Model.Types.Course
---import qualified Model.User as User
 import           Utils.Form
 
 
@@ -59,10 +57,10 @@ data CourseFormData = CourseFormData
 -- TODO Submit a user information message into the session that can then be
 -- displayed on the main page instead of displaying a separate page.
 createCourse :: CourseFormData -> AppHandler ()
-createCourse cfd =
-    liftIO (Course.create tid name sem enrStart enrEnd pc) >>= \course ->
-    liftIO (Group.create  (courseId course) g1n g1c)       >>
-    liftIO (Group.create  (courseId course) g2n g2c)       >>
+createCourse cfd = do
+    course <- Model.createCourse tid name sem enrStart enrEnd pc
+    _      <- Model.createGroup  (courseId course) g1n g1c
+    _      <- Model.createGroup  (courseId course) g2n g2c
     redirect "/tutor"
   where
     tid      = 1
@@ -75,6 +73,7 @@ createCourse cfd =
     g1c      =               group1Capacity         cfd
     g2n      = T.unpack    $ group2Name             cfd
     g2c      =               group2Capacity         cfd
+
 
 ------------------------------------------------------------------------------
 -- | Digestive course form.
@@ -89,6 +88,7 @@ courseForm time = CourseFormData
     <*> "group1Capacity"      .: (stringRead "incorrect number" Nothing)
     <*> "group2Name"          .: (text Nothing)
     <*> "group2Capacity"      .: (stringRead "incorrect number" Nothing)
+
 
 ------------------------------------------------------------------------------
 -- | Check against a valid percentage.

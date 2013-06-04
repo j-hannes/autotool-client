@@ -2,35 +2,32 @@
 
 ------------------------------------------------------------------------------
 -- | This controller enables the assignments between courses and tasks.
-module Controller.Assignment
+module Modules.Tutor.Controller.Assignment
     ( handleAssignTask
     ) where
 
 ------------------------------------------------------------------------------
-import           Data.Maybe                    (fromJust)
-import           Data.Text                     (Text)
-import qualified Data.Text                     as T
-import           Snap                          (liftIO, (<$>), (<*>), redirect)
-import           Text.Digestive.Form           (Form, choice, text, (.:),
-                                                check)
-import           Text.Digestive.Snap           (runForm)
+import           Data.Maybe             (fromJust)
+import           Data.Text              (Text)
+import qualified Data.Text              as T
+import           Snap                   ((<$>), (<*>), redirect)
+import           Text.Digestive.Form    (Form, choice, text, (.:), check)
+import           Text.Digestive.Snap    (runForm)
 ------------------------------------------------------------------------------
-import           Application
-import qualified Model.Adapter.File.Assignment as Assignment
-import qualified Model.Adapter.File.Course     as Course
-import qualified Model.Adapter.File.Task       as Task
+import           Application            (AppHandler)
+import qualified Model.Base             as Model
 import           Model.Types.Assignment
 import           Model.Types.Course
 import           Model.Types.Task
-import           Utils.Form                    (renderForm, convertDate)
+import           Utils.Form             (renderForm, convertDate)
 
 
 ------------------------------------------------------------------------------
 -- | Handler to assign a task to a course.
 handleAssignTask :: AppHandler ()
 handleAssignTask = do
-  courses <- liftIO $ Course.getAllByTutorId 1
-  tasks   <- liftIO $ Task.getAllByTutorId 1
+  courses <- Model.getCoursesByTutorId 1
+  tasks   <- Model.getTasksByTutorId   1
   let courseIds = map (tupleIdName courseId courseName) courses
       taskIds   = map (tupleIdName taskId taskName) tasks
   (view, assignData) <- runForm "form" (assignForm courseIds taskIds)
@@ -80,8 +77,9 @@ notEmpty t = t /= ""
 ------------------------------------------------------------------------------
 -- | Create an assignment if all teh data is collected.
 createAssignment :: AssignmentData -> AppHandler()
-createAssignment ad =
-    liftIO (Assignment.create cid tid sts start end) >> redirect "/tutor"
+createAssignment ad = do
+    _ <- Model.createAssignment cid tid sts start end
+    redirect "/tutor"
   where
     cid   =                          formCourseId ad
     tid   =                          formTaskId   ad

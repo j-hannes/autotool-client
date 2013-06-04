@@ -1,0 +1,48 @@
+{-# LANGUAGE OverloadedStrings #-}
+
+------------------------------------------------------------------------------
+-- | Controller to display the task list.
+module Modules.Tutor.Controller.Tasks
+    ( showTaskList
+    ) where
+
+------------------------------------------------------------------------------
+import qualified Data.Text                     as T
+------------------------------------------------------------------------------
+import           Heist.Interpreted             (Splice)
+import qualified Heist.Interpreted             as I
+import           Snap                          (ifTop)
+import           Snap.Snaplet.Heist
+------------------------------------------------------------------------------
+import           Application                   (AppHandler)
+import qualified Model.Base             as Model
+import           Model.Types.Task
+
+
+------------------------------------------------------------------------------
+-- | Renders the task page with a list of all tasks of the logged in tutor.
+showTaskList :: AppHandler ()
+showTaskList = ifTop $ do
+    tasks   <- Model.getTasksWithAssignmentCount 1
+    let splices = [("tasks", I.mapSplices renderTasks tasks)]
+    heistLocal (I.bindSplices splices) $ render "tutor/pages/tasks"
+
+
+------------------------------------------------------------------------------
+-- | Splice that is mapped over the <tasks> tag to render task related details
+-- into the template.
+renderTasks :: (Task, Int) -> Splice AppHandler
+renderTasks (task, assignments) = do
+    I.runChildrenWith [
+            ("taskConfigId",   taskIdSplice)
+          , ("taskConfigName", taskNameSplice)
+          , ("taskType",       taskTypeSplice)
+          , ("dateCreated",    dateCreatedSplice)
+          , ("assignments",    assignmentsSplice)
+          ]
+  where
+    taskIdSplice      = I.textSplice . T.pack . show $ taskId      task
+    taskNameSplice    = I.textSplice . T.pack        $ taskName    task
+    taskTypeSplice    = I.textSplice . T.pack        $ taskType    task
+    dateCreatedSplice = I.textSplice . T.pack . show $ taskCreated task
+    assignmentsSplice = I.textSplice . T.pack . show $ assignments

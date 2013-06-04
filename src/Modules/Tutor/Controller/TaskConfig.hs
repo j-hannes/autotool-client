@@ -2,28 +2,28 @@
 
 ------------------------------------------------------------------------------
 -- | Controller for creating tasks.
-module Controller.TaskConfig
+module Modules.Tutor.Controller.TaskConfig
     ( handleTaskConfig
     ) where
 
 ------------------------------------------------------------------------------
-import qualified Data.ByteString.Char8  as BS
+import qualified Data.ByteString.Char8   as BS
 import           Data.Maybe
-import           Data.Text              (Text)
-import qualified Data.Text              as T
-import           Data.Time              (getCurrentTime)
-import           Snap                   hiding (Config)
+import           Data.Text               (Text)
+import qualified Data.Text               as T
+import           Data.Time               (getCurrentTime)
+import           Snap                    hiding (Config)
 import           Snap.Snaplet.Heist
 import           Text.Digestive.Form
-import           Text.Digestive.Snap    hiding (method)
+import           Text.Digestive.Snap     hiding (method)
 ------------------------------------------------------------------------------
-import           Application            (AppHandler)
-import qualified Autotool.Client        as Autotool
+import           Application             (AppHandler)
+import qualified Autotool.Client         as Autotool
 import           Autotool.Client.Types.ScoringOrder (ScoringOrder)
-import qualified Autotool.Mock          as AutotoolMock
-import           Model.Adapter.File.Task as Task
-import           Utils.Form             (renderForm, notEmpty)
-import qualified View.Task              as View
+import qualified Autotool.Mock           as AutotoolMock
+import qualified Model.Base              as Model
+import           Utils.Form              (renderForm, notEmpty)
+import qualified Modules.Tutor.View.Task as View
 
 
 ------------------------------------------------------------------------------
@@ -121,11 +121,7 @@ handleFormVerification taskname = do
 -- | Create a new task from the entered data.
 createTask :: String -> String -> String -> ScoringOrder -> AppHandler ()
 createTask taskname tasktitle signature so = do
-    userId <- return 1  -- FIXME
-    now <- liftIO $ getCurrentTime
-    
-    _ <- liftIO $ Task.create userId tasktitle taskname signature so now
-    --writeBS $ BS.pack $ show task
-    
+    userId <- return 1
+    now    <- liftIO $ getCurrentTime
+    _      <- Model.createTask userId tasktitle taskname signature so now
     redirect "/tutor"
-

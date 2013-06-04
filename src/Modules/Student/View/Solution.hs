@@ -2,7 +2,7 @@
 
 ------------------------------------------------------------------------------
 -- |
-module View.Solution
+module Modules.Student.View.Solution
     ( bindFormSplices
     , solutionFormTemplate
     ) where
@@ -87,58 +87,3 @@ evaluationSplice (Just evaluation) = return [X.Element "pre" [
                                           ] [
                                             X.TextNode $ T.pack evaluation
                                           ]]
-
-
-------------------------------------------------------------------------------
--- | A splice that renders a list of tuples (linktext, url) into multiple 'a'
--- tags, spearated by a ' | ' separator.
-{-
-solutionDocumentationSplice :: [(String, String)] -> Splice AppHandler
-solutionDocumentationSplice linkList =
-    return . intersperse separator $ map createLink linkList
-  where
-    separator = X.TextNode " | "
--}
-
-
-------------------------------------------------------------------------------
--- | Transform a tuple of a text and an url into an html link tag.
-{-
-createLink :: (String, String) -> X.Node
-createLink (text, url)= X.Element "a" attributes [linkTextNode]
-  where
-    attributes = [("href", T.pack url), ("target", "_blank")]
-    linkTextNode = X.TextNode $ T.pack text
--}
-
-
-------------------------------------------------------------------------------
--- | A splice that contains the solution description.
-{-
-solutionDescriptionSplice :: String -> Splice AppHandler
-solutionDescriptionSplice = return . parseXML id
--}
-
-
-------------------------------------------------------------------------------
--- | Parse a string into an XML forest with function application.
---   Take an inputString and parse it's content into an XML document. Then the
---   passed function gets applied to the content of the XML document to
---   possibly transform its content (just pass id in case of no
---   transformation). The resulting XML forest is returned in the end.
-{-
-parseXML :: ([X.Node] -> [X.Node]) -> String -> [X.Node]
-parseXML transformXml inputString =
-    either textNode (transformXml . X.docContent) xmlDocument
-  where
-    xmlDocument = X.parseXML "" byteString
-    byteString  = BS.pack inputString
--}
-
-
-------------------------------------------------------------------------------
--- | Takes a string and converts it to a list with a single TextNode in it.
-{-
-textNode :: String -> [X.Node]
-textNode txt = [X.TextNode . T.pack $ txt]
--}

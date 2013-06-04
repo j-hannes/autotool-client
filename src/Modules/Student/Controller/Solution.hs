@@ -2,32 +2,31 @@
 
 ------------------------------------------------------------------------------
 -- | Controller for creating solutions.
-module Controller.Solution
+module Modules.Student.Controller.Solution
     ( showSolveTaskForm
     ) where
 
 ------------------------------------------------------------------------------
-import qualified Data.ByteString.Char8    as BS
-import           Data.List                (group)
-import           Data.List.Split          (splitOn)
+import qualified Data.ByteString.Char8           as BS
+import           Data.List                       (group)
+import           Data.List.Split                 (splitOn)
 import           Data.Maybe
-import           Data.Text                (Text)
-import qualified Data.Text                as T
-import           Data.Time                (getCurrentTime)
-import           Snap                     hiding (Config)
+import           Data.Text                       (Text)
+import qualified Data.Text                       as T
+import           Data.Time                       (getCurrentTime)
+import           Snap                            hiding (Config)
 import           Snap.Snaplet.Heist
 import           Text.Digestive.Form
-import           Text.Digestive.Snap      hiding (method)
+import           Text.Digestive.Snap             hiding (method)
 ------------------------------------------------------------------------------
-import           Application              (AppHandler)
-import qualified Autotool.Client          as Autotool
-import qualified Model.Adapter.File.Solution as Solution
-import qualified Model.Adapter.File.TaskInstance as TaskInstance
+import           Application                     (AppHandler)
+import qualified Autotool.Client                 as Autotool
+import qualified Model.Base                      as Model
 import           Model.Types.Solution
 import           Model.Types.TaskInstance
-import           Utils.Auth               (getStudentId)
-import           Utils.Form               (renderForm, notEmpty)
-import qualified View.Solution            as View
+import           Utils.Auth                      (getStudentId)
+import           Utils.Form                      (renderForm, notEmpty)
+import qualified Modules.Student.View.Solution   as View
 
 
 ------------------------------------------------------------------------------
@@ -39,8 +38,8 @@ import qualified View.Solution            as View
 showSolveTaskForm :: AppHandler ()
 showSolveTaskForm = do
     tiid <- fmap BS.unpack $ fromMaybe "" <$> getParam "taskInstanceId"
-    taskInstance <- liftIO $ TaskInstance.getById (read tiid)
-    solutions    <- liftIO $ Solution.getAllByTaskInstanceId (read tiid)
+    taskInstance <- Model.getTaskInstanceById          (read tiid)
+    solutions    <- Model.getSolutionsByTaskInstanceId (read tiid)
     let lastSolution = if null solutions
                           then Nothing
                           else Just $ head solutions --FIXME
@@ -142,7 +141,7 @@ createSolution cont response tiid = do
     liftIO $ putStrLn response
     let (_:result) = splitOn ["Bewertung"] $ words response
     
-    _ <- liftIO $ Solution.create tiid cont (format response) (getResult result) now
+    _ <- Model.createSolution tiid cont (format response) (getResult result) now
     return ()
 
 format :: String -> String

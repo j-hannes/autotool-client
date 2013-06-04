@@ -22,17 +22,17 @@
       <th>Einsendungen</th>
       <th>Beste Bewertung</th>
     </tr>
-    <assignedtasks>
+    <assignedTasks>
     <tr>
-      <td><taskname /></td>
-      <td><tasktype /></td>
+      <td><taskName /></td>
+      <td><taskType /></td>
       <td><status /></td>
       <td><highscore /></td>
       <td><timespan /></td>
       <td><submissions /></td>
       <td><bestscore /></td>
     </tr>
-    </assignedtasks>
+    </assignedTasks>
   </table> 
   <hr>
 </courses>

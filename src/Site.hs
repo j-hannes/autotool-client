@@ -18,16 +18,17 @@ import           Snap.Snaplet.Heist
 import           Snap.Util.FileServe
 ------------------------------------------------------------------------------
 import           Application
-import           Controller.Assignment (handleAssignTask)
-import           Controller.Course     (handleCourseForm)
-import           Controller.Enrollment (handleEnrollment, showEnrollments)
-import           Controller.Tasks      (showTaskList)
-import           Controller.Tutor      (handleTutor)
-import           Controller.Student    (handleStudent)
-import           Controller.Student    (handleStudentSelection)
-import           Controller.Solution   (showSolveTaskForm)
-import           Controller.TaskConfig (handleTaskConfig)
-import           Controller.TaskTree   (handleTaskTree)
+import           Modules.Student.Controller.Enrollment (handleEnrollment)
+import           Modules.Student.Controller.Enrollment (showEnrollments)
+import           Modules.Student.Controller.Main       (handleStudent)
+import           Modules.Student.Controller.Main       (handleStudentSelection)
+import           Modules.Student.Controller.Solution   (showSolveTaskForm)
+import           Modules.Tutor.Controller.Assignment   (handleAssignTask)
+import           Modules.Tutor.Controller.Course       (handleCourseForm)
+import           Modules.Tutor.Controller.Tasks        (showTaskList)
+import           Modules.Tutor.Controller.Main         (handleTutor)
+import           Modules.Tutor.Controller.TaskConfig   (handleTaskConfig)
+import           Modules.Tutor.Controller.TaskTree     (handleTaskTree)
 
 
 ------------------------------------------------------------------------------

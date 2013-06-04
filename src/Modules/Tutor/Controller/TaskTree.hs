@@ -2,19 +2,19 @@
 
 ------------------------------------------------------------------------------
 -- | Controller for creating tasks.
-module Controller.TaskTree
+module Modules.Tutor.Controller.TaskTree
     ( handleTaskTree
     ) where
 
 ------------------------------------------------------------------------------
-import qualified Data.ByteString.Char8 as BS
+import qualified Data.ByteString.Char8   as BS
 import           Snap
 import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
-import           Application           (AppHandler)
-import qualified Autotool.Client       as Autotool
-import qualified Autotool.Mock         as AutotoolMock
-import qualified View.Task             as View
+import           Application             (AppHandler)
+import qualified Autotool.Client         as Autotool
+import qualified Autotool.Mock           as AutotoolMock
+import qualified Modules.Tutor.View.Task as View
 
 
 ------------------------------------------------------------------------------

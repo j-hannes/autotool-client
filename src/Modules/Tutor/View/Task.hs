@@ -2,7 +2,7 @@
 
 ------------------------------------------------------------------------------
 -- |
-module View.Task
+module Modules.Tutor.View.Task
     ( bindTaskTreeSplice
     , bindFormSplices
     , taskTreeTemplate

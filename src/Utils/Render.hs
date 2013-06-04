@@ -2,6 +2,7 @@
 
 module Utils.Render
   ( compareToNow
+  , doubleToInt
   , translateStatus
   ) where
 
@@ -26,3 +27,9 @@ compareToNow now (Just begin) (Just end)
     | now < begin = (show begin) ++ " - " ++ (show end)
     | now < end = "noch bis " ++ (show end)
     | otherwise = "vorbei seit " ++ (show end)
+
+
+------------------------------------------------------------------------------
+-- | 
+doubleToInt :: Double -> Int
+doubleToInt = read . takeWhile ((/=) '.') . show

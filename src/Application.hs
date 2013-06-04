@@ -10,7 +10,6 @@ import           Control.Lens
 import           Data.IORef
 import           Snap.Snaplet
 import           Snap.Snaplet.Heist
-
 import           Model.Types.Assignment
 import           Model.Types.Course
 import           Model.Types.Enrollment
