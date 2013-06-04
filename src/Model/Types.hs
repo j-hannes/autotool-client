@@ -8,14 +8,15 @@ import Model.Indexable
 -- |
 data Assignment = Assignment {
     -- ^ Identifier
-    assignmentId       :: AssignmentId
+    assignmentId            :: AssignmentId
     -- ^ Relations
-  , assignmentCourseId :: CourseId
-  , assignmentTaskId   :: TaskId
+  , assignmentCourseId      :: CourseId
+  , assignmentTaskId        :: TaskId
+  , assignmentTaskInstances :: [TaskInstanceId]
     -- ^ Attributes
-  , assignmentStatus   :: Status
-  , assignmentStart    :: UTCTime
-  , assignmentEnd      :: UTCTime
+  , assignmentStatus        :: Status
+  , assignmentStart         :: UTCTime
+  , assignmentEnd           :: UTCTime
   } deriving (Eq, Read, Show)
 
 type AssignmentId = Integer
@@ -36,6 +37,8 @@ data Course = Course {
     courseId             :: CourseId
     -- ^ Relations
   , courseTutorId        :: TutorId
+  , courseGroups         :: [GroupId]
+  , courseAssignments    :: [AssignmentId]
     -- ^ Attributes
   , courseName           :: String
   , courseSemester       :: String
@@ -77,6 +80,7 @@ data Group = Group {
     groupId             :: GroupId
     -- ^ Relations
   , groupCourseId       :: CourseId
+  , groupEnrollments    :: [EnrollmentId]
     -- ^ Attributes
   , groupDescription    :: String
   , groupCapacity       :: Int
@@ -122,6 +126,7 @@ data Task = Task {
       taskId           :: TaskId
     -- ^ Relations
     , taskTutorId      :: TutorId
+    , taskAssignments  :: [AssignmentId]
     -- ^ Attributes
     , taskName         :: String
     , taskType         :: String
@@ -141,10 +146,11 @@ instance Indexable Task where
 -- |
 data TaskInstance = TaskInstance {
     -- ^ Identifier
-    taskInstanceId        :: TaskInstanceId
+    taskInstanceId            :: TaskInstanceId
     -- ^ Relations
-  , taskInstanceTaskId    :: TaskId
-  , taskInstanceStudentId :: StudentId
+  , taskInstanceTaskId        :: TaskId
+  , taskInstanceStudentId     :: StudentId
+  , taskInstanceSolutions     :: [SolutionId]
     -- ^ Attributes
   , taskInstanceDescription   :: String
   , taskInstanceDocumentation :: String
@@ -157,6 +163,7 @@ type TaskInstanceId = Integer
 instance Indexable TaskInstance where
   iid = taskInstanceId
   setId assn idVal = assn { taskInstanceId = idVal }
+
 
 ------------------------------------------------------------------------------
 -- | User data types have not been implemented yet.

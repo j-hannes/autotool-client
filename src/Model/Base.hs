@@ -63,6 +63,7 @@ getTaskInstanceById tiid = do
 
 getTaskInstanceForTask :: TaskId -> StudentId -> AppHandler (Maybe TaskInstance)
 getTaskInstanceForTask tid sid = do
+  task <- Model.Base.getTask tid
   taskInstances <- Adapter.getTaskInstances
   let ti' = filter (\ti -> taskInstanceTaskId ti == tid &&
                            taskInstanceStudentId ti == sid) taskInstances
@@ -165,12 +166,12 @@ getCachedTaskInstance task sid = do
 createAssignment :: CourseId -> TaskId -> Status -> UTCTime -> UTCTime
                  -> AppHandler Assignment
 createAssignment cid tid sts start end =
-    Adapter.createAssignment $ Assignment 0 cid tid sts start end
+    Adapter.createAssignment $ Assignment 0 cid tid [] sts start end
 
 createCourse :: TutorId -> String -> String -> Maybe UTCTime -> Maybe UTCTime
              -> Double -> AppHandler Course
 createCourse tid name sem enrStart enrEnd pass =
-    Adapter.createCourse $ Course 0 tid name sem enrStart enrEnd pass
+    Adapter.createCourse $ Course 0 tid [] [] name sem enrStart enrEnd pass
 
 createEnrollment :: GroupId -> StudentId -> UTCTime -> AppHandler Enrollment
 createEnrollment gid sid time =
@@ -178,7 +179,7 @@ createEnrollment gid sid time =
 
 createGroup :: CourseId -> String -> Int -> AppHandler Group
 createGroup cid desc cap =
-    Adapter.createGroup $ Group 0 cid desc cap
+    Adapter.createGroup $ Group 0 cid [] desc cap
 
 createSolution :: TaskInstanceId -> String -> String -> Maybe Result -> UTCTime
                -> AppHandler Solution
@@ -188,12 +189,12 @@ createSolution tid cont eval res time =
 createTask :: TutorId -> String -> String -> String -> ScoringOrder -> UTCTime
            -> AppHandler Task
 createTask tid name ttpe sig so time =
-    Adapter.createTask $ Task 0 tid name ttpe sig so time
+    Adapter.createTask $ Task 0 tid [] name ttpe sig so time
 
 createTaskInstance :: TaskId -> StudentId -> String -> String -> String
                    -> String -> AppHandler TaskInstance
 createTaskInstance tid sid desc sol doc sig =
-    Adapter.createTaskInstance $ TaskInstance 0 tid sid desc doc sol sig 
+    Adapter.createTaskInstance $ TaskInstance 0 tid sid [] desc doc sol sig 
 
 
 ------------------------------------------------------------------------------
