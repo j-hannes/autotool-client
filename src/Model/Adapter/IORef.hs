@@ -112,6 +112,16 @@ createTask task = do
     liftIO $ writeIORef taskRef newTasks
     return $ newTask
 
+createTaskInstance :: TaskInstance -> AppHandler TaskInstance
+createTaskInstance taskInstance = do
+    taskInstanceRef <- gets _taskInstances
+    taskInstances <- liftIO $ readIORef taskInstanceRef
+    let nextId    = getNextId 0 taskInstances
+        newTaskInstance  = setId taskInstance nextId
+        newTaskInstances = newTaskInstance : taskInstances
+    liftIO $ writeIORef taskInstanceRef newTaskInstances
+    return $ newTaskInstance
+
 ------------------------------------------------------------------------------
 -- | Return the highest found index (id) + 1 from a list of indexable data
 -- types.

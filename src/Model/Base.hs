@@ -1,10 +1,14 @@
 module Model.Base where
 
-import Data.Time              (UTCTime)
+import Control.Monad                      (forM)
+import Data.Maybe                         (fromJust, isJust)
+import Data.Time                          (UTCTime)
+import Snap                               (liftIO)
 
-import Application            (AppHandler)
+import Application                        (AppHandler)
+import Autotool.Client                    as Autotool
 import Autotool.Client.Types.ScoringOrder
-import Model.Adapter.IORef    as Adapter
+import Model.Adapter.IORef                as Adapter
 import Model.Types.Assignment
 import Model.Types.Course
 import Model.Types.Enrollment
@@ -14,14 +18,46 @@ import Model.Types.Task
 import Model.Types.TaskInstance
 
 
+-- consider moving to types
+
+type CourseBundle     = (Course, [(Assignment, Task)])
+type GroupBundle      = (Group, Course, [AssignmentBundle])
+type AssignmentBundle = (Assignment, Task, TaskInstance)
+
+
 -- Simple accessor functions
 
 -- get
 
-getAssignmentsByCourseIds :: [Integer] -> AppHandler [Assignment]
-getAssignmentsByCourseIds cids = do
+getAssignmentsByCourseId :: Integer -> AppHandler [Assignment]
+getAssignmentsByCourseId cid = do
   assignments <- Adapter.getAssignments
-  return $ filter (\a -> assignmentCourseId a `elem` cids) assignments
+  return $ filter (\a -> assignmentCourseId a == cid) assignments
+
+getAssignmentsForCourse :: Integer -> AppHandler [Assignment]
+getAssignmentsForCourse cid = do
+  assignments <- Adapter.getAssignments
+  return $ filter (\a -> assignmentCourseId a == cid) assignments
+
+getCourse :: Integer -> AppHandler Course
+getCourse cid = do
+  courses <- Adapter.getCourses
+  return $ head $ filter (\c -> courseId c == cid) courses
+
+getCourses :: [Integer] -> AppHandler [Course]
+getCourses cids = do
+  courses <- Adapter.getCourses
+  return $ filter (\c -> courseId c `elem` cids) courses
+
+getCoursesExcept :: [Integer] -> AppHandler [Course]
+getCoursesExcept cids = do
+  courses <- Adapter.getCourses
+  return $ filter (\c -> not $ courseId c `elem` cids) courses
+
+getGroups :: [Integer] -> AppHandler [Group]
+getGroups cids = do
+  groups <- Adapter.getGroups
+  return $ filter (\c -> groupId c `elem` cids) groups
 
 getCoursesByTutorId :: Integer -> AppHandler [Course]
 getCoursesByTutorId tid = do
@@ -37,6 +73,18 @@ getTaskInstanceById :: Integer -> AppHandler TaskInstance
 getTaskInstanceById tiid = do
   taskInstances <- Adapter.getTaskInstances
   return $ head $ filter (\t -> taskInstanceId t == tiid) taskInstances
+
+getTaskInstanceForTask :: Integer -> Integer -> AppHandler (Maybe TaskInstance)
+getTaskInstanceForTask tid sid = do
+  taskInstances <- Adapter.getTaskInstances
+  let ti' = filter (\ti -> taskInstanceTaskId ti == tid &&
+                           taskInstanceStudentId ti == sid) taskInstances
+  if null ti' then return Nothing else return $ Just $ head ti'
+
+getTask :: Integer -> AppHandler Task
+getTask tid = do
+  tasks <- Adapter.getTasks
+  return $ head $ filter (\t -> taskId t == tid) tasks
 
 getTasks :: [Integer] -> AppHandler [Task]
 getTasks tids = do
@@ -79,98 +127,80 @@ createTask :: Integer -> String -> String -> String -> ScoringOrder -> UTCTime
 createTask tid name ttpe sig so time =
     Adapter.createTask $ Task 0 tid name ttpe sig so time
 
+createTaskInstance :: Integer -> Integer -> String -> String -> String
+                   -> String -> AppHandler TaskInstance
+createTaskInstance tid uid desc sol doc sig =
+    Adapter.createTaskInstance $ TaskInstance 0 tid uid desc doc sol sig 
 
 -- Complex accessor functions
 
 getCoursesByStudentId :: Integer -> AppHandler [Course]
 getCoursesByStudentId sid = do
-    courses     <- Adapter.getCourses
-    groups      <- Adapter.getGroups
-    enrollments <- Adapter.getEnrollments
-    return $ filter (f groups enrollments) courses
+    groups <- Model.Base.getGroupsByStudentId sid
+    Model.Base.getCourses $ map groupCourseId groups
+
+getGroupBundlesByStudentId :: Integer -> AppHandler [GroupBundle]
+getGroupBundlesByStudentId sid = do
+    groups <- Model.Base.getGroupsByStudentId sid
+    forM groups filterGroups
   where
-    f g e c = courseId c `elem` (map groupCourseId $ filter (h e) g)
-    h e g   = groupId  g `elem` (map enrollmentGroupId $ filter i e)
-    i e     = enrollmentStudentId e == sid
-    
+    filterGroups group = do
+      course      <- Model.Base.getCourse (groupCourseId group) 
+      assignments <- Model.Base.getAssignmentsForCourse (courseId course) 
+      bundle      <- forM assignments filterAssignments
+      return (group, course, bundle)
+    filterAssignments assignment = do
+      task         <- Model.Base.getTask (assignmentTaskId assignment)
+      taskInstance <- Model.Base.getCachedTaskInstance task sid
+      return (assignment, task, taskInstance)
 
-getGroupsCompleteByStudentId :: Integer
-                             -> AppHandler 
-                                  [(Group, Course,
-                                    [(Assignment, Task, TaskInstance)])]
-getGroupsCompleteByStudentId sid = do
-    courses     <- Model.Base.getCoursesByStudentId sid
-    assignments <- Model.Base.getAssignmentsByCourseIds (map courseId courses)
-    tasks       <- Model.Base.getTasks (map assignmentTaskId assignments)
-    groups      <- Adapter.Model.Base.getCoursesByStudentId sid
-    return $ map (f tasks assignments) courses
-  where 
-    f t a c = (c, map (g t) (filter (h c) a))
-    g t a   = (a, filter (i a) t)
-    h c a   = assignmentCourseId a == courseId c
-    i a t   = assignmentTaskId   a == taskId   t
-
-getCoursesCompleteByTutorId :: Integer -- FIXME
-                            -> AppHandler [(Course, [(Assignment, [Task])])]
-getCoursesCompleteByTutorId tid = do
-    courses     <- Model.Base.getCoursesByTutorId tid
-    assignments <- Model.Base.getAssignmentsByCourseIds (map courseId courses)
-    tasks       <- Model.Base.getTasks (map assignmentTaskId assignments)
-    return $ map (f tasks assignments) courses
-  where 
-    f t a c = (c, map (g t) (filter (h c) a))
-    g t a   = (a, filter (i a) t)
-    h c a   = assignmentCourseId a == courseId c
-    i a t   = assignmentTaskId   a == taskId   t
+getCourseBundlesByTutorId :: Integer -> AppHandler [CourseBundle]
+getCourseBundlesByTutorId tid = do
+    courses <- Model.Base.getCoursesByTutorId tid
+    forM courses filterCourses
+  where
+    filterCourses course = do
+      assignments <- Model.Base.getAssignmentsByCourseId (courseId course)
+      bundle      <- forM assignments filterAssignments
+      return (course, bundle)
+    filterAssignments assignment = do
+      task <- getTask (assignmentTaskId assignment)
+      return (assignment, task)
 
 getGroupsByStudentId :: Integer -> AppHandler [Group]
 getGroupsByStudentId sid = do
-    groups      <- Adapter.getGroups
     enrollments <- Adapter.getEnrollments
-    return $ filter (f (filter h enrollments)) groups
-  where
-    f e g = groupId g `elem` map enrollmentGroupId e
-    h e   = enrollmentStudentId e == sid
+    let e' = filter (\e -> enrollmentStudentId e == sid) enrollments
+    Model.Base.getGroups $ map enrollmentGroupId e'
 
 getTasksWithAssignmentCount :: Integer -> AppHandler [(Task, Int)]
 getTasksWithAssignmentCount tid = do
     tasks       <- Adapter.getTasks
+    let t' = filter (\t -> taskTutorId t == tid) tasks
     assignments <- Adapter.getAssignments
-    return $ map (f assignments) (h tasks)
+    forM t' (filterTasks assignments)
   where
-    f a t = (t, length $ filter (g t) a)
-    g t a = assignmentTaskId a == taskId t
-    h t   = filter i t
-    i t   = taskId t == tid
+    filterTasks assignments task = do
+      let a' = filter (\a -> assignmentTaskId a == taskId task) assignments
+      return (task, length a')
 
-------------------------------------------------------------------------------
--- | TODO: I belive this can be refactored a lot ...
-getCoursesWithGroups :: Integer -> AppHandler [(Course, [Group])]
-getCoursesWithGroups sid = do
-    courses <- Adapter.getCourses 
-    groups  <- getEnrollableGroups sid
-    let courses' = filter (f groups) courses
-    return $ map (h groups) courses'
-  where 
-    f g c = courseId c `elem` (map groupCourseId g)
-    h g c = (c, filter (i c) g)
-    i c g = courseId c == groupCourseId g
-
-getEnrollableGroups :: Integer -> AppHandler [Group]
-getEnrollableGroups uid = do
-    enrollments <- Adapter.getEnrollments
-    groups      <- Adapter.getGroups
-    return $ filterEnrollableGroups uid enrollments groups
-
-filterEnrollableGroups :: Integer -> [Enrollment] -> [Group] -> [Group]
-filterEnrollableGroups uid enrollments groups =
-    filter (not . belongsToEnrolledCourse) groups
+getCoursesWithEnrollableGroups :: Integer -> AppHandler [(Course, [Group])]
+getCoursesWithEnrollableGroups sid = do
+    courses  <- Model.Base.getCoursesByStudentId sid
+    courses' <- Model.Base.getCoursesExcept (map courseId courses)
+    groups  <- Adapter.getGroups
+    forM courses' (filterCourses groups)
   where
-    belongsToEnrolledCourse group = groupCourseId group `elem` enrolledCourseIds
-    enrolledCourseIds  = map groupCourseId enrolledGroups
-    enrolledGroups     = filter isEnrolled groups
-    isEnrolled group   = groupId group `elem` enrolledGroupIds
-    belongsToStudent e = enrollmentStudentId e == uid
+    filterCourses groups course = do 
+      let g' = filter (\g -> groupCourseId g == courseId course) groups
+      return (course, g')
 
-    enrolledGroupIds   = map enrollmentGroupId studentEnrollments
-    studentEnrollments = filter belongsToStudent  enrollments
+getCachedTaskInstance :: Task -> Integer -> AppHandler TaskInstance
+getCachedTaskInstance task sid = do
+  loadedTaskInstance <- Model.Base.getTaskInstanceForTask (taskId task) sid
+  if isJust loadedTaskInstance
+    then return $ fromJust loadedTaskInstance
+    else do
+      (desc, sol, doc, sig) <- liftIO $ Autotool.getTaskInstance
+                                          (taskSignature task) (show sid)
+      Model.Base.createTaskInstance (taskId task) sid desc sol (show doc) sig

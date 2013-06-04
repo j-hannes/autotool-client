@@ -13,7 +13,8 @@ import           Data.ByteString                (ByteString)
 import           Data.List                      (intersperse)
 import qualified Data.Text                      as T
 import           Heist
-import           Heist.Interpreted
+import qualified Heist.Interpreted              as I
+import           Heist.Interpreted              (Splice)
 import qualified Text.XmlHtml                   as X
 ------------------------------------------------------------------------------
 import           Application
@@ -34,17 +35,19 @@ solutionFormTemplate = "student/forms/create_solution"
 ------------------------------------------------------------------------------
 -- | Binds a splice to the handlers heist state which renders a list of solution
 -- trees into a html template.
-bindFormSplices :: String
+bindFormSplices :: Integer
+                -> String
                 -> [(String, String)]
                 -> Maybe String
                 -> Maybe String
                 -> SpliceBinder 
-bindFormSplices taskDescription doc eva err =
-    bindSplices
-      [ ("taskDescription",   textSplice $ T.pack taskDescription)
+bindFormSplices sid taskDescription doc eva err =
+    I.bindSplices
+      [ ("taskDescription",   I.textSplice $ T.pack taskDescription)
       , ("taskDocumentation", taskDocumentationSplice doc)
       , ("verificationError", verificationErrorSplice err)
       , ("evaluation",        evaluationSplice eva)
+      , ("studentId",         I.textSplice . T.pack $ show sid)
       ]
 
 

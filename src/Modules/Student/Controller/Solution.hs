@@ -37,6 +37,7 @@ import qualified Modules.Student.View.Solution   as View
 -- config is returned (can be used when not in reach of the autotool server).
 showSolveTaskForm :: AppHandler ()
 showSolveTaskForm = do
+    sid    <- getStudentId
     tiid <- fmap BS.unpack $ fromMaybe "" <$> getParam "taskInstanceId"
     taskInstance <- Model.getTaskInstanceById          (read tiid)
     solutions    <- Model.getSolutionsByTaskInstanceId (read tiid)
@@ -46,7 +47,8 @@ showSolveTaskForm = do
         (errEva, succEva) = determineResult lastSolution
         solutionText = fromMaybe (taskInstanceSolution taskInstance)
                                  (fmap solutionContent lastSolution)
-    method GET (handleForm (taskInstanceDescription   taskInstance)
+    method GET (handleForm sid
+                           (taskInstanceDescription   taskInstance)
                            solutionText
                            (taskInstanceDocumentation taskInstance)
                            succEva
@@ -64,17 +66,18 @@ determineResult (Just sol)
 -- | Read the solution name from the url query (GET parameter) and ask the
 -- autotool backend server for an example configuration, documentation and
 -- solution description.
-handleForm :: String
+handleForm :: Integer
+           -> String
            -> String
            -> String
            -> Maybe String
            -> Maybe String
            -> AppHandler ()
-handleForm taskDescription exampleSolution documentation eva err = do
+handleForm sid taskDescription exampleSolution documentation eva err = do
     view <- fst <$> runForm "form" (solutionForm exampleSolution)
     heistLocal splices (renderForm View.solutionFormTemplate view)
   where
-    splices = View.bindFormSplices taskDescription doc eva err
+    splices = View.bindFormSplices sid taskDescription doc eva err
     doc     = read documentation
 
 
@@ -120,16 +123,16 @@ handleFormVerification taskInstance = do
         doc  = taskInstanceDocumentation taskInstance
 
     result <- liftIO $ Autotool.submitSolution sig sol
-    studentId <- getStudentId
+    sid    <- getStudentId
 
     case result of
       (Right signature) -> do
         createSolution sol signature tiid
-        redirect . BS.pack $ "/student/" ++ (show studentId) ++ "/solve/"
+        redirect . BS.pack $ "/student/" ++ (show sid) ++ "/solve/"
                                          ++ show tiid  -- createUrl?
       (Left  errormsg)  -> do
         createSolution sol errormsg tiid
-        handleForm desc sol doc Nothing (Just $ format errormsg)
+        handleForm sid desc sol doc Nothing (Just $ format errormsg)
 
 
 ------------------------------------------------------------------------------

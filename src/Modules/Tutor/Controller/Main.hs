@@ -16,6 +16,7 @@ import           Snap                   (ifTop, liftIO)
 import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
 import           Application            (AppHandler)
+import           Model.Base             (CourseBundle)
 import qualified Model.Base             as Model
 import           Model.Types.Assignment
 import           Model.Types.Course
@@ -28,8 +29,8 @@ import           Utils.Render           (translateStatus)
 -- | Renders the landing page with an overview over courses and assignments.
 handleTutor :: AppHandler ()
 handleTutor = ifTop $ do
-    courses <- Model.getCoursesCompleteByTutorId 1
-    now <- liftIO getCurrentTime
+    courses <- Model.getCourseBundlesByTutorId 1
+    now     <- liftIO getCurrentTime
     let splice = I.mapSplices (renderCourses now) courses
     heistLocal (I.bindSplice "courses" splice) $ render "tutor/index"
 
@@ -37,8 +38,7 @@ handleTutor = ifTop $ do
 ------------------------------------------------------------------------------
 -- | Splice that is mapped over the <courses> tag to render course related
 -- details into the template.
-renderCourses :: UTCTime -> (Course, [(Assignment, [Task])])
-              -> Splice AppHandler
+renderCourses :: UTCTime -> CourseBundle -> Splice AppHandler
 renderCourses now (course, assignments) = do
     liftIO $ print assignments
     I.runChildrenWith [
@@ -69,18 +69,16 @@ renderCourses now (course, assignments) = do
 ------------------------------------------------------------------------------
 -- | Splice that is mapped over the <assignedTasks> tag to render assignment
 -- specific details into the template.
---
--- TODO: check if things here are done alright (head?)
-renderAssignments :: UTCTime -> (Assignment, [Task]) -> Splice AppHandler
+renderAssignments :: UTCTime -> (Assignment, Task) -> Splice AppHandler
 renderAssignments now (assignment, tasks) = do
-    I.runChildrenWithText (splices $ head tasks)
+    I.runChildrenWithText (splices tasks)
   where
     splices taskConfig = [
         ("taskName", T.pack $ taskName taskConfig)
       , ("taskType", T.pack $ taskType taskConfig)
-      , ("status",   translateStatus $ assignmentStatus assignment)
+      , ("status",   T.pack $ status)
       , ("timespan", T.pack $ iTime)
       ]
-    iTime = compareToNow now
-                         (Just $ assignmentStart assignment)
-                         (Just $ assignmentEnd assignment)
+    status = translateStatus $ assignmentStatus assignment
+    iTime  = compareToNow now (Just $ assignmentStart assignment)
+                              (Just $ assignmentEnd assignment)

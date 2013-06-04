@@ -6,14 +6,13 @@ module Utils.Render
   , translateStatus
   ) where
 
-import Data.Text              (Text)
 import Data.Time              (UTCTime)
 import Model.Types.Assignment (Status(..))
 
 
 ------------------------------------------------------------------------------
 -- | 
-translateStatus :: Status -> Text
+translateStatus :: Status -> String
 translateStatus Mandatory = "Pflicht"
 translateStatus Optional  = "Zusätzlich"
 

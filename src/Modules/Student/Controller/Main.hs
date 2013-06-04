@@ -8,29 +8,24 @@ module Modules.Student.Controller.Main
     ) where
 
 ------------------------------------------------------------------------------
-import           Data.Maybe                    (fromJust, isJust)
-import qualified Data.Text                     as T
-import           Data.Time                     (UTCTime, getCurrentTime)
+import qualified Data.Text                as T
+import           Data.Time                (UTCTime, getCurrentTime)
 ------------------------------------------------------------------------------
-import           Autotool.Client               as Autotool
-import           Heist.Interpreted             (Splice)
-import qualified Heist.Interpreted             as I
-import           Snap                          (ifTop, liftIO)
+import           Heist.Interpreted        (Splice)
+import qualified Heist.Interpreted        as I
+import           Snap                     (ifTop, liftIO)
 import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
-import           Application                   (AppHandler)
-import qualified Model.Base                    as Model
-import qualified Model.Adapter.File.Assignment as Assignment
-import qualified Model.Adapter.File.Course     as Course
-import qualified Model.Adapter.File.Task       as Task
-import qualified Model.Adapter.File.TaskInstance as TaskInstance
+import           Application              (AppHandler)
+import qualified Model.Base               as Model
+import           Model.Base               (AssignmentBundle, GroupBundle)
 import           Model.Types.Assignment
 import           Model.Types.Course
 import           Model.Types.Group
 import           Model.Types.Task
 import           Model.Types.TaskInstance
-import           Utils.Auth                    (getStudentId)
-import           Utils.Render                  (compareToNow, translateStatus)
+import           Utils.Auth               (getStudentId)
+import           Utils.Render             (compareToNow, translateStatus)
 
 
 handleStudentSelection :: AppHandler ()
@@ -43,11 +38,11 @@ handleStudentSelection = do
 handleStudent :: AppHandler ()
 handleStudent = ifTop $ do
     sid    <- getStudentId
-    now    <- getCurrentTime
-    groups <- Model.getGroupsCompleteByStudentId sid
+    now    <- liftIO $ getCurrentTime
+    groups <- Model.getGroupBundlesByStudentId sid
     let splices = [
             ("studentId", I.textSplice . T.pack $ show sid)
-          , ("groups",    I.mapSplices (renderGroups sid) groups) 
+          , ("groups",    I.mapSplices (renderGroups now) groups) 
           ]
     heistLocal (I.bindSplices splices) $ render "student/index"
 
@@ -55,9 +50,8 @@ handleStudent = ifTop $ do
 ------------------------------------------------------------------------------
 -- | Splice that is mapped over the <groups> tag to render group related
 -- details into the template.
-renderGroups :: (Group, Course, [(Assignment, Task, TaskInstance)]) -> UTCTime
-             -> Splice AppHandler
-renderGroups (group, course, assignments) now =
+renderGroups :: UTCTime -> GroupBundle -> Splice AppHandler
+renderGroups now (group, crs, assnBundles) =
     I.runChildrenWith [
         ("groupDescription", groupNameSplice)
       , ("groupId",          groupIdSplice)
@@ -68,39 +62,30 @@ renderGroups (group, course, assignments) now =
   where
     groupNameSplice    = I.textSplice . T.pack        $ groupDescription group
     groupIdSplice      = I.textSplice . T.pack . show $ groupId group
-    courseNameSplice   = I.textSplice . T.pack        $ courseName course
-    passCriteriaSplice = I.textSplice . T.pack . show $ coursePassCriteria course
-    assignmentsSplice  = I.mapSplices (renderAssignments now) assignments
+    courseNameSplice   = I.textSplice . T.pack        $ courseName crs
+    passCriteriaSplice = I.textSplice . T.pack . show $ coursePassCriteria crs
+    assignmentsSplice  = I.mapSplices (renderAssignments now) assnBundles
 
 
 ------------------------------------------------------------------------------
 -- | Splice that is mapped over the <assignments> tag to render assignment
 -- related details into the template.
-renderAssignments :: Integer -> Assignment -> Splice AppHandler
-renderAssignments studentId assignment = do
-  task <- liftIO . Task.getById $ assignmentTaskId assignment
-  taskInstance <- liftIO $ getCachedTaskInstance task studentId
-  time <- liftIO getCurrentTime
-  let splices = [
-            ("description",
-                I.textSplice . T.pack $ taskName task)
-          , ("status",
-                I.textSplice . translateStatus $ assignmentStatus assignment)
-          , ("submissionTime",
-                I.textSplice . T.pack $ compareToNow time
-                                        (Just $ assignmentStart assignment)
-                                        (Just $ assignmentEnd assignment))
-          , ("taskInstanceId",
-                I.textSplice . T.pack . show $ taskInstanceId taskInstance)
-          ] 
-  I.runChildrenWith splices
-
-getCachedTaskInstance :: Task -> Integer -> IO TaskInstance
-getCachedTaskInstance task userId = do
-  loadedTaskInstance <- TaskInstance.getByTaskIdAndUserId (taskId task) userId
-  if isJust loadedTaskInstance
-    then return $ fromJust loadedTaskInstance
-    else do
-      (desc, sol, doc, sig) <- Autotool.getTaskInstance (taskSignature task)
-                                                        (show userId)
-      TaskInstance.create (taskId task) userId desc sol (show doc) sig
+renderAssignments :: UTCTime -> AssignmentBundle -> Splice AppHandler
+renderAssignments now (assignment, task, taskInstance) = do
+    I.runChildrenWith [
+        ("description",    descriptionSplice)
+      , ("status",         statusSplice)
+      , ("submissionTime", submissionTimeSplice)
+      , ("taskInstanceId", taskInstanceIdSplice)
+      ] 
+  where
+    descriptionSplice    = I.textSplice . T.pack        $ taskName task
+    statusSplice         = I.textSplice . T.pack        $ status
+    submissionTimeSplice = I.textSplice . T.pack        $ timeSpanString
+    taskInstanceIdSplice = I.textSplice . T.pack . show $ tiid
+    
+    tiid           = taskInstanceId taskInstance
+    status         = translateStatus $ assignmentStatus assignment
+    timeSpanString = compareToNow now (Just $ assignmentStart assignment)
+                                      (Just $ assignmentEnd assignment)
+    

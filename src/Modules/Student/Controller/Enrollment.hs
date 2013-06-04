@@ -32,7 +32,7 @@ showEnrollments = do
   -- below each other. allow to enroll only in one of the groups for each
   -- courses. show only courses where the student is not yet enrolled, hehe.
   studentId <- getStudentId
-  courses   <- Model.getCoursesWithGroups studentId
+  courses   <- Model.getCoursesWithEnrollableGroups studentId
   let splices = [
           ("studentId",    I.textSplice . T.pack $ show studentId)
         , ("courseGroups", I.mapSplices renderCourseGroup courses)
