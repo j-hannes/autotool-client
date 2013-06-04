@@ -5,13 +5,7 @@ import Snap                (gets, liftIO)
 
 import Application         (App(..), AppHandler)
 import Model.Indexable
-import Model.Types.Assignment
-import Model.Types.Course
-import Model.Types.Enrollment
-import Model.Types.Group
-import Model.Types.Solution
-import Model.Types.Task
-import Model.Types.TaskInstance
+import Model.Types
 
 -- get
 

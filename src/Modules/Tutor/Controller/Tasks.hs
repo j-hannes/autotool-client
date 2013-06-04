@@ -16,7 +16,7 @@ import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
 import           Application                   (AppHandler)
 import qualified Model.Base             as Model
-import           Model.Types.Task
+import           Model.Types
 
 
 ------------------------------------------------------------------------------

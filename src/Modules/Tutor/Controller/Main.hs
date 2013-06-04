@@ -16,11 +16,8 @@ import           Snap                   (ifTop, liftIO)
 import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
 import           Application            (AppHandler)
-import           Model.Base             (CourseBundle)
 import qualified Model.Base             as Model
-import           Model.Types.Assignment
-import           Model.Types.Course
-import           Model.Types.Task
+import           Model.Types
 import           Utils.Render           (compareToNow, doubleToInt)
 import           Utils.Render           (translateStatus)
 

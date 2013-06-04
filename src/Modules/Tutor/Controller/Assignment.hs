@@ -16,9 +16,7 @@ import           Text.Digestive.Snap    (runForm)
 ------------------------------------------------------------------------------
 import           Application            (AppHandler)
 import qualified Model.Base             as Model
-import           Model.Types.Assignment
-import           Model.Types.Course
-import           Model.Types.Task
+import           Model.Types
 import           Utils.Form             (renderForm, convertDate)
 
 

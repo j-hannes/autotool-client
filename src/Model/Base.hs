@@ -8,26 +8,13 @@ import Snap                               (liftIO)
 import Application                        (AppHandler)
 import Autotool.Client                    as Autotool
 import Autotool.Client.Types.ScoringOrder
+
 import Model.Adapter.IORef                as Adapter
-import Model.Types.Assignment
-import Model.Types.Course
-import Model.Types.Enrollment
-import Model.Types.Group
-import Model.Types.Solution
-import Model.Types.Task
-import Model.Types.TaskInstance
+import Model.Types
 
 
--- consider moving to types
-
-type CourseBundle     = (Course, [(Assignment, Task)])
-type GroupBundle      = (Group, Course, [AssignmentBundle])
-type AssignmentBundle = (Assignment, Task, TaskInstance)
-
-
--- Simple accessor functions
-
--- get
+------------------------------------------------------------------------------
+-- simple accessor functions
 
 getAssignmentsByCourseId :: Integer -> AppHandler [Assignment]
 getAssignmentsByCourseId cid = do
@@ -97,42 +84,8 @@ getTasksByTutorId tid = do
   return $ filter (\t -> taskTutorId t == tid) tasks
 
 
--- create
-
-createAssignment :: Integer -> Integer -> Status -> UTCTime -> UTCTime
-                 -> AppHandler Assignment
-createAssignment cid tid sts start end =
-    Adapter.createAssignment $ Assignment 0 cid tid sts start end
-
-createCourse :: Integer -> String -> String -> Maybe UTCTime -> Maybe UTCTime
-             -> Double -> AppHandler Course
-createCourse tid name sem enrStart enrEnd pass =
-    Adapter.createCourse $ Course 0 tid name sem enrStart enrEnd pass
-
-createEnrollment :: Integer -> Integer -> UTCTime -> AppHandler Enrollment
-createEnrollment gid sid time =
-    Adapter.createEnrollment $ Enrollment 0 gid sid time
-
-createGroup :: Integer -> String -> Int -> AppHandler Group
-createGroup cid desc cap =
-    Adapter.createGroup $ Group 0 cid desc cap
-
-createSolution :: Integer -> String -> String -> Maybe Result -> UTCTime
-               -> AppHandler Solution
-createSolution tid cont eval res time =
-    Adapter.createSolution $ Solution 0 tid cont eval res time
-
-createTask :: Integer -> String -> String -> String -> ScoringOrder -> UTCTime
-           -> AppHandler Task
-createTask tid name ttpe sig so time =
-    Adapter.createTask $ Task 0 tid name ttpe sig so time
-
-createTaskInstance :: Integer -> Integer -> String -> String -> String
-                   -> String -> AppHandler TaskInstance
-createTaskInstance tid uid desc sol doc sig =
-    Adapter.createTaskInstance $ TaskInstance 0 tid uid desc doc sol sig 
-
--- Complex accessor functions
+------------------------------------------------------------------------------
+-- complex accessor functions
 
 getCoursesByStudentId :: Integer -> AppHandler [Course]
 getCoursesByStudentId sid = do
@@ -204,3 +157,52 @@ getCachedTaskInstance task sid = do
       (desc, sol, doc, sig) <- liftIO $ Autotool.getTaskInstance
                                           (taskSignature task) (show sid)
       Model.Base.createTaskInstance (taskId task) sid desc sol (show doc) sig
+
+
+------------------------------------------------------------------------------
+-- create functions
+
+createAssignment :: Integer -> Integer -> Status -> UTCTime -> UTCTime
+                 -> AppHandler Assignment
+createAssignment cid tid sts start end =
+    Adapter.createAssignment $ Assignment 0 cid tid sts start end
+
+createCourse :: Integer -> String -> String -> Maybe UTCTime -> Maybe UTCTime
+             -> Double -> AppHandler Course
+createCourse tid name sem enrStart enrEnd pass =
+    Adapter.createCourse $ Course 0 tid name sem enrStart enrEnd pass
+
+createEnrollment :: Integer -> Integer -> UTCTime -> AppHandler Enrollment
+createEnrollment gid sid time =
+    Adapter.createEnrollment $ Enrollment 0 gid sid time
+
+createGroup :: Integer -> String -> Int -> AppHandler Group
+createGroup cid desc cap =
+    Adapter.createGroup $ Group 0 cid desc cap
+
+createSolution :: Integer -> String -> String -> Maybe Result -> UTCTime
+               -> AppHandler Solution
+createSolution tid cont eval res time =
+    Adapter.createSolution $ Solution 0 tid cont eval res time
+
+createTask :: Integer -> String -> String -> String -> ScoringOrder -> UTCTime
+           -> AppHandler Task
+createTask tid name ttpe sig so time =
+    Adapter.createTask $ Task 0 tid name ttpe sig so time
+
+createTaskInstance :: Integer -> Integer -> String -> String -> String
+                   -> String -> AppHandler TaskInstance
+createTaskInstance tid uid desc sol doc sig =
+    Adapter.createTaskInstance $ TaskInstance 0 tid uid desc doc sol sig 
+
+
+------------------------------------------------------------------------------
+-- modification functions
+
+-- TBI
+
+
+------------------------------------------------------------------------------
+-- delete functions
+
+-- TBI

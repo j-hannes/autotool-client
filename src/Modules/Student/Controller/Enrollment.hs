@@ -19,8 +19,7 @@ import           Snap.Snaplet.Heist    (heistLocal, render)
 ------------------------------------------------------------------------------
 import           Application           (AppHandler)
 import qualified Model.Base            as Model
-import           Model.Types.Course
-import           Model.Types.Group
+import           Model.Types
 import           Utils.Auth            (getStudentId)
 
 

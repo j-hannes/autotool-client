@@ -6,8 +6,8 @@ module Utils.Render
   , translateStatus
   ) where
 
-import Data.Time              (UTCTime)
-import Model.Types.Assignment (Status(..))
+import Data.Time   (UTCTime)
+import Model.Types (Status(..))
 
 
 ------------------------------------------------------------------------------

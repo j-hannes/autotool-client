@@ -10,13 +10,7 @@ import           Control.Lens
 import           Data.IORef
 import           Snap.Snaplet
 import           Snap.Snaplet.Heist
-import           Model.Types.Assignment
-import           Model.Types.Course
-import           Model.Types.Enrollment
-import           Model.Types.Group
-import           Model.Types.Solution
-import           Model.Types.Task
-import           Model.Types.TaskInstance
+import           Model.Types
 
 ------------------------------------------------------------------------------
 data App = App

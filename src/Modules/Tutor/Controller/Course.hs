@@ -17,7 +17,7 @@ import           Text.Digestive.Snap
 ------------------------------------------------------------------------------
 import           Application
 import qualified Model.Base          as Model
-import           Model.Types.Course
+import           Model.Types
 import           Utils.Form
 
 

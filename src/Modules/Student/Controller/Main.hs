@@ -18,12 +18,7 @@ import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
 import           Application              (AppHandler)
 import qualified Model.Base               as Model
-import           Model.Base               (AssignmentBundle, GroupBundle)
-import           Model.Types.Assignment
-import           Model.Types.Course
-import           Model.Types.Group
-import           Model.Types.Task
-import           Model.Types.TaskInstance
+import           Model.Types
 import           Utils.Auth               (getStudentId)
 import           Utils.Render             (compareToNow, translateStatus)
 
