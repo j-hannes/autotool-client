@@ -1,124 +1,84 @@
 module Model.Adapter.IORef where
 
-import Data.IORef          (readIORef, writeIORef)
+import Data.IORef          (IORef, readIORef, writeIORef)
 import Snap                (gets, liftIO)
 
 import Application         (App(..), AppHandler)
 import Model.Indexable
 import Model.Types
 
--- get
 
-getAssignments :: AppHandler [Assignment]
-getAssignments = do
-    assignmentRef <- gets _assignments
+------------------------------------------------------------------------------ 
+-- | Generic getter and setter.
+
+get :: (App -> IORef [a]) -> AppHandler [a]
+get ioRef = do
+    assignmentRef <- gets ioRef
     liftIO $ readIORef assignmentRef
 
-getCourses :: AppHandler [Course]
-getCourses = do
-    courseRef <- gets _courses
-    liftIO $ readIORef courseRef
+create :: (Indexable a) => (App -> IORef [a]) -> a -> AppHandler a
+create ioRef object = do
+    objectRef <- gets ioRef
+    objects   <- liftIO $ readIORef objectRef
+    let nextId     = getNextId 0 objects
+        newObject  = setId object nextId
+        newObjects = newObject : objects
+    liftIO $ writeIORef objectRef newObjects
+    return $ newObject
 
-getEnrollments :: AppHandler [Enrollment]
-getEnrollments = do
-    enrollmentRef <- gets _enrollments
-    liftIO $ readIORef enrollmentRef
 
-getGroups :: AppHandler [Group]
-getGroups = do
-    groupRef <- gets _groups
-    liftIO $ readIORef groupRef
+------------------------------------------------------------------------------ 
+-- | Specific getters.
 
-getSolutions :: AppHandler [Solution]
-getSolutions = do
-    solutionRef <- gets _solutions
-    liftIO $ readIORef solutionRef
+getAssignments   :: AppHandler [Assignment]
+getAssignments   = get _assignments
 
-getTasks :: AppHandler [Task]
-getTasks = do
-    taskRef <- gets _tasks
-    liftIO $ readIORef taskRef
+getCourses       :: AppHandler [Course]
+getCourses       = get _courses
+
+getEnrollments   :: AppHandler [Enrollment]
+getEnrollments   = get _enrollments
+
+getGroups        :: AppHandler [Group]
+getGroups        = get _groups
+
+getSolutions     :: AppHandler [Solution]
+getSolutions     = get _solutions
+
+getTasks         :: AppHandler [Task]
+getTasks         = get _tasks
 
 getTaskInstances :: AppHandler [TaskInstance]
-getTaskInstances = do
-    taskInstanceRef <- gets _taskInstances
-    liftIO $ readIORef taskInstanceRef
+getTaskInstances = get _taskInstances
 
--- create
 
-createAssignment :: Assignment -> AppHandler Assignment
-createAssignment assignment = do
-    assignmentRef <- gets _assignments
-    assignments <- liftIO $ readIORef assignmentRef
-    let nextId    = getNextId 0 assignments
-        newAssignment  = setId assignment nextId
-        newAssignments = newAssignment : assignments
-    liftIO $ writeIORef assignmentRef newAssignments
-    return $ newAssignment
+------------------------------------------------------------------------------ 
+-- | Specific setters.
 
-createCourse :: Course -> AppHandler Course
-createCourse course = do
-    courseRef <- gets _courses
-    courses <- liftIO $ readIORef courseRef
-    let nextId     = getNextId 0 courses
-        newCourse  = setId course nextId
-        newCourses = newCourse : courses
-    liftIO $ writeIORef courseRef newCourses
-    return $ newCourse
+createAssignment   :: Assignment -> AppHandler Assignment
+createAssignment   = create _assignments
 
-createEnrollment :: Enrollment -> AppHandler Enrollment
-createEnrollment enrollment = do
-    enrollmentRef <- gets _enrollments
-    enrollments <- liftIO $ readIORef enrollmentRef
-    let nextId     = getNextId 0 enrollments
-        newEnrollment  = setId enrollment nextId
-        newEnrollments = newEnrollment : enrollments
-    liftIO $ writeIORef enrollmentRef newEnrollments
-    return $ newEnrollment
+createCourse       :: Course -> AppHandler Course
+createCourse       = create _courses
 
-createGroup :: Group -> AppHandler Group
-createGroup group = do
-    groupRef <- gets _groups
-    groups <- liftIO $ readIORef groupRef
-    let nextId    = getNextId 0 groups
-        newGroup  = setId group nextId
-        newGroups = newGroup : groups
-    liftIO $ writeIORef groupRef newGroups
-    return $ newGroup
+createEnrollment   :: Enrollment -> AppHandler Enrollment
+createEnrollment   = create _enrollments
 
-createSolution :: Solution -> AppHandler Solution
-createSolution solution = do
-    solutionRef <- gets _solutions
-    solutions <- liftIO $ readIORef solutionRef
-    let nextId    = getNextId 0 solutions
-        newSolution  = setId solution nextId
-        newSolutions = newSolution : solutions
-    liftIO $ writeIORef solutionRef newSolutions
-    return $ newSolution
+createGroup        :: Group -> AppHandler Group
+createGroup        = create _groups
 
-createTask :: Task -> AppHandler Task
-createTask task = do
-    taskRef <- gets _tasks
-    tasks <- liftIO $ readIORef taskRef
-    let nextId    = getNextId 0 tasks
-        newTask  = setId task nextId
-        newTasks = newTask : tasks
-    liftIO $ writeIORef taskRef newTasks
-    return $ newTask
+createSolution     :: Solution -> AppHandler Solution
+createSolution     = create _solutions
+
+createTask         :: Task -> AppHandler Task
+createTask         = create _tasks
 
 createTaskInstance :: TaskInstance -> AppHandler TaskInstance
-createTaskInstance taskInstance = do
-    taskInstanceRef <- gets _taskInstances
-    taskInstances <- liftIO $ readIORef taskInstanceRef
-    let nextId    = getNextId 0 taskInstances
-        newTaskInstance  = setId taskInstance nextId
-        newTaskInstances = newTaskInstance : taskInstances
-    liftIO $ writeIORef taskInstanceRef newTaskInstances
-    return $ newTaskInstance
+createTaskInstance = create _taskInstances
+
 
 ------------------------------------------------------------------------------
--- | Return the highest found index (id) + 1 from a list of indexable data
--- types.
+-- | Return the highest found index (id) + 1 from a list of indexable DTs.
 getNextId :: (Indexable a) => Integer -> [a] -> Integer
 getNextId n [] = n + 1
 getNextId n (x:xs) | i > n     = getNextId i xs
