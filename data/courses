@@ -1,1 +1,0 @@
-Course {courseId = 1, courseTutorId = 1, courseName = "Compilerbau", courseSemester = "SS13", courseEnrollmentFrom = Just 2013-06-08 16:30:20 UTC, courseEnrollmentTo = Just 2013-06-15 17:30:20 UTC, coursePassCriteria = 50.0}
