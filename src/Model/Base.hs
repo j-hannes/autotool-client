@@ -9,7 +9,7 @@ import Application                        (AppHandler)
 import Autotool.Client                    as Autotool
 import Autotool.Client.Types.ScoringOrder
 
-import Model.Adapter.IORef                as Adapter
+import Model.Adapter.FileStore            as Adapter
 import Model.Types
 
 

@@ -1,9 +1,12 @@
 module Model.Adapter.IORef where
 
-import Data.IORef          (IORef, readIORef, writeIORef)
-import Snap                (gets, liftIO)
-
-import Application         (App(..), AppHandler)
+------------------------------------------------------------------------------
+import Data.IORef         (IORef, readIORef, writeIORef)
+------------------------------------------------------------------------------
+import Snap               (gets, liftIO)
+------------------------------------------------------------------------------
+import Application        (App(..), AppHandler)
+import Model.Adapter.Base (getNextId)
 import Model.Indexable
 import Model.Types
 
@@ -75,13 +78,3 @@ createTask         = create _tasks
 
 createTaskInstance :: TaskInstance -> AppHandler TaskInstance
 createTaskInstance = create _taskInstances
-
-
-------------------------------------------------------------------------------
--- | Return the highest found index (id) + 1 from a list of indexable DTs.
-getNextId :: (Indexable a) => Integer -> [a] -> Integer
-getNextId n [] = n + 1
-getNextId n (x:xs) | i > n     = getNextId i xs
-                   | otherwise = getNextId n xs        
-                   where
-                     i = iid x
