@@ -141,10 +141,10 @@ instance Indexable Task where
 -- |
 data TaskInstance = TaskInstance {
     -- ^ Identifier
-    taskInstanceId        :: TaskInstanceId
+    taskInstanceId            :: TaskInstanceId
     -- ^ Relations
-  , taskInstanceTaskId    :: TaskId
-  , taskInstanceStudentId :: StudentId
+  , taskInstanceTaskId        :: TaskId
+  , taskInstanceStudentId     :: StudentId
     -- ^ Attributes
   , taskInstanceDescription   :: String
   , taskInstanceDocumentation :: String
