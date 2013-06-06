@@ -21,11 +21,6 @@ getAssignmentsByCourseId cid = do
   assignments <- Adapter.getAssignments
   return $ filter (\a -> assignmentCourseId a == cid) assignments
 
-getAssignmentsForCourse :: CourseId -> AppHandler [Assignment]
-getAssignmentsForCourse cid = do
-  assignments <- Adapter.getAssignments
-  return $ filter (\a -> assignmentCourseId a == cid) assignments
-
 getCourse :: CourseId -> AppHandler Course
 getCourse cid = do
   courses <- Adapter.getCourses
@@ -99,7 +94,7 @@ getGroupBundlesByStudentId sid = do
   where
     filterGroups group = do
       course      <- Model.Base.getCourse (groupCourseId group) 
-      assignments <- Model.Base.getAssignmentsForCourse (courseId course) 
+      assignments <- Model.Base.getAssignmentsByCourseId (courseId course) 
       bundle      <- forM assignments filterAssignments
       return (group, course, bundle)
     filterAssignments assignment = do
