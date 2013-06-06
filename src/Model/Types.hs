@@ -12,7 +12,6 @@ data Assignment = Assignment {
     -- ^ Relations
   , assignmentCourseId      :: CourseId
   , assignmentTaskId        :: TaskId
-  , assignmentTaskInstances :: [TaskInstanceId]
     -- ^ Attributes
   , assignmentStatus        :: Status
   , assignmentStart         :: UTCTime
@@ -123,16 +122,17 @@ instance Indexable Solution where
 -- |
 data Task = Task {
     -- ^ Identifier
-      taskId           :: TaskId
+      taskId            :: TaskId
     -- ^ Relations
-    , taskTutorId      :: TutorId
-    , taskAssignments  :: [AssignmentId]
+    , taskTutorId       :: TutorId
+    , taskAssignments   :: [AssignmentId]
+    , taskTaskInstances :: [TaskInstanceId]
     -- ^ Attributes
-    , taskName         :: String
-    , taskType         :: String
-    , taskSignature    :: String
-    , taskScoringOrder :: ScoringOrder
-    , taskCreated      :: UTCTime
+    , taskName          :: String
+    , taskType          :: String
+    , taskSignature     :: String
+    , taskScoringOrder  :: ScoringOrder
+    , taskCreated       :: UTCTime
     } deriving (Read, Show)
 
 type TaskId = Integer
@@ -167,7 +167,23 @@ instance Indexable TaskInstance where
 
 ------------------------------------------------------------------------------
 -- | User data types have not been implemented yet.
+data Tutor = Tutor {
+    tutorId      :: TutorId
+  , tutorCourses :: [CourseId]
+  , tutorTasks   :: [TaskId]
+  } deriving (Eq, Read, Show)
+
 type TutorId   = Integer
+
+
+------------------------------------------------------------------------------
+-- | User data types have not been implemented yet.
+data Student = Student {
+    studentId      :: StudentId
+  , studentCourses :: [CourseId]
+  , studentTasks   :: [TaskId]
+  } deriving (Eq, Read, Show)
+
 type StudentId = Integer
 
 

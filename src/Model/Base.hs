@@ -3,7 +3,7 @@ module Model.Base where
 import Control.Monad                      (forM)
 import Data.Maybe                         (fromJust, isJust)
 import Data.Time                          (UTCTime)
-import Snap                               (liftIO)
+import Snap                               (liftIO, (<$>))
 
 import Application                        (AppHandler)
 import Autotool.Client                    as Autotool
@@ -16,20 +16,10 @@ import Model.Types
 ------------------------------------------------------------------------------
 -- simple accessor functions
 
-getAssignmentsByCourseId :: CourseId -> AppHandler [Assignment]
-getAssignmentsByCourseId cid = do
+getAssignments :: [AssignmentId] -> AppHandler [Assignment]
+getAssignments aids = do
   assignments <- Adapter.getAssignments
-  return $ filter (\a -> assignmentCourseId a == cid) assignments
-
-getAssignmentsForCourse :: CourseId -> AppHandler [Assignment]
-getAssignmentsForCourse cid = do
-  assignments <- Adapter.getAssignments
-  return $ filter (\a -> assignmentCourseId a == cid) assignments
-
-getCourse :: CourseId -> AppHandler Course
-getCourse cid = do
-  courses <- Adapter.getCourses
-  return $ head $ filter (\c -> courseId c == cid) courses
+  return $ filter (\a -> assignmentCourseId a `elem` aids) assignments
 
 getCourses :: [CourseId] -> AppHandler [Course]
 getCourses cids = do
@@ -46,16 +36,6 @@ getGroups cids = do
   groups <- Adapter.getGroups
   return $ filter (\c -> groupId c `elem` cids) groups
 
-getCoursesByTutorId :: TutorId -> AppHandler [Course]
-getCoursesByTutorId tid = do
-  courses <- Adapter.getCourses
-  return $ filter (\c -> courseTutorId c == tid) courses
-
-getSolutionsByTaskInstanceId :: TaskInstanceId -> AppHandler [Solution]
-getSolutionsByTaskInstanceId tid = do
-  solutions <- Adapter.getSolutions
-  return $ filter (\c -> solutionTaskInstanceId c == tid) solutions
-
 getTaskInstanceById :: TaskInstanceId -> AppHandler TaskInstance
 getTaskInstanceById tiid = do
   taskInstances <- Adapter.getTaskInstances
@@ -63,7 +43,6 @@ getTaskInstanceById tiid = do
 
 getTaskInstanceForTask :: TaskId -> StudentId -> AppHandler (Maybe TaskInstance)
 getTaskInstanceForTask tid sid = do
-  task <- Model.Base.getTask tid
   taskInstances <- Adapter.getTaskInstances
   let ti' = filter (\ti -> taskInstanceTaskId ti == tid &&
                            taskInstanceStudentId ti == sid) taskInstances
@@ -99,8 +78,8 @@ getGroupBundlesByStudentId sid = do
     forM groups filterGroups
   where
     filterGroups group = do
-      course      <- Model.Base.getCourse (groupCourseId group) 
-      assignments <- Model.Base.getAssignmentsForCourse (courseId course) 
+      course      <- head <$> Model.Base.getCourses [groupCourseId group]
+      assignments <- Model.Base.getAssignments (courseAssignments course) 
       bundle      <- forM assignments filterAssignments
       return (group, course, bundle)
     filterAssignments assignment = do
@@ -108,13 +87,13 @@ getGroupBundlesByStudentId sid = do
       taskInstance <- Model.Base.getCachedTaskInstance task sid
       return (assignment, task, taskInstance)
 
-getCourseBundlesByTutorId :: TutorId -> AppHandler [CourseBundle]
-getCourseBundlesByTutorId tid = do
-    courses <- Model.Base.getCoursesByTutorId tid
+getCourseBundlesByTutor :: Tutor -> AppHandler [CourseBundle]
+getCourseBundlesByTutor tutor = do
+    courses <- Model.Base.getCourses (tutorCourses tutor)
     forM courses filterCourses
   where
     filterCourses course = do
-      assignments <- Model.Base.getAssignmentsByCourseId (courseId course)
+      assignments <- Model.Base.getAssignments (courseAssignments course)
       bundle      <- forM assignments filterAssignments
       return (course, bundle)
     filterAssignments assignment = do
@@ -166,7 +145,7 @@ getCachedTaskInstance task sid = do
 createAssignment :: CourseId -> TaskId -> Status -> UTCTime -> UTCTime
                  -> AppHandler Assignment
 createAssignment cid tid sts start end =
-    Adapter.createAssignment $ Assignment 0 cid tid [] sts start end
+    Adapter.createAssignment $ Assignment 0 cid tid sts start end
 
 createCourse :: TutorId -> String -> String -> Maybe UTCTime -> Maybe UTCTime
              -> Double -> AppHandler Course
@@ -189,7 +168,7 @@ createSolution tid cont eval res time =
 createTask :: TutorId -> String -> String -> String -> ScoringOrder -> UTCTime
            -> AppHandler Task
 createTask tid name ttpe sig so time =
-    Adapter.createTask $ Task 0 tid [] name ttpe sig so time
+    Adapter.createTask $ Task 0 tid [] [] name ttpe sig so time
 
 createTaskInstance :: TaskId -> StudentId -> String -> String -> String
                    -> String -> AppHandler TaskInstance
