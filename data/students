@@ -1,3 +1,4 @@
 (1,Student {studentId = 1, studentEnrollments = [3], studentTaskInstances = []})
-(2,Student {studentId = 2, studentEnrollments = [], studentTaskInstances = []})
+(2,Student {studentId = 2, studentEnrollments = [5], studentTaskInstances = []})
+(3,Student {studentId = 3, studentEnrollments = [4], studentTaskInstances = []})
 (4,Student {studentId = 4, studentEnrollments = [2], studentTaskInstances = []})

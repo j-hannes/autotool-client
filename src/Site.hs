@@ -10,8 +10,6 @@ module Site
 
 ------------------------------------------------------------------------------
 import           Data.ByteString       (ByteString)
-import           Data.Map              (Map)
-import qualified Data.Map              as Map
 import           Data.Monoid
 ------------------------------------------------------------------------------
 import           Heist

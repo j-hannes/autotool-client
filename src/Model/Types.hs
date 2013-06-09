@@ -193,10 +193,3 @@ type StudentId = Integer
 instance Indexable Student where
   iid = studentId
   setId assn idVal = assn { studentId = idVal }
-
-
-------------------------------------------------------------------------------
--- | Bundle types.
-type CourseBundle     = (Course, [(Assignment, Task)])
-type GroupBundle      = (Group, Course, [AssignmentBundle])
-type AssignmentBundle = (Assignment, Task, TaskInstance)

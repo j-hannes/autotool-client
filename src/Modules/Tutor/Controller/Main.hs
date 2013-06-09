@@ -7,19 +7,19 @@ module Modules.Tutor.Controller.Main
     ) where
 
 ------------------------------------------------------------------------------
-import qualified Data.Text          as T
-import           Data.Time          (UTCTime, getCurrentTime)
+import           Data.Maybe         (fromJust)
+import           Data.Time          (getCurrentTime)
 ------------------------------------------------------------------------------
 import           Heist.Interpreted  (Splice)
 import qualified Heist.Interpreted  as I
-import           Snap               (ifTop, liftIO)
+import           Snap               (ifTop, lift, liftIO, (<$>))
 import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
 import           Application        (AppHandler)
 import qualified Model.Base         as Model
 import           Model.Types
-import           Utils.Render       (compareToNow, doubleToInt)
-import           Utils.Render       (translateStatus)
+import           Utils.Render       (compareToNow)
+import           Utils.Render       (translateStatus, (|<), (|-))
 
 
 ------------------------------------------------------------------------------
@@ -29,61 +29,48 @@ handleTutor = ifTop $ do
     mTutor <- Model.getTutor 1
     case mTutor of
       Nothing -> do
-        tutor <- Model.putTutor $ Tutor 0 [] []
+        tutor <- Model.newTutor 0
         continueWith tutor
       Just tutor -> continueWith tutor
   where
     continueWith tutor = do
-      courses <- Model.getTutorCourseBundles tutor
-      now     <- liftIO getCurrentTime
-      let splice = I.mapSplices (renderCourses now) courses
+      courses <- Model.getCourses (tutorCourses tutor)
+      let splice = I.mapSplices renderCourse courses
       heistLocal (I.bindSplice "courses" splice) $ render "tutor/index"
 
 
 ------------------------------------------------------------------------------
 -- | Splice that is mapped over the <courses> tag to render course related
 -- details into the template.
-renderCourses :: UTCTime -> CourseBundle -> Splice AppHandler
-renderCourses now (course, assignments) = do
-    liftIO $ print assignments
+renderCourse :: Course -> Splice AppHandler
+renderCourse course = do
+    now         <- liftIO getCurrentTime
+    assignments <- lift $ Model.getAssignments (courseAssignments course)
     I.runChildrenWith [
-        ("courseId",      courseIdSplice)
-      , ("courseName",    courseNameSplice)
-      , ("enrollment",    enrollmentSplice)
-      , ("students",      studentSplice)
-      , ("passCriteria",  passCriteriaSplice)
-      , ("passRate",      passRateSplice)
-      , ("assignedTasks", assignedTasksSplice)
+        ("courseId",      courseId           |< course)
+      , ("passCriteria",  coursePassCriteria |< course)
+      , ("courseName",    courseName         |- course)
+      , ("enrollment",    id |- compareToNow now from to)
+      , ("assignedTasks", I.mapSplices renderAssignment assignments)
       ]
   where
-    courseIdSplice      = I.textSplice . T.pack . show $ courseId   course
-    courseNameSplice    = I.textSplice . T.pack        $ courseName course
-    enrollmentSplice    = I.textSplice . T.pack        $ enrollmentText
-    studentSplice       = I.textSplice . T.pack . show $ students
-    passCriteriaSplice  = I.textSplice . T.pack . show $ passCriteria
-    passRateSplice      = I.textSplice . T.pack        $ passRate
-    assignedTasksSplice = I.mapSplices (renderAssignments now) assignments
-
-    passRate       = "??"       -- FIXME
-    students       = 23 :: Int  -- FIXME
-    passCriteria   = doubleToInt $ coursePassCriteria course
-    enrollmentText = compareToNow now (courseEnrollmentFrom course)
-                                      (courseEnrollmentTo course)
+    from  = courseEnrollmentFrom course
+    to    = courseEnrollmentTo   course
 
 
 ------------------------------------------------------------------------------
 -- | Splice that is mapped over the <assignedTasks> tag to render assignment
 -- specific details into the template.
-renderAssignments :: UTCTime -> (Assignment, Task) -> Splice AppHandler
-renderAssignments now (assignment, tasks) = do
-    I.runChildrenWithText (splices tasks)
-  where
-    splices taskConfig = [
-        ("taskName", T.pack $ taskName taskConfig)
-      , ("taskType", T.pack $ taskType taskConfig)
-      , ("status",   T.pack $ status)
-      , ("timespan", T.pack $ iTime)
+renderAssignment :: Assignment -> Splice AppHandler
+renderAssignment assignment = do
+    now  <- liftIO getCurrentTime
+    task <- fromJust <$> (lift $ Model.getTask (assignmentTaskId assignment))
+    I.runChildrenWith [
+        ("taskName", taskName |- task)
+      , ("taskType", taskType |- task)
+      , ("status",   (translateStatus . assignmentStatus) |- assignment)
+      , ("timespan", id |- compareToNow now from to)
       ]
-    status = translateStatus $ assignmentStatus assignment
-    iTime  = compareToNow now (Just $ assignmentStart assignment)
-                              (Just $ assignmentEnd assignment)
+  where
+    from = Just $ assignmentStart assignment
+    to   = Just $ assignmentEnd   assignment

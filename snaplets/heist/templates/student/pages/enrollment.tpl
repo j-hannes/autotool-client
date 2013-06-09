@@ -1,5 +1,5 @@
 <apply template="base">
-  <courseGroups>
+  <courses>
     <h1><courseName /></h1>
     <div class="row">
     <groups>
@@ -11,5 +11,6 @@
       </div>
     </groups>
     </div>
-  </courseGroups>
+    <hr>
+  </courses>
 </apply>

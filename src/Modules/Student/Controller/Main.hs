@@ -8,19 +8,19 @@ module Modules.Student.Controller.Main
     ) where
 
 ------------------------------------------------------------------------------
-import qualified Data.Text          as T
-import           Data.Time          (UTCTime, getCurrentTime)
+import           Data.Maybe         (fromJust)
+import           Data.Time          (getCurrentTime)
 ------------------------------------------------------------------------------
 import           Heist.Interpreted  (Splice)
 import qualified Heist.Interpreted  as I
-import           Snap               (ifTop, liftIO)
+import           Snap               (ifTop, lift, liftIO, (<$>))
 import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
 import           Application        (AppHandler)
 import qualified Model.Base         as Model
 import           Model.Types
 import           Utils.Auth         (getStudentId)
-import           Utils.Render       (compareToNow, translateStatus)
+import           Utils.Render       (compareToNow, translateStatus, (|<), (|-))
 
 
 ------------------------------------------------------------------------------
@@ -33,20 +33,19 @@ handleStudentSelection = do
 -- | Renders the landing page with an overview of the tasks.
 handleStudent :: AppHandler ()
 handleStudent = ifTop $ do
-    sid     <- getStudentId
+    sid      <- getStudentId
     mStudent <- Model.getStudent sid
     case mStudent of
       Nothing -> do
-        student <- Model.putStudent $ Student sid [] []
+        student <- Model.newStudent sid
         continueWith student
       Just student -> continueWith student
   where
     continueWith student = do
-      now     <- liftIO $ getCurrentTime
-      groups  <- Model.getStudentGroupBundles student
+      groups <- Model.getEnrolledGroups student
       let splices = [
-              ("studentId", I.textSplice . T.pack $ show (studentId student))
-            , ("groups",    I.mapSplices (renderGroups now) groups) 
+              ("studentId", studentId |< student)
+            , ("groups",    I.mapSplices renderGroup groups) 
             ]
       heistLocal (I.bindSplices splices) $ render "student/index"
 
@@ -54,42 +53,37 @@ handleStudent = ifTop $ do
 ------------------------------------------------------------------------------
 -- | Splice that is mapped over the <groups> tag to render group related
 -- details into the template.
-renderGroups :: UTCTime -> GroupBundle -> Splice AppHandler
-renderGroups now (group, crs, assnBundles) =
+renderGroup :: Group -> Splice AppHandler
+renderGroup group = do
+    course      <- fromJust <$> (lift $ Model.getCourse (groupCourseId group))
+    assignments <- lift $ Model.getAssignments (courseAssignments course)
     I.runChildrenWith [
-        ("groupDescription", groupNameSplice)
-      , ("groupId",          groupIdSplice)
-      , ("courseName",       courseNameSplice)
-      , ("passCriteria",     passCriteriaSplice)
-      , ("assignments",      assignmentsSplice)
+        ("groupDescription", groupDescription   |< group)
+      , ("groupId",          groupId            |< group)
+      , ("courseName",       courseName         |- course)
+      , ("passCriteria",     coursePassCriteria |< course)
+      , ("assignments",      I.mapSplices renderAssignment assignments)
       ]
-  where
-    groupNameSplice    = I.textSplice . T.pack        $ groupDescription group
-    groupIdSplice      = I.textSplice . T.pack . show $ groupId group
-    courseNameSplice   = I.textSplice . T.pack        $ courseName crs
-    passCriteriaSplice = I.textSplice . T.pack . show $ coursePassCriteria crs
-    assignmentsSplice  = I.mapSplices (renderAssignments now) assnBundles
 
 
 ------------------------------------------------------------------------------
 -- | Splice that is mapped over the <assignments> tag to render assignment
 -- related details into the template.
-renderAssignments :: UTCTime -> AssignmentBundle -> Splice AppHandler
-renderAssignments now (assignment, task, taskInstance) = do
+renderAssignment :: Assignment -> Splice AppHandler
+renderAssignment assignment = do
+    now          <- liftIO getCurrentTime
+    task         <- fromJust <$> (lift $ Model.getTask
+                                           (assignmentTaskId assignment))
+    sid          <- lift getStudentId
+    student      <- fromJust <$> (lift $ Model.getStudent sid)
+    taskInstance <- lift $ Model.getCachedTaskInstance task student
     I.runChildrenWith [
-        ("description",    descriptionSplice)
-      , ("status",         statusSplice)
-      , ("submissionTime", submissionTimeSplice)
-      , ("taskInstanceId", taskInstanceIdSplice)
+        ("description",    taskName |- task)
+      , ("status",         (translateStatus . assignmentStatus) |- assignment)
+      , ("submissionTime", id |- (compareToNow now from to))
+      , ("submissions"   , id |< (length $ taskInstanceSolutions taskInstance))
+      , ("taskInstanceId", taskInstanceId |< taskInstance)
       ] 
   where
-    descriptionSplice    = I.textSplice . T.pack        $ taskName task
-    statusSplice         = I.textSplice . T.pack        $ status
-    submissionTimeSplice = I.textSplice . T.pack        $ timeSpanString
-    taskInstanceIdSplice = I.textSplice . T.pack . show $ tiid
-    
-    tiid           = taskInstanceId taskInstance
-    status         = translateStatus $ assignmentStatus assignment
-    timeSpanString = compareToNow now (Just $ assignmentStart assignment)
-                                      (Just $ assignmentEnd assignment)
-    
+    from = Just $ assignmentStart assignment
+    to   = Just $ assignmentEnd assignment

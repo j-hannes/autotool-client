@@ -14,52 +14,49 @@ import qualified Data.Text             as T
 import           Data.Time             (getCurrentTime)
 import           Heist.Interpreted     (Splice)
 import qualified Heist.Interpreted     as I
-import           Snap                  (liftIO, (<$>), redirect, getParam)
+import           Snap                  (liftIO, lift, (<$>), redirect)
+import           Snap                  (getParam)
 import           Snap.Snaplet.Heist    (heistLocal, render)
 ------------------------------------------------------------------------------
 import           Application           (AppHandler)
 import qualified Model.Base            as Model
 import           Model.Types
 import           Utils.Auth            (getStudentId)
+import           Utils.Render          ((|<), (|-))
 
 
 ------------------------------------------------------------------------------
 -- | Handler to enroll a task to a course.
 showEnrollments :: AppHandler ()
 showEnrollments = do
-  -- todo: get all groups, but actually sorted nicely by courses to show them
-  -- below each other. allow to enroll only in one of the groups for each
-  -- courses. show only courses where the student is not yet enrolled, hehe.
-  sid     <- getStudentId
+  sid      <- getStudentId
   mStudent <- Model.getStudent sid
   case mStudent of
     Nothing      -> redirect "/404"
     Just student -> do
       courses <- Model.getEnrollableCourses student
       let splices = [
-              ("studentId",    I.textSplice . T.pack $ show sid)
-            , ("courseGroups", I.mapSplices renderCourseGroup courses)
+              ("studentId", I.textSplice . T.pack $ show sid)
+            , ("courses",   I.mapSplices renderCourse courses)
             ]  
       heistLocal (I.bindSplices splices) $ render "student/pages/enrollment"
 
-renderCourseGroup :: (Course, [Group]) -> Splice AppHandler
-renderCourseGroup (course, groups) =
-    I.runChildrenWith splices
-  where
-    splices = [
-        ("courseName", I.textSplice . T.pack $ courseName course)
-      , ("groups", I.mapSplices renderGroup groups)
+renderCourse :: Course -> Splice AppHandler
+renderCourse course = do
+    groups <- lift $ Model.getGroups (courseGroups course)
+    I.runChildrenWith [
+        ("courseName", courseName |- course)
+      , ("groups",     I.mapSplices renderGroup groups)
       ]
 
 renderGroup :: Group -> Splice AppHandler
 renderGroup group =
-    I.runChildrenWith splices
-  where
-    splices = [
-        ("groupId",          I.textSplice . T.pack . show $ groupId   group)
-      , ("groupDescription", I.textSplice . T.pack $ groupDescription group)
-      ]
+    I.runChildrenWith [
+        ("groupId",          groupId          |< group)
+      , ("groupDescription", groupDescription |- group)
+      ] 
 
+------------------------------------------------------------------------------
 handleEnrollment :: AppHandler ()
 handleEnrollment = do
     sid      <- getStudentId

@@ -2,7 +2,7 @@ module Model.Base where
 
 ------------------------------------------------------------------------------
 import Control.Monad           (forM)
-import Data.Maybe              (catMaybes, fromJust)
+import Data.Maybe              (catMaybes)
 import Snap                    (liftIO, (<$>))
 ------------------------------------------------------------------------------
 import Application             (AppHandler)
@@ -86,57 +86,17 @@ getTutor = Adapter.getTutor
 -- complex retrieve functions
 ------------------------------------------------------------------------------
 
-getStudentGroups :: Student -> AppHandler [Group]
-getStudentGroups student = do
+getEnrollableCourses :: Student -> AppHandler [Course]
+getEnrollableCourses student = do
+    groups      <- Model.Base.getEnrolledGroups student
+    courses     <- Model.Base.getAllCourses
+    return $ filter (\c -> not $ courseId c `elem` (map groupCourseId groups))
+               courses
+
+getEnrolledGroups :: Student -> AppHandler [Group]
+getEnrolledGroups student = do
     enrollments <- Model.Base.getEnrollments (studentEnrollments student)
     Model.Base.getGroups (map enrollmentGroupId enrollments)
-
-getStudentCourses :: Student -> AppHandler [Course]
-getStudentCourses student = do
-    groups <- Model.Base.getStudentGroups student
-    Model.Base.getCourses (map groupCourseId groups)
-
-getEnrollableCourses :: Student -> AppHandler [(Course, [Group])]
-getEnrollableCourses student = do
-    courses        <- Model.Base.getAllCourses
-    studentCourses <- Model.Base.getStudentCourses student
-    let courses' = filter (\c -> not $ courseId c `elem` (map courseId studentCourses)) courses
-    forM courses' attachGroups
-  where
-    attachGroups course = do 
-      groups <- Model.Base.getGroups (courseGroups course) 
-      return (course, groups)
-
-------------------------------------------------------------------------------
-
-getStudentGroupBundles :: Student -> AppHandler [GroupBundle]
-getStudentGroupBundles student = do
-    groups <- Model.Base.getStudentGroups student
-    forM groups filterGroups
-  where
-    filterGroups group = do
-      course      <- fromJust <$> Model.Base.getCourse (groupCourseId group)
-      assignments <- Model.Base.getAssignments (courseAssignments course) 
-      bundle      <- forM assignments filterAssignments
-      return (group, course, bundle)
-    filterAssignments assignment = do
-      task         <- fromJust <$> Model.Base.getTask
-                        (assignmentTaskId assignment)
-      taskInstance <- Model.Base.getCachedTaskInstance task student
-      return (assignment, task, taskInstance)
-
-getTutorCourseBundles :: Tutor -> AppHandler [CourseBundle]
-getTutorCourseBundles tutor = do
-    courses <- Model.Base.getCourses (tutorCourses tutor)
-    forM courses filterCourses
-  where
-    filterCourses course = do
-      assignments <- Model.Base.getAssignments (courseAssignments course)
-      bundle      <- forM assignments filterAssignments
-      return (course, bundle)
-    filterAssignments assignment = do
-      task <- fromJust <$> Model.Base.getTask (assignmentTaskId assignment)
-      return (assignment, task)
 
 ------------------------------------------------------------------------------
 
@@ -203,3 +163,14 @@ putTutor = Adapter.putTutor
 
 putTaskInstance :: TaskInstance -> AppHandler TaskInstance
 putTaskInstance = Adapter.putTaskInstance
+
+
+------------------------------------------------------------------------------
+-- new functions
+------------------------------------------------------------------------------
+
+newTutor :: TutorId -> AppHandler Tutor
+newTutor tid = Model.Base.putTutor $ Tutor tid [] []
+
+newStudent :: StudentId -> AppHandler Student
+newStudent sid = Model.Base.putStudent $ Student sid [] []
