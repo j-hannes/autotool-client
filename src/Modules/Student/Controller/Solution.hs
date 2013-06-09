@@ -36,9 +36,10 @@ import qualified Modules.Student.View.Solution   as View
 -- config is returned (can be used when not in reach of the autotool server).
 showSolveTaskForm :: AppHandler ()
 showSolveTaskForm = do
-    sid    <- getStudentId
+    sid  <- getStudentId
     tiid <- fmap BS.unpack $ fromMaybe "" <$> getParam "taskInstanceId"
     mTaskInstance <- Model.getTaskInstance (read tiid)
+    -- writeText $ T.pack $ "sid: " ++ show sid ++ ", tiid: " ++ show mTaskInstance
     case mTaskInstance of
       Nothing           -> redirect "/404"
       Just taskInstance -> do
@@ -164,4 +165,4 @@ getResult result | "No" `elem` (head result) = Nothing
                  | otherwise = Just $ Result sco siz
   where
     sco = read $ head $ drop 2 $ dropWhile ((/=) "punkte") $ head result
-    siz  = read $ head $ drop 2 $ dropWhile ((/=) "size_") $ head result
+    siz = read $ head $ drop 2 $ dropWhile ((/=) "size_") $ head result
