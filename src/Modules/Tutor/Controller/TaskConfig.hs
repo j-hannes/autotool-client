@@ -22,6 +22,7 @@ import qualified Autotool.Client         as Autotool
 import           Autotool.Client.Types.ScoringOrder (ScoringOrder)
 import qualified Autotool.Mock           as AutotoolMock
 import qualified Model.Base              as Model
+import           Model.Types
 import           Utils.Form              (renderForm, notEmpty)
 import qualified Modules.Tutor.View.Task as View
 
@@ -121,7 +122,13 @@ handleFormVerification taskname = do
 -- | Create a new task from the entered data.
 createTask :: String -> String -> String -> ScoringOrder -> AppHandler ()
 createTask taskname tasktitle signature so = do
-    userId <- return 1
-    now    <- liftIO $ getCurrentTime
-    _      <- Model.createTask userId tasktitle taskname signature so now
+    tid   <- return 1
+    now   <- liftIO $ getCurrentTime
+    task  <- Model.putTask (Task 0 tid [] [] tasktitle taskname signature so
+                                 now)
+
+    tutor <- fromJust <$> Model.getTutor tid
+    _     <- Model.putTutor $ tutor {tutorTasks =
+               taskId task : tutorTasks tutor}
+
     redirect "/tutor"

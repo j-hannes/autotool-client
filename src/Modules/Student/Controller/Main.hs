@@ -8,21 +8,22 @@ module Modules.Student.Controller.Main
     ) where
 
 ------------------------------------------------------------------------------
-import qualified Data.Text                as T
-import           Data.Time                (UTCTime, getCurrentTime)
+import qualified Data.Text          as T
+import           Data.Time          (UTCTime, getCurrentTime)
 ------------------------------------------------------------------------------
-import           Heist.Interpreted        (Splice)
-import qualified Heist.Interpreted        as I
-import           Snap                     (ifTop, liftIO)
+import           Heist.Interpreted  (Splice)
+import qualified Heist.Interpreted  as I
+import           Snap               (ifTop, liftIO)
 import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
-import           Application              (AppHandler)
-import qualified Model.Base               as Model
+import           Application        (AppHandler)
+import qualified Model.Base         as Model
 import           Model.Types
-import           Utils.Auth               (getStudentId)
-import           Utils.Render             (compareToNow, translateStatus)
+import           Utils.Auth         (getStudentId)
+import           Utils.Render       (compareToNow, translateStatus)
 
 
+------------------------------------------------------------------------------
 handleStudentSelection :: AppHandler ()
 handleStudentSelection = do
     render "student/pages/select"
@@ -32,14 +33,22 @@ handleStudentSelection = do
 -- | Renders the landing page with an overview of the tasks.
 handleStudent :: AppHandler ()
 handleStudent = ifTop $ do
-    sid    <- getStudentId
-    now    <- liftIO $ getCurrentTime
-    groups <- Model.getGroupBundlesByStudentId sid
-    let splices = [
-            ("studentId", I.textSplice . T.pack $ show sid)
-          , ("groups",    I.mapSplices (renderGroups now) groups) 
-          ]
-    heistLocal (I.bindSplices splices) $ render "student/index"
+    sid     <- getStudentId
+    mStudent <- Model.getStudent sid
+    case mStudent of
+      Nothing -> do
+        student <- Model.putStudent $ Student 0 [] []
+        continueWith student
+      Just student -> continueWith student
+  where
+    continueWith student = do
+      now     <- liftIO $ getCurrentTime
+      groups  <- Model.getStudentGroupBundles student
+      let splices = [
+              ("studentId", I.textSplice . T.pack $ show (studentId student))
+            , ("groups",    I.mapSplices (renderGroups now) groups) 
+            ]
+      heistLocal (I.bindSplices splices) $ render "student/index"
 
 
 ------------------------------------------------------------------------------

@@ -10,8 +10,11 @@ module Site
 
 ------------------------------------------------------------------------------
 import           Data.ByteString       (ByteString)
-import           Data.IORef            (newIORef)
+import           Data.IORef            (IORef, newIORef)
+import           Data.Map              (Map)
+import qualified Data.Map              as Map
 import           Data.Monoid
+------------------------------------------------------------------------------
 import           Heist
 import           Snap
 import           Snap.Snaplet.Heist
@@ -47,6 +50,7 @@ routes = [
   , ("/assign_task",                              handleAssignTask)
   , ("/task/select",                              handleTaskTree)
   , ("/task/configure/:taskname",                 handleTaskConfig)
+  , ("/404",                                      render "404")
   , ("",                                          serveDirectory "static")
   ]
 
@@ -55,15 +59,22 @@ routes = [
 -- | The application initializer.
 app :: SnapletInit App App
 app = makeSnaplet "app" "An snaplet example application." Nothing $ do
-    h <- nestSnaplet "" heist $ heistInit' "templates" config
-    c <- liftIO $ newIORef []
-    g <- liftIO $ newIORef []
-    e <- liftIO $ newIORef []
-    t <- liftIO $ newIORef []
-    a <- liftIO $ newIORef []
-    i <- liftIO $ newIORef []
-    s <- liftIO $ newIORef []
+    h  <- nestSnaplet "" heist $ heistInit' "templates" config
+    a  <- getNewIORef
+    c  <- getNewIORef
+    e  <- getNewIORef
+    g  <- getNewIORef
+    so <- getNewIORef
+    st <- getNewIORef
+    t  <- getNewIORef
+    ti <- getNewIORef
+    tu <- getNewIORef
     addRoutes routes
-    return $ App h c g e t a i s
+    return $ App h a c e g so st t ti tu
   where
     config = mempty { hcInterpretedSplices = defaultInterpretedSplices }
+
+
+------------------------------------------------------------------------------
+getNewIORef :: Initializer App App (IORef (Map Integer a))
+getNewIORef = liftIO . newIORef $ Map.fromList []

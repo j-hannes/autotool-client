@@ -1,80 +1,106 @@
 module Model.Adapter.IORef where
 
 ------------------------------------------------------------------------------
-import Data.IORef         (IORef, readIORef, writeIORef)
+import           Data.IORef         (IORef, readIORef, writeIORef)
+import           Data.Map           (Map)
+import qualified Data.Map           as Map
 ------------------------------------------------------------------------------
-import Snap               (gets, liftIO)
+import           Snap               (gets, liftIO, (<$>))
 ------------------------------------------------------------------------------
-import Application        (App(..), AppHandler)
-import Model.Adapter.Base (getNextId)
-import Model.Indexable
-import Model.Types
+import           Application        (App(..), AppHandler)
+import           Model.Adapter.Base (getNextId)
+import           Model.Indexable
+import           Model.Types
 
 
 ------------------------------------------------------------------------------ 
 -- | Generic getter and setter.
 
-get :: (App -> IORef [a]) -> AppHandler [a]
-get ioRef = do
-    assignmentRef <- gets ioRef
-    liftIO $ readIORef assignmentRef
+get :: (App -> IORef (Map Integer a)) -> Integer -> AppHandler (Maybe a)
+get ioRef oid = do
+    objectRef <- gets ioRef
+    objectMap <- liftIO $ readIORef objectRef
+    return $ Map.lookup oid objectMap
 
-create :: (Indexable a) => (App -> IORef [a]) -> a -> AppHandler a
-create ioRef object = do
+list :: (App -> IORef (Map Integer a)) -> AppHandler [a]
+list ioRef = do
+    objectRef <- gets ioRef
+    liftIO $ Map.elems <$> readIORef objectRef
+
+put :: (Indexable a) => (App -> IORef (Map Integer a)) -> a -> AppHandler a
+put ioRef object = do
     objectRef <- gets ioRef
     objects   <- liftIO $ readIORef objectRef
-    let nextId     = getNextId 0 objects
-        newObject  = setId object nextId
-        newObjects = newObject : objects
+    let newObject   = constructOrCopy object objects
+        newObjects  = Map.insert (iid newObject) newObject objects
     liftIO $ writeIORef objectRef newObjects
     return $ newObject
+  where
+    constructOrCopy obj objs
+      | iid object == 0 = setId object (getNextId objs)
+      | otherwise       = obj
 
 
 ------------------------------------------------------------------------------ 
 -- | Specific getters.
 
-getAssignments   :: AppHandler [Assignment]
-getAssignments   = get _assignments
+getAssignment   :: Integer ->  AppHandler (Maybe Assignment)
+getAssignment   = get _assignments
 
-getCourses       :: AppHandler [Course]
-getCourses       = get _courses
+getCourse       :: Integer -> AppHandler (Maybe Course)
+getCourse       = get _courses
 
-getEnrollments   :: AppHandler [Enrollment]
-getEnrollments   = get _enrollments
+getCourses      :: AppHandler [Course]
+getCourses      = list _courses
 
-getGroups        :: AppHandler [Group]
-getGroups        = get _groups
+getEnrollment   :: Integer -> AppHandler (Maybe Enrollment)
+getEnrollment   = get _enrollments
 
-getSolutions     :: AppHandler [Solution]
-getSolutions     = get _solutions
+getGroup        :: Integer -> AppHandler (Maybe Group)
+getGroup        = get _groups
 
-getTasks         :: AppHandler [Task]
-getTasks         = get _tasks
+getSolution     :: Integer -> AppHandler (Maybe Solution)
+getSolution     = get _solutions
 
-getTaskInstances :: AppHandler [TaskInstance]
-getTaskInstances = get _taskInstances
+getStudent        :: Integer -> AppHandler (Maybe Student)
+getStudent        = get _students
+
+getTask         :: Integer -> AppHandler (Maybe Task)
+getTask         = get _tasks
+
+getTutor        :: Integer -> AppHandler (Maybe Tutor)
+getTutor        = get _tutors
+
+getTaskInstance :: Integer -> AppHandler (Maybe TaskInstance)
+getTaskInstance = get _taskInstances
 
 
 ------------------------------------------------------------------------------ 
 -- | Specific setters.
 
-createAssignment   :: Assignment -> AppHandler Assignment
-createAssignment   = create _assignments
+putAssignment   :: Assignment -> AppHandler Assignment
+putAssignment   = put _assignments
 
-createCourse       :: Course -> AppHandler Course
-createCourse       = create _courses
+putCourse       :: Course -> AppHandler Course
+putCourse       = put _courses
 
-createEnrollment   :: Enrollment -> AppHandler Enrollment
-createEnrollment   = create _enrollments
+putEnrollment   :: Enrollment -> AppHandler Enrollment
+putEnrollment   = put _enrollments
 
-createGroup        :: Group -> AppHandler Group
-createGroup        = create _groups
+putGroup        :: Group -> AppHandler Group
+putGroup        = put _groups
 
-createSolution     :: Solution -> AppHandler Solution
-createSolution     = create _solutions
+putSolution     :: Solution -> AppHandler Solution
+putSolution     = put _solutions
 
-createTask         :: Task -> AppHandler Task
-createTask         = create _tasks
+putStudent         :: Student -> AppHandler Student
+putStudent         = put _students
 
-createTaskInstance :: TaskInstance -> AppHandler TaskInstance
-createTaskInstance = create _taskInstances
+putTask         :: Task -> AppHandler Task
+putTask         = put _tasks
+
+putTutor         :: Tutor -> AppHandler Tutor
+putTutor         = put _tutors
+
+putTaskInstance :: TaskInstance -> AppHandler TaskInstance
+putTaskInstance = put _taskInstances

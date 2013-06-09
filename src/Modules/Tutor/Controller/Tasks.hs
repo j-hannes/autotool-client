@@ -7,14 +7,15 @@ module Modules.Tutor.Controller.Tasks
     ) where
 
 ------------------------------------------------------------------------------
-import qualified Data.Text                     as T
+import           Data.Maybe             (fromJust)
+import qualified Data.Text              as T
 ------------------------------------------------------------------------------
-import           Heist.Interpreted             (Splice)
-import qualified Heist.Interpreted             as I
-import           Snap                          (ifTop)
+import           Heist.Interpreted      (Splice)
+import qualified Heist.Interpreted      as I
+import           Snap                   (ifTop, (<$>))
 import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
-import           Application                   (AppHandler)
+import           Application            (AppHandler)
 import qualified Model.Base             as Model
 import           Model.Types
 
@@ -23,7 +24,8 @@ import           Model.Types
 -- | Renders the task page with a list of all tasks of the logged in tutor.
 showTaskList :: AppHandler ()
 showTaskList = ifTop $ do
-    tasks   <- Model.getTasksWithAssignmentCount 1
+    tutor <- fromJust <$> Model.getTutor 1
+    tasks <- Model.getTasksWithAssignmentCount tutor
     let splices = [("tasks", I.mapSplices renderTasks tasks)]
     heistLocal (I.bindSplices splices) $ render "tutor/pages/tasks"
 

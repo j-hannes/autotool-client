@@ -8,20 +8,26 @@ module Application where
 ------------------------------------------------------------------------------
 import           Control.Lens
 import           Data.IORef
+import           Data.Map
+------------------------------------------------------------------------------
 import           Snap.Snaplet
 import           Snap.Snaplet.Heist
+------------------------------------------------------------------------------
 import           Model.Types
+
 
 ------------------------------------------------------------------------------
 data App = App
     { _heist         :: Snaplet (Heist App)
-    , _courses       :: IORef [Course]
-    , _groups        :: IORef [Group]
-    , _enrollments   :: IORef [Enrollment]
-    , _tasks         :: IORef [Task]
-    , _assignments   :: IORef [Assignment]
-    , _taskInstances :: IORef [TaskInstance]
-    , _solutions     :: IORef [Solution]
+    , _assignments   :: IORef (Map Integer Assignment)
+    , _courses       :: IORef (Map Integer Course)
+    , _enrollments   :: IORef (Map Integer Enrollment)
+    , _groups        :: IORef (Map Integer Group)
+    , _solutions     :: IORef (Map Integer Solution)
+    , _students      :: IORef (Map Integer Student)
+    , _taskInstances :: IORef (Map Integer TaskInstance)
+    , _tasks         :: IORef (Map Integer Task)
+    , _tutors        :: IORef (Map Integer Tutor)
     }
 
 makeLenses ''App

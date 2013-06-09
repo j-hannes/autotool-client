@@ -24,8 +24,9 @@ import           Utils.Form             (renderForm, convertDate)
 -- | Handler to assign a task to a course.
 handleAssignTask :: AppHandler ()
 handleAssignTask = do
-  courses <- Model.getCoursesByTutorId 1
-  tasks   <- Model.getTasksByTutorId   1
+  tutor   <- fromJust <$> Model.getTutor 1
+  courses <- Model.getCourses (tutorCourses tutor)
+  tasks   <- Model.getTasks (tutorTasks tutor)
   let courseIds = map (tupleIdName courseId courseName) courses
       taskIds   = map (tupleIdName taskId taskName) tasks
   (view, assignData) <- runForm "form" (assignForm courseIds taskIds)
@@ -76,7 +77,16 @@ notEmpty t = t /= ""
 -- | Create an assignment if all teh data is collected.
 createAssignment :: AssignmentData -> AppHandler()
 createAssignment ad = do
-    _ <- Model.createAssignment cid tid sts start end
+    assignment <- Model.putAssignment (Assignment 0 cid tid sts start end)
+
+    course <- fromJust <$> Model.getCourse cid
+    _      <- Model.putCourse $ course {courseAssignments =
+                assignmentId assignment : courseAssignments course}
+
+    task   <- fromJust <$> Model.getTask tid
+    _      <- Model.putTask $ task {taskAssignments =
+                assignmentId assignment : taskAssignments task}
+
     redirect "/tutor"
   where
     cid   =                          formCourseId ad

@@ -7,29 +7,37 @@ module Modules.Tutor.Controller.Main
     ) where
 
 ------------------------------------------------------------------------------
-import qualified Data.Text              as T
-import           Data.Time              (UTCTime, getCurrentTime)
+import qualified Data.Text          as T
+import           Data.Time          (UTCTime, getCurrentTime)
 ------------------------------------------------------------------------------
-import           Heist.Interpreted      (Splice)
-import qualified Heist.Interpreted      as I
-import           Snap                   (ifTop, liftIO)
+import           Heist.Interpreted  (Splice)
+import qualified Heist.Interpreted  as I
+import           Snap               (ifTop, liftIO)
 import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
-import           Application            (AppHandler)
-import qualified Model.Base             as Model
+import           Application        (AppHandler)
+import qualified Model.Base         as Model
 import           Model.Types
-import           Utils.Render           (compareToNow, doubleToInt)
-import           Utils.Render           (translateStatus)
+import           Utils.Render       (compareToNow, doubleToInt)
+import           Utils.Render       (translateStatus)
 
 
 ------------------------------------------------------------------------------
 -- | Renders the landing page with an overview over courses and assignments.
 handleTutor :: AppHandler ()
 handleTutor = ifTop $ do
-    courses <- Model.getCourseBundlesByTutorId 1
-    now     <- liftIO getCurrentTime
-    let splice = I.mapSplices (renderCourses now) courses
-    heistLocal (I.bindSplice "courses" splice) $ render "tutor/index"
+    mTutor <- Model.getTutor 1
+    case mTutor of
+      Nothing -> do
+        tutor <- Model.putTutor $ Tutor 0 [] []
+        continueWith tutor
+      Just tutor -> continueWith tutor
+  where
+    continueWith tutor = do
+      courses <- Model.getTutorCourseBundles tutor
+      now     <- liftIO getCurrentTime
+      let splice = I.mapSplices (renderCourses now) courses
+      heistLocal (I.bindSplice "courses" splice) $ render "tutor/index"
 
 
 ------------------------------------------------------------------------------

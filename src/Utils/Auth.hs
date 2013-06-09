@@ -15,9 +15,6 @@ import           Application
 import           Model.Types
 
 ------------------------------------------------------------------------------
--- | 
+-- | Read the student id from query params.
 getStudentId :: AppHandler StudentId
-getStudentId = do
-    studentId <- BS.unpack <$> fromMaybe "0" <$> getParam "studentId"
-    return $ read studentId
-
+getStudentId = read <$> BS.unpack <$> fromMaybe "0" <$> getParam "studentId"

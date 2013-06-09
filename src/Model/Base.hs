@@ -1,94 +1,132 @@
 module Model.Base where
 
-import Control.Monad                      (forM)
-import Data.Maybe                         (fromJust, isJust)
-import Data.Time                          (UTCTime)
-import Snap                               (liftIO, (<$>))
-
-import Application                        (AppHandler)
-import Autotool.Client                    as Autotool
-import Autotool.Client.Types.ScoringOrder
-
-import Model.Adapter.IORef                as Adapter
+------------------------------------------------------------------------------
+import Control.Monad       (forM)
+import Data.Maybe          (catMaybes, fromJust)
+import Snap                (liftIO, (<$>))
+------------------------------------------------------------------------------
+import Application         (AppHandler)
+import Autotool.Client     as Autotool
+------------------------------------------------------------------------------
+import Model.Adapter.IORef as Adapter
 import Model.Types
 
 
 ------------------------------------------------------------------------------
--- simple accessor functions
+-- simple retrieve functions
+------------------------------------------------------------------------------
+
+getAssignment :: AssignmentId -> AppHandler (Maybe Assignment)
+getAssignment = Adapter.getAssignment
 
 getAssignments :: [AssignmentId] -> AppHandler [Assignment]
-getAssignments aids = do
-  assignments <- Adapter.getAssignments
-  return $ filter (\a -> assignmentCourseId a `elem` aids) assignments
+getAssignments aids = catMaybes <$> mapM Adapter.getAssignment aids
+
+------------------------------------------------------------------------------
+
+getCourse :: CourseId -> AppHandler (Maybe Course)
+getCourse = Adapter.getCourse
 
 getCourses :: [CourseId] -> AppHandler [Course]
-getCourses cids = do
-  courses <- Adapter.getCourses
-  return $ filter (\c -> courseId c `elem` cids) courses
+getCourses cids = catMaybes <$> mapM Adapter.getCourse cids
 
-getCoursesExcept :: [CourseId] -> AppHandler [Course]
-getCoursesExcept cids = do
-  courses <- Adapter.getCourses
-  return $ filter (\c -> not $ courseId c `elem` cids) courses
+getAllCourses :: AppHandler [Course]
+getAllCourses = Adapter.getCourses
+
+------------------------------------------------------------------------------
+
+getEnrollments :: [EnrollmentId] -> AppHandler [Enrollment]
+getEnrollments eids = catMaybes <$> mapM Adapter.getEnrollment eids
+
+------------------------------------------------------------------------------
+
+getGroup :: GroupId -> AppHandler (Maybe Group)
+getGroup = Adapter.getGroup
 
 getGroups :: [GroupId] -> AppHandler [Group]
-getGroups cids = do
-  groups <- Adapter.getGroups
-  return $ filter (\c -> groupId c `elem` cids) groups
+getGroups gids = catMaybes <$> mapM Adapter.getGroup gids
 
-getTaskInstanceById :: TaskInstanceId -> AppHandler TaskInstance
-getTaskInstanceById tiid = do
-  taskInstances <- Adapter.getTaskInstances
-  return $ head $ filter (\t -> taskInstanceId t == tiid) taskInstances
+------------------------------------------------------------------------------
 
-getTaskInstanceForTask :: TaskId -> StudentId -> AppHandler (Maybe TaskInstance)
-getTaskInstanceForTask tid sid = do
-  taskInstances <- Adapter.getTaskInstances
-  let ti' = filter (\ti -> taskInstanceTaskId ti == tid &&
-                           taskInstanceStudentId ti == sid) taskInstances
-  if null ti' then return Nothing else return $ Just $ head ti'
+getTaskInstance :: TaskInstanceId -> AppHandler (Maybe TaskInstance)
+getTaskInstance = Adapter.getTaskInstance
 
-getTask :: TaskId -> AppHandler Task
-getTask tid = do
-  tasks <- Adapter.getTasks
-  return $ head $ filter (\t -> taskId t == tid) tasks
+getTaskInstances :: [TaskInstanceId] -> AppHandler [TaskInstance]
+getTaskInstances tiids = catMaybes <$> mapM Adapter.getTaskInstance tiids
+
+------------------------------------------------------------------------------
+
+getSolution :: SolutionId -> AppHandler (Maybe Solution)
+getSolution = Adapter.getSolution
+
+getSolutions :: [SolutionId] -> AppHandler [Solution]
+getSolutions tiids = catMaybes <$> mapM Adapter.getSolution tiids
+
+------------------------------------------------------------------------------
+
+getStudent :: StudentId -> AppHandler (Maybe Student)
+getStudent = Adapter.getStudent
+
+------------------------------------------------------------------------------
+
+getTask :: TaskId -> AppHandler (Maybe Task)
+getTask = Adapter.getTask
 
 getTasks :: [TaskId] -> AppHandler [Task]
-getTasks tids = do
-  tasks <- Adapter.getTasks
-  return $ filter (\t -> taskId t `elem` tids) tasks
+getTasks tids = catMaybes <$> mapM Adapter.getTask tids
 
-getTasksByTutorId :: TutorId -> AppHandler [Task]
-getTasksByTutorId tid = do
-  tasks <- Adapter.getTasks
-  return $ filter (\t -> taskTutorId t == tid) tasks
+------------------------------------------------------------------------------
+
+getTutor :: TutorId -> AppHandler (Maybe Tutor)
+getTutor = Adapter.getTutor
+
 
 
 ------------------------------------------------------------------------------
--- complex accessor functions
+-- complex retrieve functions
+------------------------------------------------------------------------------
 
-getCoursesByStudentId :: StudentId -> AppHandler [Course]
-getCoursesByStudentId sid = do
-    groups <- Model.Base.getGroupsByStudentId sid
-    Model.Base.getCourses $ map groupCourseId groups
+getStudentGroups :: Student -> AppHandler [Group]
+getStudentGroups student = do
+    enrollments <- Model.Base.getEnrollments (studentEnrollments student)
+    Model.Base.getGroups (map enrollmentGroupId enrollments)
 
-getGroupBundlesByStudentId :: StudentId -> AppHandler [GroupBundle]
-getGroupBundlesByStudentId sid = do
-    groups <- Model.Base.getGroupsByStudentId sid
+getStudentCourses :: Student -> AppHandler [Course]
+getStudentCourses student = do
+    groups <- Model.Base.getStudentGroups student
+    Model.Base.getCourses (map groupCourseId groups)
+
+getEnrollableCourses :: Student -> AppHandler [(Course, [Group])]
+getEnrollableCourses student = do
+    courses        <- Model.Base.getAllCourses
+    studentCourses <- Model.Base.getStudentCourses student
+    let courses' = filter (\c -> not $ courseId c `elem` (map courseId studentCourses)) courses
+    forM courses' attachGroups
+  where
+    attachGroups course = do 
+      groups <- Model.Base.getGroups (courseGroups course) 
+      return (course, groups)
+
+------------------------------------------------------------------------------
+
+getStudentGroupBundles :: Student -> AppHandler [GroupBundle]
+getStudentGroupBundles student = do
+    groups <- Model.Base.getStudentGroups student
     forM groups filterGroups
   where
     filterGroups group = do
-      course      <- head <$> Model.Base.getCourses [groupCourseId group]
+      course      <- fromJust <$> Model.Base.getCourse (groupCourseId group)
       assignments <- Model.Base.getAssignments (courseAssignments course) 
       bundle      <- forM assignments filterAssignments
       return (group, course, bundle)
     filterAssignments assignment = do
-      task         <- Model.Base.getTask (assignmentTaskId assignment)
-      taskInstance <- Model.Base.getCachedTaskInstance task sid
+      task         <- fromJust <$> Model.Base.getTask
+                        (assignmentTaskId assignment)
+      taskInstance <- Model.Base.getCachedTaskInstance task student
       return (assignment, task, taskInstance)
 
-getCourseBundlesByTutor :: Tutor -> AppHandler [CourseBundle]
-getCourseBundlesByTutor tutor = do
+getTutorCourseBundles :: Tutor -> AppHandler [CourseBundle]
+getTutorCourseBundles tutor = do
     courses <- Model.Base.getCourses (tutorCourses tutor)
     forM courses filterCourses
   where
@@ -97,92 +135,65 @@ getCourseBundlesByTutor tutor = do
       bundle      <- forM assignments filterAssignments
       return (course, bundle)
     filterAssignments assignment = do
-      task <- getTask (assignmentTaskId assignment)
+      task <- fromJust <$> Model.Base.getTask (assignmentTaskId assignment)
       return (assignment, task)
 
-getGroupsByStudentId :: StudentId -> AppHandler [Group]
-getGroupsByStudentId sid = do
-    enrollments <- Adapter.getEnrollments
-    let e' = filter (\e -> enrollmentStudentId e == sid) enrollments
-    Model.Base.getGroups $ map enrollmentGroupId e'
+------------------------------------------------------------------------------
 
-getTasksWithAssignmentCount :: TutorId -> AppHandler [(Task, Int)]
-getTasksWithAssignmentCount tid = do
-    tasks       <- Adapter.getTasks
-    let t' = filter (\t -> taskTutorId t == tid) tasks
-    assignments <- Adapter.getAssignments
-    forM t' (filterTasks assignments)
+getTasksWithAssignmentCount :: Tutor -> AppHandler [(Task, Int)]
+getTasksWithAssignmentCount tutor = do
+    tasks <- Model.Base.getTasks (tutorTasks tutor)
+    forM tasks filterTasks
   where
-    filterTasks assignments task = do
-      let a' = filter (\a -> assignmentTaskId a == taskId task) assignments
-      return (task, length a')
+    filterTasks task = do
+      assignments <- mapM Adapter.getAssignment (taskAssignments task)
+      return (task, length assignments)
 
-getCoursesWithEnrollableGroups :: StudentId -> AppHandler [(Course, [Group])]
-getCoursesWithEnrollableGroups sid = do
-    courses  <- Model.Base.getCoursesByStudentId sid
-    courses' <- Model.Base.getCoursesExcept (map courseId courses)
-    groups  <- Adapter.getGroups
-    forM courses' (filterCourses groups)
+------------------------------------------------------------------------------
+
+getCachedTaskInstance :: Task -> Student -> AppHandler TaskInstance
+getCachedTaskInstance task student = do
+    taskInstances <- Model.Base.getTaskInstances (taskTaskInstances task)
+    let taskInstances' = filterInstances taskInstances
+    if null taskInstances'
+      then do
+        (desc, sol, doc, sig) <- liftIO $ Autotool.getTaskInstance
+                                            (taskSignature task) (show sid)
+        Model.Base.putTaskInstance $ TaskInstance 0 (taskId task) sid [] desc sol (show doc) sig
+      else return $ head taskInstances'
   where
-    filterCourses groups course = do 
-      let g' = filter (\g -> groupCourseId g == courseId course) groups
-      return (course, g')
+    sid             = studentId student
+    filterInstances = filter (\ti -> taskInstanceStudentId ti == sid)
 
-getCachedTaskInstance :: Task -> StudentId -> AppHandler TaskInstance
-getCachedTaskInstance task sid = do
-  loadedTaskInstance <- Model.Base.getTaskInstanceForTask (taskId task) sid
-  if isJust loadedTaskInstance
-    then return $ fromJust loadedTaskInstance
-    else do
-      (desc, sol, doc, sig) <- liftIO $ Autotool.getTaskInstance
-                                          (taskSignature task) (show sid)
-      Model.Base.createTaskInstance (taskId task) sid desc sol (show doc) sig
 
 
 ------------------------------------------------------------------------------
--- create functions
-
-createAssignment :: CourseId -> TaskId -> Status -> UTCTime -> UTCTime
-                 -> AppHandler Assignment
-createAssignment cid tid sts start end =
-    Adapter.createAssignment $ Assignment 0 cid tid sts start end
-
-createCourse :: TutorId -> String -> String -> Maybe UTCTime -> Maybe UTCTime
-             -> Double -> AppHandler Course
-createCourse tid name sem enrStart enrEnd pass =
-    Adapter.createCourse $ Course 0 tid [] [] name sem enrStart enrEnd pass
-
-createEnrollment :: GroupId -> StudentId -> UTCTime -> AppHandler Enrollment
-createEnrollment gid sid time =
-    Adapter.createEnrollment $ Enrollment 0 gid sid time
-
-createGroup :: CourseId -> String -> Int -> AppHandler Group
-createGroup cid desc cap =
-    Adapter.createGroup $ Group 0 cid [] desc cap
-
-createSolution :: TaskInstanceId -> String -> String -> Maybe Result -> UTCTime
-               -> AppHandler Solution
-createSolution tid cont eval res time =
-    Adapter.createSolution $ Solution 0 tid cont eval res time
-
-createTask :: TutorId -> String -> String -> String -> ScoringOrder -> UTCTime
-           -> AppHandler Task
-createTask tid name ttpe sig so time =
-    Adapter.createTask $ Task 0 tid [] [] name ttpe sig so time
-
-createTaskInstance :: TaskId -> StudentId -> String -> String -> String
-                   -> String -> AppHandler TaskInstance
-createTaskInstance tid sid desc sol doc sig =
-    Adapter.createTaskInstance $ TaskInstance 0 tid sid [] desc doc sol sig 
-
-
+-- put functions
 ------------------------------------------------------------------------------
--- modification functions
 
--- TBI
+putAssignment :: Assignment -> AppHandler Assignment
+putAssignment = Adapter.putAssignment
 
+putCourse :: Course -> AppHandler Course
+putCourse = Adapter.putCourse
 
-------------------------------------------------------------------------------
--- delete functions
+putEnrollment :: Enrollment -> AppHandler Enrollment
+putEnrollment = Adapter.putEnrollment
 
--- TBI
+putGroup :: Group -> AppHandler Group
+putGroup = Adapter.putGroup
+
+putSolution :: Solution -> AppHandler Solution
+putSolution = Adapter.putSolution
+
+putStudent :: Student -> AppHandler Student
+putStudent = Adapter.putStudent
+
+putTask :: Task -> AppHandler Task
+putTask = Adapter.putTask
+
+putTutor :: Tutor -> AppHandler Tutor
+putTutor = Adapter.putTutor
+
+putTaskInstance :: TaskInstance -> AppHandler TaskInstance
+putTaskInstance = Adapter.putTaskInstance

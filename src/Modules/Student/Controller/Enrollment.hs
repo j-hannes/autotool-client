@@ -30,13 +30,17 @@ showEnrollments = do
   -- todo: get all groups, but actually sorted nicely by courses to show them
   -- below each other. allow to enroll only in one of the groups for each
   -- courses. show only courses where the student is not yet enrolled, hehe.
-  studentId <- getStudentId
-  courses   <- Model.getCoursesWithEnrollableGroups studentId
-  let splices = [
-          ("studentId",    I.textSplice . T.pack $ show studentId)
-        , ("courseGroups", I.mapSplices renderCourseGroup courses)
-        ]  
-  heistLocal (I.bindSplices splices) $ render "student/pages/enrollment"
+  sid     <- getStudentId
+  mStudent <- Model.getStudent sid
+  case mStudent of
+    Nothing      -> redirect "/404"
+    Just student -> do
+      courses <- Model.getEnrollableCourses student
+      let splices = [
+              ("studentId",    I.textSplice . T.pack $ show sid)
+            , ("courseGroups", I.mapSplices renderCourseGroup courses)
+            ]  
+      heistLocal (I.bindSplices splices) $ render "student/pages/enrollment"
 
 renderCourseGroup :: (Course, [Group]) -> Splice AppHandler
 renderCourseGroup (course, groups) =
@@ -58,8 +62,14 @@ renderGroup group =
 
 handleEnrollment :: AppHandler ()
 handleEnrollment = do
-    sid <- getStudentId
-    gid <- BS.unpack <$> fromMaybe "0" <$> getParam "groupId"
-    now <- liftIO getCurrentTime
-    _   <- Model.createEnrollment (read gid) sid now
-    redirect (BS.pack ("/student/" ++ show sid))
+    sid      <- getStudentId
+    mStudent <- Model.getStudent sid
+    case mStudent of
+      Nothing      -> redirect "/404"
+      Just student -> do
+        gid     <- BS.unpack <$> fromMaybe "0" <$> getParam "groupId"
+        now     <- liftIO getCurrentTime
+        enr     <- Model.putEnrollment $ Enrollment 0 (read gid) sid now
+        _       <- Model.putStudent $ student {studentEnrollments =
+                    enrollmentId enr : studentEnrollments student}
+        redirect (BS.pack ("/student/" ++ show sid))

@@ -38,21 +38,25 @@ showSolveTaskForm :: AppHandler ()
 showSolveTaskForm = do
     sid    <- getStudentId
     tiid <- fmap BS.unpack $ fromMaybe "" <$> getParam "taskInstanceId"
-    taskInstance <- Model.getTaskInstanceById          (read tiid)
-    solutions    <- Model.getSolutionsByTaskInstanceId (read tiid)
-    let lastSolution = if null solutions
-                          then Nothing
-                          else Just $ head solutions --FIXME
-        (errEva, succEva) = determineResult lastSolution
-        solutionText = fromMaybe (taskInstanceSolution taskInstance)
-                                 (fmap solutionContent lastSolution)
-    method GET (handleForm sid
-                           (taskInstanceDescription   taskInstance)
-                           solutionText
-                           (taskInstanceDocumentation taskInstance)
-                           succEva
-                           errEva)
-      <|> method POST (handleFormSubmit taskInstance)
+    mTaskInstance <- Model.getTaskInstance (read tiid)
+    case mTaskInstance of
+      Nothing           -> redirect "/404"
+      Just taskInstance -> do
+        solutions    <- Model.getSolutions (taskInstanceSolutions taskInstance)
+        let lastSolution = if null solutions
+                              then Nothing
+                              else Just $ head solutions --FIXME
+            (errEva, succEva) = determineResult lastSolution
+            solutionText = fromMaybe
+                             (taskInstanceSolution taskInstance)
+                             (fmap solutionContent lastSolution)
+        method GET (handleForm
+                      sid
+                      (taskInstanceDescription taskInstance) solutionText
+                      (taskInstanceDocumentation taskInstance)
+                      succEva
+                      errEva)
+          <|> method POST (handleFormSubmit taskInstance)
 
 determineResult :: Maybe Solution -> (Maybe String, Maybe String)
 determineResult Nothing = (Nothing, Nothing)
@@ -143,7 +147,12 @@ createSolution cont response tiid = do
     liftIO $ putStrLn response
     let (_:result) = splitOn ["Bewertung"] $ words response
     
-    _ <- Model.createSolution tiid cont (format response) (getResult result) now
+    solution     <- Model.putSolution $ Solution 0 tiid cont (format response)
+                                                 (getResult result) now
+    taskInstance <- fromJust <$> Model.getTaskInstance tiid
+    _ <- Model.putTaskInstance $ taskInstance { taskInstanceSolutions =
+           solutionId solution : taskInstanceSolutions taskInstance}
+
     return ()
 
 format :: String -> String

@@ -175,16 +175,24 @@ data Tutor = Tutor {
 
 type TutorId   = Integer
 
+instance Indexable Tutor where
+  iid = tutorId
+  setId assn idVal = assn { tutorId = idVal }
+
 
 ------------------------------------------------------------------------------
 -- | User data types have not been implemented yet.
 data Student = Student {
-    studentId      :: StudentId
-  , studentCourses :: [CourseId]
-  , studentTasks   :: [TaskId]
+    studentId            :: StudentId
+  , studentEnrollments   :: [EnrollmentId]
+  , studentTaskInstances :: [TaskInstanceId]
   } deriving (Eq, Read, Show)
 
 type StudentId = Integer
+
+instance Indexable Student where
+  iid = studentId
+  setId assn idVal = assn { studentId = idVal }
 
 
 ------------------------------------------------------------------------------
