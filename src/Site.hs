@@ -10,7 +10,6 @@ module Site
 
 ------------------------------------------------------------------------------
 import           Data.ByteString       (ByteString)
-import           Data.IORef            (IORef, newIORef)
 import           Data.Map              (Map)
 import qualified Data.Map              as Map
 import           Data.Monoid
@@ -60,21 +59,7 @@ routes = [
 app :: SnapletInit App App
 app = makeSnaplet "app" "An snaplet example application." Nothing $ do
     h  <- nestSnaplet "" heist $ heistInit' "templates" config
-    a  <- getNewIORef
-    c  <- getNewIORef
-    e  <- getNewIORef
-    g  <- getNewIORef
-    so <- getNewIORef
-    st <- getNewIORef
-    t  <- getNewIORef
-    ti <- getNewIORef
-    tu <- getNewIORef
     addRoutes routes
-    return $ App h a c e g so st t ti tu
+    return $ App h
   where
     config = mempty { hcInterpretedSplices = defaultInterpretedSplices }
-
-
-------------------------------------------------------------------------------
-getNewIORef :: Initializer App App (IORef (Map Integer a))
-getNewIORef = liftIO . newIORef $ Map.fromList []

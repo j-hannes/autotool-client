@@ -37,7 +37,7 @@ handleStudent = ifTop $ do
     mStudent <- Model.getStudent sid
     case mStudent of
       Nothing -> do
-        student <- Model.putStudent $ Student 0 [] []
+        student <- Model.putStudent $ Student sid [] []
         continueWith student
       Just student -> continueWith student
   where

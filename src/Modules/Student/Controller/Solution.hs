@@ -39,7 +39,6 @@ showSolveTaskForm = do
     sid  <- getStudentId
     tiid <- fmap BS.unpack $ fromMaybe "" <$> getParam "taskInstanceId"
     mTaskInstance <- Model.getTaskInstance (read tiid)
-    -- writeText $ T.pack $ "sid: " ++ show sid ++ ", tiid: " ++ show mTaskInstance
     case mTaskInstance of
       Nothing           -> redirect "/404"
       Just taskInstance -> do
@@ -51,9 +50,11 @@ showSolveTaskForm = do
             solutionText = fromMaybe
                              (taskInstanceSolution taskInstance)
                              (fmap solutionContent lastSolution)
+
         method GET (handleForm
                       sid
-                      (taskInstanceDescription taskInstance) solutionText
+                      (taskInstanceDescription taskInstance)
+                      solutionText
                       (taskInstanceDocumentation taskInstance)
                       succEva
                       errEva)

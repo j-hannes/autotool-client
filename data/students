@@ -1,0 +1,3 @@
+(1,Student {studentId = 1, studentEnrollments = [], studentTaskInstances = []})
+(2,Student {studentId = 2, studentEnrollments = [], studentTaskInstances = []})
+(4,Student {studentId = 4, studentEnrollments = [2], studentTaskInstances = []})
