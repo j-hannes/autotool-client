@@ -131,7 +131,14 @@ getCachedTaskInstance task student = do
     sid             = studentId student
     filterInstances = filter (\ti -> taskInstanceStudentId ti == sid)
 
+------------------------------------------------------------------------------
 
+{- eeeeeeeh ... impossible! -> taskInstances need a relationship to assignments
+getAssignmentSubmissions :: Assignment -> AppHandler Int
+getAssignmentSubmissions assignment = do
+  
+    taskInstances   <- lift $ Model.getTaskInstances (taskTaskInstances task)
+-}
 
 ------------------------------------------------------------------------------
 -- put functions
