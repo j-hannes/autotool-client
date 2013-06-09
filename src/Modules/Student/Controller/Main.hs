@@ -76,7 +76,7 @@ renderAssignment assignment = do
                                            (assignmentTaskId assignment))
     sid          <- lift getStudentId
     student      <- fromJust <$> (lift $ Model.getStudent sid)
-    taskInstance <- lift $ Model.getCachedTaskInstance task student
+    taskInstance <- lift $ Model.getCachedTaskInstance assignment student
     I.runChildrenWith [
         ("description",    taskName |- task)
       , ("status",         (translateStatus . assignmentStatus) |- assignment)

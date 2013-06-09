@@ -77,7 +77,7 @@ notEmpty t = t /= ""
 -- | Create an assignment if all teh data is collected.
 createAssignment :: AssignmentData -> AppHandler()
 createAssignment ad = do
-    assignment <- Model.putAssignment (Assignment 0 cid tid sts start end)
+    assignment <- Model.putAssignment (Assignment 0 cid tid [] sts start end)
 
     course <- fromJust <$> Model.getCourse cid
     _      <- Model.putCourse $ course {courseAssignments =

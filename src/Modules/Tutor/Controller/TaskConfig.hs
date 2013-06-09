@@ -124,7 +124,7 @@ createTask :: String -> String -> String -> ScoringOrder -> AppHandler ()
 createTask taskname tasktitle signature so = do
     tid   <- return 1
     now   <- liftIO $ getCurrentTime
-    task  <- Model.putTask (Task 0 tid [] [] tasktitle taskname signature so
+    task  <- Model.putTask (Task 0 tid [] tasktitle taskname signature so
                                  now)
 
     tutor <- fromJust <$> Model.getTutor tid

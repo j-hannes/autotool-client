@@ -2,7 +2,7 @@ module Model.Base where
 
 ------------------------------------------------------------------------------
 import Control.Monad           (forM)
-import Data.Maybe              (catMaybes)
+import Data.Maybe              (catMaybes, fromJust)
 import Snap                    (liftIO, (<$>))
 ------------------------------------------------------------------------------
 import Application             (AppHandler)
@@ -111,18 +111,21 @@ getTasksWithAssignmentCount tutor = do
 
 ------------------------------------------------------------------------------
 
-getCachedTaskInstance :: Task -> Student -> AppHandler TaskInstance
-getCachedTaskInstance task student = do
-    taskInstances <- Model.Base.getTaskInstances (taskTaskInstances task)
+getCachedTaskInstance :: Assignment -> Student -> AppHandler TaskInstance
+getCachedTaskInstance assignment student = do
+    taskInstances <- Model.Base.getTaskInstances
+                       (assignmentTaskInstances assignment)
     let taskInstances' = filterInstances taskInstances
     if null taskInstances'
       then do
+        task <- fromJust <$> Model.Base.getTask (assignmentTaskId assignment)
         (desc, sol, doc, sig) <- liftIO $ Autotool.getTaskInstance
                                             (taskSignature task) (show sid)
-        ti <- Model.Base.putTaskInstance $ TaskInstance 0 (taskId task) sid []
-                                                        desc (show doc) sol sig
-        _  <- Model.Base.putTask $ task {taskTaskInstances =
-                taskInstanceId ti : taskTaskInstances task}
+        ti <- Model.Base.putTaskInstance $
+                TaskInstance 0 (assignmentId assignment) sid [] desc
+                             (show doc) sol sig
+        _  <- Model.Base.putAssignment $ assignment {assignmentTaskInstances =
+                taskInstanceId ti : assignmentTaskInstances assignment}
 
         return ti
       else

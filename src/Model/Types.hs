@@ -12,6 +12,7 @@ data Assignment = Assignment {
     -- ^ Relations
   , assignmentCourseId      :: CourseId
   , assignmentTaskId        :: TaskId
+  , assignmentTaskInstances :: [TaskInstanceId]
     -- ^ Attributes
   , assignmentStatus        :: Status
   , assignmentStart         :: UTCTime
@@ -126,7 +127,6 @@ data Task = Task {
     -- ^ Relations
     , taskTutorId       :: TutorId
     , taskAssignments   :: [AssignmentId]
-    , taskTaskInstances :: [TaskInstanceId]
     -- ^ Attributes
     , taskName          :: String
     , taskType          :: String
@@ -148,7 +148,7 @@ data TaskInstance = TaskInstance {
     -- ^ Identifier
     taskInstanceId            :: TaskInstanceId
     -- ^ Relations
-  , taskInstanceTaskId        :: TaskId
+  , taskInstanceAssignmentId  :: AssignmentId
   , taskInstanceStudentId     :: StudentId
   , taskInstanceSolutions     :: [SolutionId]
     -- ^ Attributes
