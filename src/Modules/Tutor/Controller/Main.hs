@@ -65,11 +65,14 @@ renderAssignment :: Assignment -> Splice AppHandler
 renderAssignment assignment = do
     now  <- liftIO getCurrentTime
     task <- fromJust <$> (lift $ Model.getTask (assignmentTaskId assignment))
+    taskInstances <- lift $ Model.getTaskInstances (taskTaskInstances task)
+    let nSubmissions = length $ concatMap taskInstanceSolutions taskInstances
     I.runChildrenWith [
-        ("taskName", taskName |- task)
-      , ("taskType", taskType |- task)
-      , ("status",   (translateStatus . assignmentStatus) |- assignment)
-      , ("timespan", id |- compareToNow now from to)
+        ("taskName",    taskName |- task)
+      , ("taskType",    taskType |- task)
+      , ("status",      (translateStatus . assignmentStatus) |- assignment)
+      , ("timespan",    id |- compareToNow now from to)
+      , ("submissions", id |< nSubmissions)
       ]
   where
     from = Just $ assignmentStart assignment
