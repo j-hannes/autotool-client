@@ -159,8 +159,15 @@ getCachedTaskInstance task student = do
       then do
         (desc, sol, doc, sig) <- liftIO $ Autotool.getTaskInstance
                                             (taskSignature task) (show sid)
-        Model.Base.putTaskInstance $ TaskInstance 0 (taskId task) sid [] desc sol (show doc) sig
-      else return $ head taskInstances'
+        ti <- Model.Base.putTaskInstance $ TaskInstance 0 (taskId task) sid []
+                                                        desc (show doc) sol sig
+
+        _ <- Model.Base.putTask $ task {taskTaskInstances =
+               taskInstanceId ti : taskTaskInstances task}
+        
+        return ti
+      else
+        return $ head taskInstances'
   where
     sid             = studentId student
     filterInstances = filter (\ti -> taskInstanceStudentId ti == sid)

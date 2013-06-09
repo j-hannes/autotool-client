@@ -62,8 +62,8 @@ getGroup        = get _groups
 getSolution     :: Integer -> AppHandler (Maybe Solution)
 getSolution     = get _solutions
 
-getStudent        :: Integer -> AppHandler (Maybe Student)
-getStudent        = get _students
+getStudent      :: Integer -> AppHandler (Maybe Student)
+getStudent      = get _students
 
 getTask         :: Integer -> AppHandler (Maybe Task)
 getTask         = get _tasks
