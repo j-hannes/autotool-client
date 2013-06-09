@@ -1,2 +1,3 @@
 (1,Enrollment {enrollmentId = 1, enrollmentGroupId = 1, enrollmentStudentId = 2, enrollmentTime = 2013-06-09 14:32:00.135019 UTC})
 (2,Enrollment {enrollmentId = 2, enrollmentGroupId = 1, enrollmentStudentId = 4, enrollmentTime = 2013-06-09 14:39:36.479571 UTC})
+(3,Enrollment {enrollmentId = 3, enrollmentGroupId = 1, enrollmentStudentId = 1, enrollmentTime = 2013-06-09 16:06:46.280982 UTC})
