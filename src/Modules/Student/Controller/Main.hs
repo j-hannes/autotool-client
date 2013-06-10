@@ -20,7 +20,8 @@ import           Application        (AppHandler)
 import qualified Model.Base         as Model
 import           Model.Types
 import           Utils.Auth         (getStudentId)
-import           Utils.Render       (compareToNow, translateStatus, (|<), (|-))
+import           Utils.Render       (compareToNow, (|<), (|-))
+import           Utils.Render       (translateScore, translateStatus)
 
 
 ------------------------------------------------------------------------------
@@ -77,12 +78,16 @@ renderAssignment assignment = do
     sid          <- lift getStudentId
     student      <- fromJust <$> (lift $ Model.getStudent sid)
     taskInstance <- lift $ Model.getCachedTaskInstance assignment student
+    bestScore    <- lift $ Model.getBestScore assignment
+    myBestScore  <- lift $ Model.getBestScoreForStudent assignment student
     I.runChildrenWith [
         ("description",    taskName |- task)
       , ("status",         (translateStatus . assignmentStatus) |- assignment)
       , ("submissionTime", id |- (compareToNow now from to))
       , ("submissions"   , id |< (length $ taskInstanceSolutions taskInstance))
       , ("taskInstanceId", taskInstanceId |< taskInstance)
+      , ("mybestscore",    id |- translateScore myBestScore)
+      , ("bestscore",      id |- translateScore bestScore)
       ] 
   where
     from = Just $ assignmentStart assignment

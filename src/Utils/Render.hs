@@ -4,6 +4,8 @@ module Utils.Render
   ( compareToNow
   , doubleToInt
   , translateStatus
+  , translateScore
+  , translateScoringOrder
   , (|<)
   , (|-)
   , (|.)
@@ -18,6 +20,7 @@ import           Heist.Interpreted (Splice)
 import qualified Heist.Interpreted as I
 ------------------------------------------------------------------------------
 import           Application       (AppHandler)
+import           Autotool.Client.Types.ScoringOrder (ScoringOrder(..))
 import           Model.Types       (Status(..))
 
 ------------------------------------------------------------------------------
@@ -33,11 +36,23 @@ f |. x = I.textSplice $ f x
 
 
 ------------------------------------------------------------------------------
--- | 
+-- | Übersetzen des Aufgabentyps.
 translateStatus :: Status -> String
 translateStatus Mandatory = "Pflicht"
 translateStatus Optional  = "Zusätzlich"
 
+------------------------------------------------------------------------------
+-- | Übersetzen der Punktzahl
+translateScore :: Maybe Int -> String
+translateScore Nothing  = "noch keine"
+translateScore (Just n) = show n
+
+------------------------------------------------------------------------------
+-- | Übersetzen der Bewertungsreihenfolge.
+translateScoringOrder :: ScoringOrder -> String
+translateScoringOrder Decreasing  = "absteigend"
+translateScoringOrder Increasing  = "aufsteigend"
+translateScoringOrder None        = "keine"
 
 ------------------------------------------------------------------------------
 -- | 

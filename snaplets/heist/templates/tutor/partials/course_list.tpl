@@ -21,6 +21,7 @@
       <th>Bearbeitungszeit</th>
       <th>Einsendungen</th>
       <th>Beste Bewertung</th>
+      <th>Reihenfolge</th>
     </tr>
     <assignedTasks>
     <tr>
@@ -31,6 +32,7 @@
       <td><timespan /></td>
       <td><submissions /></td>
       <td><bestscore /></td>
+      <td><scoringorder /></td>
     </tr>
     </assignedTasks>
   </table> 

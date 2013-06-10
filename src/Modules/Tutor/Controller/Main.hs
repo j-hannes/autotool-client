@@ -18,8 +18,9 @@ import           Snap.Snaplet.Heist
 import           Application        (AppHandler)
 import qualified Model.Base         as Model
 import           Model.Types
-import           Utils.Render       (compareToNow)
-import           Utils.Render       (translateStatus, (|<), (|-))
+import           Utils.Render       (compareToNow, (|<), (|-))
+import           Utils.Render       (translateStatus, translateScore)
+import           Utils.Render       (translateScoringOrder)
 
 
 ------------------------------------------------------------------------------
@@ -65,19 +66,16 @@ renderAssignment :: Assignment -> Splice AppHandler
 renderAssignment assignment = do
     now  <- liftIO getCurrentTime
     task <- fromJust <$> (lift $ Model.getTask (assignmentTaskId assignment))
-    -- taskInstances   <- lift $ Model.getTaskInstances (taskTaskInstances task)
-    -- assnSubmissions <- lift $ Model.getAssignmentSubmissions assignment
-    -- let solutionIds = map taskInstanceSolutions taskInstances
-        -- nSubmissions = length $ concat solutionIds
-    -- solutions <- lift $ Model.getSolutions solutionIds  
-
+    assnSubmissions <- lift $ Model.getAssignmentSubmissions assignment
+    bestScore <- lift $ Model.getBestScore assignment
     I.runChildrenWith [
-        ("taskName",    taskName |- task)
-      , ("taskType",    taskType |- task)
-      , ("status",      (translateStatus . assignmentStatus) |- assignment)
-      , ("timespan",    id |- compareToNow now from to)
-      -- , ("submissions", id |< nSubmissions)
-      -- , ("bestscore"  , id |< bestScore)
+        ("taskName",     taskName |- task)
+      , ("taskType",     taskType |- task)
+      , ("timespan",     id |- compareToNow now from to)
+      , ("submissions",  id |< assnSubmissions)
+      , ("bestscore",    id |- translateScore bestScore)
+      , ("status",       (translateStatus . assignmentStatus) |- assignment)
+      , ("scoringorder", (translateScoringOrder . taskScoringOrder) |- task)
       ]
   where
     from = Just $ assignmentStart assignment

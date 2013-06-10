@@ -1,14 +1,15 @@
 module Model.Base where
 
 ------------------------------------------------------------------------------
-import Control.Monad           (forM)
-import Data.Maybe              (catMaybes, fromJust)
-import Snap                    (liftIO, (<$>))
+import Control.Monad                      (forM)
+import Data.Maybe                         (catMaybes, fromJust)
+import Snap                               (liftIO, (<$>))
 ------------------------------------------------------------------------------
-import Application             (AppHandler)
-import Autotool.Client         as Autotool
+import Application                        (AppHandler)
+import Autotool.Client                    as Autotool
+import Autotool.Client.Types.ScoringOrder (ScoringOrder(..))
 ------------------------------------------------------------------------------
-import Model.Adapter.FileStore as Adapter
+import Model.Adapter.FileStore            as Adapter
 import Model.Types
 
 
@@ -136,12 +137,49 @@ getCachedTaskInstance assignment student = do
 
 ------------------------------------------------------------------------------
 
-{- eeeeeeeh ... impossible! -> taskInstances need a relationship to assignments
 getAssignmentSubmissions :: Assignment -> AppHandler Int
 getAssignmentSubmissions assignment = do
-  
-    taskInstances   <- lift $ Model.getTaskInstances (taskTaskInstances task)
--}
+    taskInstances   <- Model.Base.getTaskInstances
+                         (assignmentTaskInstances assignment)
+    return $ length $ concatMap taskInstanceSolutions taskInstances
+
+------------------------------------------------------------------------------
+
+getBestScore :: Assignment -> AppHandler (Maybe Int)
+getBestScore assignment = do
+    taskInstances <- Model.Base.getTaskInstances
+                       (assignmentTaskInstances assignment)
+    solutions <- concat <$> mapM
+                    (Model.Base.getSolutions . taskInstanceSolutions)
+                    taskInstances
+    task <- fromJust <$> Model.Base.getTask (assignmentTaskId assignment)
+    let results = catMaybes (map solutionResult solutions)
+    if null results
+      then return Nothing
+      else case taskScoringOrder task of
+            Decreasing -> return . Just . maximum $ map score results
+            Increasing -> return . Just . minimum $ map score results
+            None       -> return Nothing
+
+-- TODO: refactoring :)
+getBestScoreForStudent :: Assignment -> Student -> AppHandler (Maybe Int)
+getBestScoreForStudent assignment student = do
+    taskInstances <- Model.Base.getTaskInstances
+                       (assignmentTaskInstances assignment)
+    let taskInstances' = filterInstances taskInstances
+    solutions <- concat <$> mapM
+                    (Model.Base.getSolutions . taskInstanceSolutions)
+                    taskInstances'
+    task <- fromJust <$> Model.Base.getTask (assignmentTaskId assignment)
+    let results = catMaybes (map solutionResult solutions)
+    if null results
+      then return Nothing
+      else case taskScoringOrder task of
+            Decreasing -> return . Just . maximum $ map score results
+            Increasing -> return . Just . minimum $ map score results
+            None       -> return Nothing
+  where
+    filterInstances = filter (\ti -> taskInstanceStudentId ti == studentId student)
 
 ------------------------------------------------------------------------------
 -- put functions
