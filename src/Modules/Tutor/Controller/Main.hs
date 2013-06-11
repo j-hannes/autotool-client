@@ -18,7 +18,7 @@ import           Snap.Snaplet.Heist
 import           Application        (AppHandler)
 import qualified Model.Base         as Model
 import           Model.Types
-import           Utils.Render       (compareToNow)
+import           Utils.Render       (compareToNow, bestScore, translateScore)
 import           Utils.Render       (translateStatus, (|<), (|-))
 
 
@@ -48,7 +48,7 @@ renderCourse course = do
         ("courseId",      courseId           |< course)
       , ("passCriteria",  coursePassCriteria |< course)
       , ("courseName",    courseName         |- course)
-      , ("enrollment",    id |- compareToNow now from to)
+      , ("enrollment",    id                 |- compareToNow now from to)
       , ("assignedTasks", I.mapSplices renderAssignment assignments)
       ]
   where
@@ -63,20 +63,17 @@ renderAssignment :: Assignment -> Splice AppHandler
 renderAssignment assignment = do
     now  <- liftIO getCurrentTime
     task <- fromJust <$> (lift $ Model.getTask (assignmentTask assignment))
-    -- taskInstances   <- lift $ Model.getTaskInstances (taskTaskInstances task)
-    -- assnSubmissions <- lift $ Model.getAssignmentSubmissions assignment
-    -- let solutionIds = map taskInstanceSolutions taskInstances
-        -- nSubmissions = length $ concat solutionIds
-    -- solutions <- lift $ Model.getSolutions solutionIds  
-
+    solutions <- lift $ Model.getSolutionsByAssignment
+                          (assignmentId assignment)  
     I.runChildrenWith [
         ("taskName",    taskName |- task)
       , ("taskType",    taskType |- task)
-      , ("status",      (translateStatus . assignmentStatus) |- assignment)
-      , ("timespan",    id |- compareToNow now from to)
-      -- , ("submissions", id |< nSubmissions)
-      -- , ("bestscore"  , id |< bestScore)
+      , ("status",      translateStatus |- assignmentStatus assignment)
+      , ("timespan",    id              |- compareToNow now from to)
+      , ("submissions", length          |< solutions)
+      , ("bestscore"  , translateScore  |- bestScore task solutions)
       ]
   where
     from = Just $ assignmentStart assignment
     to   = Just $ assignmentEnd   assignment
+

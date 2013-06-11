@@ -2,8 +2,10 @@
 
 module Utils.Render
   ( compareToNow
-  , doubleToInt
   , translateStatus
+  , translateScore
+  , bestScore
+  , doubleToInt
   , (|<)
   , (|-)
   , (|.)
@@ -18,7 +20,7 @@ import           Heist.Interpreted (Splice)
 import qualified Heist.Interpreted as I
 ------------------------------------------------------------------------------
 import           Application       (AppHandler)
-import           Model.Types       (Status(..))
+import           Model.Types
 
 ------------------------------------------------------------------------------
 -- | Some syntactic sugar.
@@ -38,6 +40,11 @@ translateStatus :: Status -> String
 translateStatus Mandatory = "Pflicht"
 translateStatus Optional  = "Zusätzlich"
 
+------------------------------------------------------------------------------
+-- | 
+translateScore :: Maybe Int -> String
+translateScore Nothing  = "noch keine"
+translateScore (Just n) = show n
 
 ------------------------------------------------------------------------------
 -- | 
@@ -52,5 +59,17 @@ compareToNow now (Just begin) (Just end)
 
 ------------------------------------------------------------------------------
 -- | 
+bestScore :: Task -> [Solution] -> Maybe Int
+bestScore _    []                         = Nothing
+bestScore task solutions
+    | taskScoringOrder task == Decreasing = maximum scores
+    | taskScoringOrder task == Increasing = minimum scores
+    | otherwise                           = Nothing
+  where scores = map (fmap score . solutionResult) solutions
+    
+
+
+------------------------------------------------------------------------------
+-- | Where is that actually used?
 doubleToInt :: Double -> Int
 doubleToInt = read . takeWhile ((/=) '.') . show

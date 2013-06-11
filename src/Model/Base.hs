@@ -24,6 +24,7 @@ module Model.Base (
     -- ^ joined retrieve
   , getEnrollableCourses
   , getEnrolledGroups
+  , getSolutionsByAssignment
   , getTasksWithAssignmentCount
   , getCachedTaskInstance    
 
@@ -61,6 +62,14 @@ getEnrolledGroups :: Student -> AppHandler [Group]
 getEnrolledGroups student = do
     enrollments <- Db.getEnrollmentsByStudent (studentId student)
     Db.getGroups (map enrollmentGroup enrollments)
+
+------------------------------------------------------------------------------
+
+getSolutionsByAssignment :: AssignmentId -> AppHandler [Solution]
+getSolutionsByAssignment aid = do
+    taskInstances <- Db.getTaskInstancesByAssignment aid
+    concat <$> mapM Db.getSolutionsByTaskInstance 
+                    (map taskInstanceId taskInstances)
 
 ------------------------------------------------------------------------------
 
