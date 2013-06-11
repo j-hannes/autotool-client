@@ -6,9 +6,6 @@ module Model.Base (
   , Db.getTaskInstance
   , Db.getTutor
 
-    -- ^ retrieve all
-  , Db.getGroups
-
     -- ^ retrieve many by index 
   , Db.getAssignmentsByCourse
   , Db.getCoursesByTutor

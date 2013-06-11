@@ -1,7 +1,44 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 
-module Model.Types where
+module Model.Types (
+    -- ^ main types
+    Assignment   (..)
+  , Course       (..)
+  , Enrollment   (..)
+  , Group        (..)
+  , Solution     (..)
+  , Student      (..)
+  , Task         (..)
+  , TaskInstance (..)
+  , Tutor        (..)
+
+    -- ^ id types
+  , AssignmentId
+  , CourseId
+  , EnrollmentId
+  , GroupId
+  , SolutionId
+  , StudentId
+  , TaskId
+  , TaskInstanceId
+  , TutorId
+
+    -- ^ additional types
+  , Result       (..)
+  , ScoringOrder (..)
+  , Status       (..)
+
+    -- ^ value tuples
+  , AssignmentValues
+  , CourseValues
+  , EnrollmentValues
+  , GroupValues
+  , SolutionValues
+  , TaskValues
+  , TaskInstanceValues
+
+  ) where
 
 ------------------------------------------------------------------------------
 import           Control.Applicative ((<$>), (<*>))
@@ -269,15 +306,8 @@ type GroupValues =
 type SolutionValues =
        (TaskInstanceId, String, String, Maybe Result, UTCTime)
 
-type StudentValues =
-       (String)
-
 type TaskValues =
        (TutorId, String, String, String, ScoringOrder, UTCTime)
 
 type TaskInstanceValues =
        (AssignmentId, StudentId, String, String, String, String)
-
-type TutorValues =
-       (String)
-

@@ -7,11 +7,7 @@ module Model.Adapter.Sqlite (
     getAllCourses
 
     -- ^ retrieve one by primary key
-  , getAssignment
   , getCourse
-  , getEnrollment
-  , getGroup
-  , getSolution
   , getStudent
   , getTask
   , getTaskInstance
@@ -36,10 +32,8 @@ module Model.Adapter.Sqlite (
   , createEnrollment
   , createGroup
   , createSolution
-  , createStudent
   , createTask
   , createTaskInstance
-  , createTutor
 
     -- ^ other
   , getLastSolutionsByTaskInstance
@@ -67,10 +61,6 @@ import           Model.Types
 ------------------------------------------------------------------------------ 
 -- | Retrieve.
 
-getAssignment :: AssignmentId ->  AppHandler (Maybe Assignment)
-getAssignment aid =
-    listToMaybe <$> query "SELECT * FROM assignment WHERE id = ?" (Only aid)
-
 getAssignmentsByCourse :: CourseId -> AppHandler [Assignment]
 getAssignmentsByCourse cid =
     query "SELECT * FROM assignment WHERE course = ?" (Only cid)
@@ -95,19 +85,11 @@ getCoursesByTutor tid =
 
 ------------------------------------------------------------------------------ 
 
-getEnrollment :: EnrollmentId -> AppHandler (Maybe Enrollment)
-getEnrollment eid =
-    listToMaybe <$> query "SELECT * FROM enrollment WHERE id = ?" (Only eid)
-
 getEnrollmentsByStudent :: StudentId -> AppHandler [Enrollment]
 getEnrollmentsByStudent tid =
   query "SELECT * FROM enrollment WHERE student = ?" (Only tid)
 
 ------------------------------------------------------------------------------ 
-
-getGroup :: GroupId -> AppHandler (Maybe Group)
-getGroup gid =
-    listToMaybe <$> query "SELECT * FROM group_ WHERE id = ?" (Only gid)
 
 getGroups :: [GroupId] -> AppHandler [Group]
 getGroups gids = do
@@ -118,10 +100,6 @@ getGroupsByCourse tid =
   query "SELECT * FROM group_ WHERE course = ?" (Only tid)
 
 ------------------------------------------------------------------------------ 
-
-getSolution :: SolutionId -> AppHandler (Maybe Solution)
-getSolution sid = 
-    listToMaybe <$> query "SELECT * FROM solution WHERE id = ?" (Only sid)
 
 getSolutionsByTaskInstance :: TaskInstanceId -> AppHandler [Solution]
 getSolutionsByTaskInstance tid =
@@ -220,18 +198,6 @@ createTaskInstance = create $ concat
     [ "INSERT INTO task_instance ("
     , "assignment, student, description, documentation, solution, signature"
     , ") VALUES (?,?,?,?,?,?)"]
-
-createStudent :: StudentValues -> AppHandler StudentId
-createStudent = create (concat
-    [ "INSERT INTO student ("
-    , "email"
-    , ") VALUES (?)"]) . Only
-
-createTutor :: TutorValues -> AppHandler TutorId
-createTutor = create (concat
-    [ "INSERT INTO tutor ("
-    , "email"
-    , ") VALUES (?)"]) . Only
 
 
 ------------------------------------------------------------------------------ 
