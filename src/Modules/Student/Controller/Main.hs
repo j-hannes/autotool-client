@@ -51,7 +51,7 @@ handleStudent = ifTop $ do
 -- details into the template.
 renderGroup :: Group -> Splice AppHandler
 renderGroup group = do
-    course      <- fromJust <$> (lift $ Model.getCourse (groupCourseId group))
+    course      <- fromJust <$> (lift $ Model.getCourse (groupCourse group))
     assignments <- lift $ Model.getAssignmentsByCourse (courseId course)
     I.runChildrenWith [
         ("groupDescription", groupDescription   |- group)
@@ -69,7 +69,7 @@ renderAssignment :: Assignment -> Splice AppHandler
 renderAssignment assignment = do
     now          <- liftIO getCurrentTime
     task         <- fromJust <$> (lift $ Model.getTask
-                                           (assignmentTaskId assignment))
+                                           (assignmentTask assignment))
     sid          <- lift getStudentId
     student      <- fromJust <$> (lift $ Model.getStudent sid)
     taskInstance <- lift $ Model.getCachedTaskInstance assignment student

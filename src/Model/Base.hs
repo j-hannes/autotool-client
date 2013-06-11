@@ -54,13 +54,13 @@ getEnrollableCourses :: Student -> AppHandler [Course]
 getEnrollableCourses student = do
     groups      <- Model.Base.getEnrolledGroups student
     courses     <- Db.getAllCourses
-    return $ filter (\c -> not $ courseId c `elem` (map groupCourseId groups))
+    return $ filter (\c -> not $ courseId c `elem` (map groupCourse groups))
                courses
 
 getEnrolledGroups :: Student -> AppHandler [Group]
 getEnrolledGroups student = do
     enrollments <- Db.getEnrollmentsByStudent (studentId student)
-    Db.getGroups (map enrollmentGroupId enrollments)
+    Db.getGroups (map enrollmentGroup enrollments)
 
 ------------------------------------------------------------------------------
 
@@ -82,7 +82,7 @@ getCachedTaskInstance assignment student = do
     let taskInstances' = filterInstances taskInstances
     if null taskInstances'
       then do
-        task <- fromJust <$> Db.getTask (assignmentTaskId assignment)
+        task <- fromJust <$> Db.getTask (assignmentTask assignment)
         (desc, sol, doc, sig) <- liftIO $ Autotool.getTaskInstance
                                             (taskSignature task) (show sid)
         tid <- Db.createTaskInstance

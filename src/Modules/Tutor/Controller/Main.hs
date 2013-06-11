@@ -62,7 +62,7 @@ renderCourse course = do
 renderAssignment :: Assignment -> Splice AppHandler
 renderAssignment assignment = do
     now  <- liftIO getCurrentTime
-    task <- fromJust <$> (lift $ Model.getTask (assignmentTaskId assignment))
+    task <- fromJust <$> (lift $ Model.getTask (assignmentTask assignment))
     -- taskInstances   <- lift $ Model.getTaskInstances (taskTaskInstances task)
     -- assnSubmissions <- lift $ Model.getAssignmentSubmissions assignment
     -- let solutionIds = map taskInstanceSolutions taskInstances

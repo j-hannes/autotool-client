@@ -59,14 +59,14 @@ import           Model.Indexable
 -- |
 data Assignment = Assignment {
     -- ^ Identifier
-    assignmentId            :: AssignmentId
+    assignmentId     :: AssignmentId
     -- ^ Relations
-  , assignmentCourseId      :: CourseId
-  , assignmentTaskId        :: TaskId
+  , assignmentCourse :: CourseId
+  , assignmentTask   :: TaskId
     -- ^ Attributes
-  , assignmentStatus        :: Status
-  , assignmentStart         :: UTCTime
-  , assignmentEnd           :: UTCTime
+  , assignmentStatus :: Status
+  , assignmentStart  :: UTCTime
+  , assignmentEnd    :: UTCTime
   } deriving (Eq, Read, Show)
 
 type AssignmentId = Integer
@@ -96,7 +96,7 @@ data Course = Course {
     -- ^ Identifier
     courseId             :: CourseId
     -- ^ Relations
-  , courseTutorId        :: TutorId
+  , courseTutor          :: TutorId
     -- ^ Attributes
   , courseName           :: String
   , courseSemester       :: String
@@ -119,12 +119,12 @@ instance FromRow Course where
 -- |
 data Enrollment = Enrollment {
     -- ^ Identifier
-    enrollmentId        :: EnrollmentId
+    enrollmentId      :: EnrollmentId
     -- ^ Relations
-  , enrollmentGroupId   :: GroupId
-  , enrollmentStudentId :: StudentId
+  , enrollmentGroup   :: GroupId
+  , enrollmentStudent :: StudentId
     -- ^ Attributes
-  , enrollmentTime      :: UTCTime
+  , enrollmentTime    :: UTCTime
   } deriving (Eq, Read, Show)
 
 type EnrollmentId = Integer
@@ -141,12 +141,12 @@ instance FromRow Enrollment where
 -- |
 data Group = Group {
     -- ^ Identifier
-    groupId             :: GroupId
+    groupId          :: GroupId
     -- ^ Relations
-  , groupCourseId       :: CourseId
+  , groupCourse      :: CourseId
     -- ^ Attributes
-  , groupDescription    :: String
-  , groupCapacity       :: Int
+  , groupDescription :: String
+  , groupCapacity    :: Int
   } deriving (Eq, Ord, Read, Show)
 
 type GroupId = Integer
@@ -162,14 +162,14 @@ instance FromRow Group where
 -- |
 data Solution = Solution {
     -- ^ Identifier
-      solutionId             :: SolutionId
+      solutionId           :: SolutionId
     -- ^ Relations
-    , solutionTaskInstanceId :: TaskInstanceId
+    , solutionTaskInstance :: TaskInstanceId
     -- ^ Attributes
-    , solutionContent        :: String
-    , solutionEvaluation     :: String
-    , solutionResult         :: Maybe Result
-    , solutionSubmission     :: UTCTime
+    , solutionContent      :: String
+    , solutionEvaluation   :: String
+    , solutionResult       :: Maybe Result
+    , solutionSubmission   :: UTCTime
     } deriving (Read, Show)
 
 type SolutionId = Integer
@@ -214,15 +214,15 @@ instance FromRow Student where
 -- |
 data Task = Task {
     -- ^ Identifier
-      taskId            :: TaskId
+      taskId           :: TaskId
     -- ^ Relations
-    , taskTutorId       :: TutorId
+    , taskTutor        :: TutorId
     -- ^ Attributes
-    , taskName          :: String
-    , taskType          :: String
-    , taskSignature     :: String
-    , taskScoringOrder  :: ScoringOrder
-    , taskCreated       :: UTCTime
+    , taskName         :: String
+    , taskType         :: String
+    , taskSignature    :: String
+    , taskScoringOrder :: ScoringOrder
+    , taskCreated      :: UTCTime
     } deriving (Read, Show)
 
 type TaskId = Integer
@@ -251,7 +251,7 @@ data TaskInstance = TaskInstance {
     -- ^ Identifier
     taskInstanceId            :: TaskInstanceId
     -- ^ Relations
-  , taskInstanceAssignmentId  :: AssignmentId
+  , taskInstanceAssignment    :: AssignmentId
   , taskInstanceStudentId     :: StudentId
     -- ^ Attributes
   , taskInstanceDescription   :: String
