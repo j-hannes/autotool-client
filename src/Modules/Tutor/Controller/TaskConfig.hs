@@ -19,7 +19,7 @@ import           Text.Digestive.Snap     hiding (method)
 ------------------------------------------------------------------------------
 import           Application             (AppHandler)
 import qualified Autotool.Client         as Autotool
-import           Autotool.Client.Types.ScoringOrder (ScoringOrder)
+import qualified Autotool.Client.Types.ScoringOrder as SO
 import qualified Autotool.Mock           as AutotoolMock
 import qualified Model.Base              as Model
 import           Model.Types
@@ -114,21 +114,22 @@ handleFormVerification taskname = do
                                else Autotool.getInitialTaskConfig taskname
 
     case result of
-      (Right signature) -> createTask taskname ttitle signature so
+      (Right signature) -> createTask taskname ttitle signature (tso so)
       (Left  errormsg)  -> handleForm taskname config doc (Just errormsg)
 
+
+------------------------------------------------------------------------------
+-- | Transformation of equal but differently defined data types.
+tso :: SO.ScoringOrder -> ScoringOrder
+tso SO.Decreasing = Decreasing
+tso SO.Increasing = Increasing
+tso SO.None       = None
 
 ------------------------------------------------------------------------------
 -- | Create a new task from the entered data.
 createTask :: String -> String -> String -> ScoringOrder -> AppHandler ()
 createTask taskname tasktitle signature so = do
-    tid   <- return 1
-    now   <- liftIO $ getCurrentTime
-    task  <- Model.putTask (Task 0 tid [] tasktitle taskname signature so
-                                 now)
-
-    tutor <- fromJust <$> Model.getTutor tid
-    _     <- Model.putTutor $ tutor {tutorTasks =
-               taskId task : tutorTasks tutor}
-
+    tid <- return 1
+    now <- liftIO $ getCurrentTime
+    _   <- Model.createTask (tid, tasktitle, taskname, signature, so, now)
     redirect "/tutor"

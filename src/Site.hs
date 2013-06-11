@@ -9,15 +9,18 @@ module Site
   ) where
 
 ------------------------------------------------------------------------------
+import           Control.Concurrent (withMVar)
 import           Data.ByteString       (ByteString)
 import           Data.Monoid
 ------------------------------------------------------------------------------
 import           Heist
 import           Snap
 import           Snap.Snaplet.Heist
+import           Snap.Snaplet.SqliteSimple
 import           Snap.Util.FileServe
 ------------------------------------------------------------------------------
 import           Application
+import           Model.Adapter.Sqlite (createTables)
 import           Modules.Student.Controller.Enrollment (handleEnrollment)
 import           Modules.Student.Controller.Enrollment (showEnrollments)
 import           Modules.Student.Controller.Main       (handleStudent)
@@ -56,8 +59,15 @@ routes = [
 -- | The application initializer.
 app :: SnapletInit App App
 app = makeSnaplet "app" "An snaplet example application." Nothing $ do
-    h  <- nestSnaplet "" heist $ heistInit' "templates" config
+    h <- nestSnaplet "" heist $ heistInit' "templates" config
+    d <- nestSnaplet "db" db sqliteInit
+
+    -- Grab the DB connection pool from the sqlite snaplet and call
+    -- into the Model to create all the DB tables if necessary.
+    let c = sqliteConn $ d ^# snapletValue
+    liftIO $ withMVar c $ \conn -> createTables conn
+
     addRoutes routes
-    return $ App h
+    return $ App h d
   where
     config = mempty { hcInterpretedSplices = defaultInterpretedSplices }

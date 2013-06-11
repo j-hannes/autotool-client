@@ -42,11 +42,9 @@ showSolveTaskForm = do
     case mTaskInstance of
       Nothing           -> redirect "/404"
       Just taskInstance -> do
-        solutions    <- Model.getSolutions (taskInstanceSolutions taskInstance)
-        let lastSolution = if null solutions
-                              then Nothing
-                              else Just $ head solutions --FIXME
-            (errEva, succEva) = determineResult lastSolution
+        lastSolution    <- Model.getLastSolutionsByTaskInstance
+                             (taskInstanceId taskInstance)
+        let (errEva, succEva) = determineResult lastSolution
             solutionText = fromMaybe
                              (taskInstanceSolution taskInstance)
                              (fmap solutionContent lastSolution)
@@ -133,8 +131,8 @@ handleFormVerification taskInstance = do
     case result of
       (Right signature) -> do
         createSolution sol signature tiid
-        redirect . BS.pack $ "/student/" ++ (show sid) ++ "/solve/"
-                                         ++ show tiid  -- createUrl?
+        redirect $ BS.concat [ "/student/" , BS.pack $ show sid , "/solve/"
+                             , BS.pack $ show tiid ]
       (Left  errormsg)  -> do
         createSolution sol errormsg tiid
         handleForm sid desc sol doc Nothing (Just $ format errormsg)
@@ -149,11 +147,8 @@ createSolution cont response tiid = do
     liftIO $ putStrLn response
     let (_:result) = splitOn ["Bewertung"] $ words response
     
-    solution     <- Model.putSolution $ Solution 0 tiid cont (format response)
-                                                 (getResult result) now
-    taskInstance <- fromJust <$> Model.getTaskInstance tiid
-    _ <- Model.putTaskInstance $ taskInstance { taskInstanceSolutions =
-           solutionId solution : taskInstanceSolutions taskInstance}
+    _ <- Model.createSolution
+           (tiid, cont, format response, getResult result, now)
 
     return ()
 

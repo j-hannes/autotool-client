@@ -7,7 +7,6 @@ module Modules.Tutor.Controller.Course
   ) where
 
 ------------------------------------------------------------------------------
-import           Data.Maybe          (fromJust)
 import           Data.Text           (Text)
 import qualified Data.Text           as T
 import           Data.Time
@@ -19,7 +18,6 @@ import           Text.Digestive.Snap
 ------------------------------------------------------------------------------
 import           Application
 import qualified Model.Base          as Model
-import           Model.Types
 import           Utils.Form
 
 
@@ -60,16 +58,9 @@ data CourseFormData = CourseFormData
 -- displayed on the main page instead of displaying a separate page.
 createCourse :: CourseFormData -> AppHandler ()
 createCourse cfd = do
-    course <- Model.putCourse $ Course 0 tid [] [] name sem enrStart enrEnd pc
-    group1 <- Model.putGroup  $ Group 0 (courseId course) [] g1n g1c
-    group2 <- Model.putGroup  $ Group 0 (courseId course) [] g2n g2c
-
-    _      <- Model.putCourse $ course {courseGroups =
-                [groupId group1, groupId group2]}
-
-    tutor  <- fromJust <$> Model.getTutor tid
-    _      <- Model.putTutor $ tutor {tutorCourses =
-                courseId course : tutorCourses tutor}
+    cid <- Model.createCourse (tid, name, sem, enrStart, enrEnd, pc)
+    _   <- Model.createGroup  (cid, g1n, g1c)
+    _   <- Model.createGroup  (cid, g2n, g2c)
 
     redirect "/tutor"
   where

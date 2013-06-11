@@ -43,7 +43,7 @@ showEnrollments = do
 
 renderCourse :: Course -> Splice AppHandler
 renderCourse course = do
-    groups <- lift $ Model.getGroups (courseGroups course)
+    groups <- lift $ Model.getGroupsByCourse (courseId course)
     I.runChildrenWith [
         ("courseName", courseName |- course)
       , ("groups",     I.mapSplices renderGroup groups)
@@ -62,11 +62,9 @@ handleEnrollment = do
     sid      <- getStudentId
     mStudent <- Model.getStudent sid
     case mStudent of
-      Nothing      -> redirect "/404"
-      Just student -> do
-        gid     <- BS.unpack <$> fromMaybe "0" <$> getParam "groupId"
-        now     <- liftIO getCurrentTime
-        enr     <- Model.putEnrollment $ Enrollment 0 (read gid) sid now
-        _       <- Model.putStudent $ student {studentEnrollments =
-                    enrollmentId enr : studentEnrollments student}
+      Nothing -> redirect "/404"
+      Just _  -> do
+        gid <- BS.unpack <$> fromMaybe "0" <$> getParam "groupId"
+        now <- liftIO getCurrentTime
+        _   <- Model.createEnrollment (read gid, sid, now)
         redirect (BS.pack ("/student/" ++ show sid))

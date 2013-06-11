@@ -13,7 +13,7 @@ import           Data.Time          (getCurrentTime)
 ------------------------------------------------------------------------------
 import           Heist.Interpreted  (Splice)
 import qualified Heist.Interpreted  as I
-import           Snap               (ifTop, lift, liftIO, (<$>))
+import           Snap               (ifTop, lift, liftIO, (<$>), redirect)
 import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
 import           Application        (AppHandler)
@@ -36,18 +36,14 @@ handleStudent = ifTop $ do
     sid      <- getStudentId
     mStudent <- Model.getStudent sid
     case mStudent of
-      Nothing -> do
-        student <- Model.newStudent sid
-        continueWith student
-      Just student -> continueWith student
-  where
-    continueWith student = do
-      groups <- Model.getEnrolledGroups student
-      let splices = [
-              ("studentId", studentId |< student)
-            , ("groups",    I.mapSplices renderGroup groups) 
-            ]
-      heistLocal (I.bindSplices splices) $ render "student/index"
+      Nothing      -> redirect "/404"
+      Just student -> do
+        groups <- Model.getEnrolledGroups student
+        let splices = [
+                ("studentId", studentId |< student)
+              , ("groups",    I.mapSplices renderGroup groups) 
+              ]
+        heistLocal (I.bindSplices splices) $ render "student/index"
 
 
 ------------------------------------------------------------------------------
@@ -56,9 +52,9 @@ handleStudent = ifTop $ do
 renderGroup :: Group -> Splice AppHandler
 renderGroup group = do
     course      <- fromJust <$> (lift $ Model.getCourse (groupCourseId group))
-    assignments <- lift $ Model.getAssignments (courseAssignments course)
+    assignments <- lift $ Model.getAssignmentsByCourse (courseId course)
     I.runChildrenWith [
-        ("groupDescription", groupDescription   |< group)
+        ("groupDescription", groupDescription   |- group)
       , ("groupId",          groupId            |< group)
       , ("courseName",       courseName         |- course)
       , ("passCriteria",     coursePassCriteria |< course)
@@ -77,11 +73,13 @@ renderAssignment assignment = do
     sid          <- lift getStudentId
     student      <- fromJust <$> (lift $ Model.getStudent sid)
     taskInstance <- lift $ Model.getCachedTaskInstance assignment student
+    solutions    <- lift $ Model.getSolutionsByTaskInstance
+                             (taskInstanceId taskInstance)
     I.runChildrenWith [
         ("description",    taskName |- task)
       , ("status",         (translateStatus . assignmentStatus) |- assignment)
       , ("submissionTime", id |- (compareToNow now from to))
-      , ("submissions"   , id |< (length $ taskInstanceSolutions taskInstance))
+      , ("submissions"   , id |< (length solutions))
       , ("taskInstanceId", taskInstanceId |< taskInstance)
       ] 
   where

@@ -12,7 +12,7 @@ import           Data.Time          (getCurrentTime)
 ------------------------------------------------------------------------------
 import           Heist.Interpreted  (Splice)
 import qualified Heist.Interpreted  as I
-import           Snap               (ifTop, lift, liftIO, (<$>))
+import           Snap               (ifTop, lift, liftIO, (<$>), redirect)
 import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
 import           Application        (AppHandler)
@@ -28,13 +28,11 @@ handleTutor :: AppHandler ()
 handleTutor = ifTop $ do
     mTutor <- Model.getTutor 1
     case mTutor of
-      Nothing -> do
-        tutor <- Model.newTutor 0
-        continueWith tutor
+      Nothing -> redirect "/404"
       Just tutor -> continueWith tutor
   where
     continueWith tutor = do
-      courses <- Model.getCourses (tutorCourses tutor)
+      courses <- Model.getCoursesByTutor (tutorId tutor)
       let splice = I.mapSplices renderCourse courses
       heistLocal (I.bindSplice "courses" splice) $ render "tutor/index"
 
@@ -45,7 +43,7 @@ handleTutor = ifTop $ do
 renderCourse :: Course -> Splice AppHandler
 renderCourse course = do
     now         <- liftIO getCurrentTime
-    assignments <- lift $ Model.getAssignments (courseAssignments course)
+    assignments <- lift $ Model.getAssignmentsByCourse (courseId course)
     I.runChildrenWith [
         ("courseId",      courseId           |< course)
       , ("passCriteria",  coursePassCriteria |< course)
