@@ -1,14 +1,14 @@
-module Model.Adapter.IORef where
+module Model.DbAdapter.IORef where
 
 ------------------------------------------------------------------------------
-import           Data.IORef         (IORef, readIORef, writeIORef)
-import           Data.Map           (Map)
-import qualified Data.Map           as Map
+import           Data.IORef           (IORef, readIORef, writeIORef)
+import           Data.Map             (Map)
+import qualified Data.Map             as Map
 ------------------------------------------------------------------------------
-import           Snap               (gets, liftIO, (<$>))
+import           Snap                 (gets, liftIO, (<$>))
 ------------------------------------------------------------------------------
-import           Application        (App(..), AppHandler)
-import           Model.Adapter.Base (getNextId)
+import           Application          (App(..), AppHandler)
+import           Model.DbAdapter.Base (getNextId)
 import           Model.Indexable
 import           Model.Types
 

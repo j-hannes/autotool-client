@@ -1,4 +1,4 @@
-module Model.Adapter.Base
+module Model.DbAdapter.Base
   ( getNextId
   ) where
 

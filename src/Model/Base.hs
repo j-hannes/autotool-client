@@ -40,8 +40,12 @@ import Snap                    (liftIO, (<$>))
 import Application             (AppHandler)
 import Autotool.Client         as Autotool
 ------------------------------------------------------------------------------
-import Model.Adapter.Sqlite    as Db
 import Model.Types
+
+------------------------------------------------------------------------------
+-- | Switch the according DB adater here:
+import Model.DbAdapter.Sqlite    as Db
+------------------------------------------------------------------------------
 
 
 ------------------------------------------------------------------------------

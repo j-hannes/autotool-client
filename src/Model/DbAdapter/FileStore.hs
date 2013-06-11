@@ -1,15 +1,15 @@
-module Model.Adapter.FileStore where 
+module Model.DbAdapter.FileStore where 
 
 ------------------------------------------------------------------------------
-import           Data.Map           (Map)
-import qualified Data.Map           as Map
-import           System.IO          hiding (hGetContents)
-import           System.IO.Strict   (hGetContents)
+import           Data.Map             (Map)
+import qualified Data.Map             as Map
+import           System.IO            hiding (hGetContents)
+import           System.IO.Strict     (hGetContents)
 ------------------------------------------------------------------------------
-import           Snap               (liftIO)
+import           Snap                 (liftIO)
 ------------------------------------------------------------------------------
-import           Application        (AppHandler)
-import           Model.Adapter.Base (getNextId)
+import           Application          (AppHandler)
+import           Model.DbAdapter.Base (getNextId)
 import           Model.Indexable
 import           Model.Types
 
