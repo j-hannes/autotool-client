@@ -35,7 +35,7 @@ module Model.DbAdapter.IORef (
   , getLastSolutionsByTaskInstance
 
     -- ^ helper
-  , createFiles
+  , initUsers
 
   ) where
 
@@ -55,25 +55,23 @@ import           Model.Types
 ------------------------------------------------------------------------------ 
 -- | Generic getter and setter.
 
-get :: (App -> IORef (Map Integer a)) -> Integer -> AppHandler (Maybe a)
-get ioRef oid = do
+get :: (App -> IORef (Map Integer a)) -> AppHandler (Map Integer a)
+get ioRef = do
     objectRef <- gets ioRef
-    objectMap <- liftIO $ readIORef objectRef
-    return $ Map.lookup oid objectMap
+    liftIO $ readIORef objectRef
 
 list :: (App -> IORef (Map Integer a)) -> AppHandler [a]
-list ioRef = do
-    objectRef <- gets ioRef
-    liftIO $ Map.elems <$> readIORef objectRef
+list = fmap Map.elems . get
 
-create :: (Indexable a) => (App -> IORef (Map Integer a)) -> a -> AppHandler a
+create :: (Indexable a) => (App -> IORef (Map Integer a)) -> a
+       -> AppHandler Integer
 create ioRef object = do
     objectRef <- gets ioRef
     objects   <- liftIO $ readIORef objectRef
     let newObject   = constructOrCopy object objects
         newObjects  = Map.insert (iid newObject) newObject objects
     liftIO $ writeIORef objectRef newObjects
-    return $ newObject
+    return $ iid newObject
   where
     constructOrCopy obj objs
       | iid object == 0 = setId object (getNextId objs)
@@ -81,65 +79,141 @@ create ioRef object = do
 
 
 ------------------------------------------------------------------------------ 
--- | Specific getters.
+-- | Retrieve.
 
-getAssignment :: Integer ->  AppHandler (Maybe Assignment)
-getAssignment = get _assignments
+getAssignmentsByCourse :: CourseId -> AppHandler [Assignment]
+getAssignmentsByCourse cid =
+    filter (\a -> assignmentCourse a == cid) <$> list _assignments
 
-getCourse :: Integer -> AppHandler (Maybe Course)
-getCourse = get _courses
+getAssignmentsByTask :: TaskId -> AppHandler [Assignment]
+getAssignmentsByTask tid =
+    filter (\a -> assignmentTask a == tid) <$> list _assignments
 
-getCourses :: AppHandler [Course]
-getCourses = list _courses
+------------------------------------------------------------------------------ 
 
-getEnrollment :: Integer -> AppHandler (Maybe Enrollment)
-getEnrollment = get _enrollments
+getCourse :: CourseId -> AppHandler (Maybe Course)
+getCourse cid = Map.lookup cid <$> get _courses
 
-getGroup :: Integer -> AppHandler (Maybe Group)
-getGroup = get _groups
+getAllCourses :: AppHandler [Course]
+getAllCourses = list _courses
 
-getSolution :: Integer -> AppHandler (Maybe Solution)
-getSolution = get _solutions
+getCoursesByTutor :: TutorId -> AppHandler [Course]
+getCoursesByTutor tid =
+    filter (\c -> courseTutor c == tid) <$> list _courses
 
-getStudent :: Integer -> AppHandler (Maybe Student)
-getStudent = get _students
+------------------------------------------------------------------------------ 
 
-getTask :: Integer -> AppHandler (Maybe Task)
-getTask = get _tasks
+getEnrollmentsByStudent :: StudentId -> AppHandler [Enrollment]
+getEnrollmentsByStudent sid =
+    filter (\e -> enrollmentStudent e == sid) <$> list _enrollments
 
-getTutor :: Integer -> AppHandler (Maybe Tutor)
-getTutor = get _tutors
+------------------------------------------------------------------------------ 
 
-getTaskInstance :: Integer -> AppHandler (Maybe TaskInstance)
-getTaskInstance = get _taskInstances
+getGroups :: [GroupId] -> AppHandler [Group]
+getGroups gids = do
+    filter (\g -> groupId g `elem` gids) <$> list _groups
+
+getGroupsByCourse :: CourseId -> AppHandler [Group]
+getGroupsByCourse cid =
+    filter (\a -> groupCourse a == cid) <$> list _groups
+
+------------------------------------------------------------------------------ 
+
+getSolutionsByTaskInstance :: TaskInstanceId -> AppHandler [Solution]
+getSolutionsByTaskInstance tid =
+    filter (\s -> solutionTaskInstance s == tid) <$> list _solutions
+
+getLastSolutionsByTaskInstance :: TaskInstanceId -> AppHandler (Maybe Solution)
+getLastSolutionsByTaskInstance tid =
+    listToMaybe <$> filter (\s -> solutionTaskInstance s == tid)
+                <$> list _solutions
+
+------------------------------------------------------------------------------ 
+
+getStudent :: StudentId -> AppHandler (Maybe Student)
+getStudent sid = Map.lookup sid <$> get _students
+
+------------------------------------------------------------------------------ 
+
+getTask :: TaskId -> AppHandler (Maybe Task)
+getTask tid = Map.lookup tid <$> get _tasks
+
+getTasksByTutor :: TutorId -> AppHandler [Task]
+getTasksByTutor tid =
+    filter (\t -> taskTutor t == tid) <$> list _tasks
+
+------------------------------------------------------------------------------ 
+
+getTaskInstance :: TaskInstanceId -> AppHandler (Maybe TaskInstance)
+getTaskInstance tid = Map.lookup tid <$> get _taskInstances
+
+getTaskInstancesByAssignment :: AssignmentId -> AppHandler [TaskInstance]
+getTaskInstancesByAssignment aid =
+    filter (\t -> taskInstanceAssignment t == aid) <$> list _taskInstances
+
+------------------------------------------------------------------------------ 
+
+getTutor :: TutorId -> AppHandler (Maybe Tutor)
+getTutor tid = Map.lookup tid <$> get _tutors
+
+
+------------------------------------------------------------------------------ 
+-- | Utils.
+listToMaybe :: [a] -> Maybe a
+listToMaybe [] = Nothing
+listToMaybe xs = Just $ last xs
 
 
 ------------------------------------------------------------------------------ 
 -- | Specific setters.
 
-createAssignment :: Assignment -> AppHandler Assignment
-createAssignment = create _assignments
+createAssignment :: AssignmentValues -> AppHandler AssignmentId
+createAssignment (course, task, status, start, end) =
+    create _assignments $ Assignment 0 course task status start end
 
-createCourse :: Course -> AppHandler Course
-createCourse = create _courses
+createCourse :: CourseValues -> AppHandler CourseId
+createCourse (tutor, name, semester, enrol_from, enrol_to, pass_criteria) =
+    create _courses $ Course 0 tutor name semester enrol_from enrol_to
+                              pass_criteria
 
-createEnrollment :: Enrollment -> AppHandler Enrollment
-createEnrollment = create _enrollments
+createEnrollment :: EnrollmentValues -> AppHandler EnrollmentId
+createEnrollment (group, student, time) =
+    create _enrollments $ Enrollment 0 group student time
 
-createGroup :: Group -> AppHandler Group
-createGroup = create _groups
+createGroup :: GroupValues -> AppHandler GroupId
+createGroup (course, description, capacity)=
+    create _groups $ Group 0 course description capacity
 
-createSolution :: Solution -> AppHandler Solution
-createSolution = create _solutions
+createSolution :: SolutionValues -> AppHandler SolutionId
+createSolution (task_instance, content, evaluation, result, submission) =
+    create _solutions $ Solution 0 task_instance content evaluation result
+                                  submission
 
-createStudent :: Student -> AppHandler Student
-createStudent = create _students
+createTask :: TaskValues -> AppHandler TaskId
+createTask (tutor, name, type_, signature, scoring_order, created) =
+    create _tasks $ Task 0 tutor name type_ signature scoring_order created
 
-createTask :: Task -> AppHandler Task
-createTask = create _tasks
+createTaskInstance :: TaskInstanceValues -> AppHandler TaskInstanceId
+createTaskInstance (assignment, student, desc, doc, solution, signature) =
+    create _taskInstances $ TaskInstance 0 assignment student desc doc
+                                           solution signature
 
-createTutor :: Tutor -> AppHandler Tutor
-createTutor = create _tutors
 
-createTaskInstance :: TaskInstance -> AppHandler TaskInstance
-createTaskInstance = create _taskInstances
+------------------------------------------------------------------------------ 
+-- | Set up.
+initUsers :: (IORef (Map Integer Tutor)) -> (IORef (Map Integer Student))
+          -> IO ()
+initUsers tutorRef studentRef = do
+    writeIORef tutorRef tutors
+    writeIORef studentRef students
+  where
+    tutors = Map.fromList [
+        (1, Tutor 1 "tutor1@htwk-leipzig.de")
+      , (2, Tutor 2 "tutor2@htwk-leipzig.de")
+      ]
+    students = Map.fromList [
+        (1, Student 1 "student1@htwk-leipzig.de")
+      , (2, Student 2 "student2@htwk-leipzig.de")
+      , (3, Student 3 "student3@htwk-leipzig.de")
+      , (4, Student 4 "student4@htwk-leipzig.de")
+      ]

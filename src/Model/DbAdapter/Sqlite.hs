@@ -85,8 +85,8 @@ getCoursesByTutor tid =
 ------------------------------------------------------------------------------ 
 
 getEnrollmentsByStudent :: StudentId -> AppHandler [Enrollment]
-getEnrollmentsByStudent tid =
-  query "SELECT * FROM enrollment WHERE student = ?" (Only tid)
+getEnrollmentsByStudent sid =
+  query "SELECT * FROM enrollment WHERE student = ?" (Only sid)
 
 ------------------------------------------------------------------------------ 
 
@@ -96,7 +96,7 @@ getGroups gids = do
 
 getGroupsByCourse :: CourseId -> AppHandler [Group]
 getGroupsByCourse tid =
-  query "SELECT * FROM group_ WHERE course = ?" (Only tid)
+    query "SELECT * FROM group_ WHERE course = ?" (Only tid)
 
 ------------------------------------------------------------------------------ 
 

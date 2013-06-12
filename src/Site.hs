@@ -10,14 +10,22 @@ module Site
 
 ------------------------------------------------------------------------------
 import           Data.ByteString       (ByteString)
+import           Data.IORef (IORef, newIORef)
+import           Data.Map   (Map)
+import qualified Data.Map   as Map
 import           Data.Monoid
+import           Control.Concurrent        (withMVar)
 ------------------------------------------------------------------------------
 import           Heist
 import           Snap
 import           Snap.Snaplet.Heist
+import           Snap.Snaplet.SqliteSimple
 import           Snap.Util.FileServe
 ------------------------------------------------------------------------------
 import           Application
+import           Model.DbAdapter.FileStore
+import           Model.DbAdapter.IORef                 (initUsers)
+import           Model.DbAdapter.Sqlite                (createTables)
 import           Modules.Student.Controller.Enrollment (handleEnrollment)
 import           Modules.Student.Controller.Enrollment (showEnrollments)
 import           Modules.Student.Controller.Main       (handleStudent)
@@ -29,19 +37,6 @@ import           Modules.Tutor.Controller.Tasks        (showTaskList)
 import           Modules.Tutor.Controller.Main         (handleTutor)
 import           Modules.Tutor.Controller.TaskConfig   (handleTaskConfig)
 import           Modules.Tutor.Controller.TaskTree     (handleTaskTree)
-
-------------------------------------------------------------------------------
--- To enable the Model.DbAdapter.FileStore:
-------------------------------------------------------------------------------
-
-import          Model.DbAdapter.FileStore
-
-------------------------------------------------------------------------------
--- To enable the Model.DbAdapter.Sqlite:
-------------------------------------------------------------------------------
-{-import           Control.Concurrent (withMVar)-}
-{-import           Snap.Snaplet.SqliteSimple-}
-{-import           Model.DbAdapter.Sqlite (createTables)-}
 
 
 ------------------------------------------------------------------------------
@@ -71,26 +66,35 @@ app :: SnapletInit App App
 app = makeSnaplet "app" "An snaplet example application." Nothing $ do
     h <- nestSnaplet "" heist $ heistInit' "templates" config
     
-------------------------------------------------------------------------------
--- To set up the Model.DbAdapter.FileStore:
-------------------------------------------------------------------------------
+    -- Model.DbAdapter.IORef
+    co <- getNewIORef
+    gr <- getNewIORef
+    en <- getNewIORef
+    ta <- getNewIORef
+    as <- getNewIORef
+    ti <- getNewIORef
+    so <- getNewIORef
+    tu <- getNewIORef
+    st <- getNewIORef
+    liftIO $ initUsers tu st
 
+    -- Model.DbAdapter.FileStore
     liftIO createFiles  
 
-------------------------------------------------------------------------------
--- To set up the Model.DbAdapter.Sqlite:
-------------------------------------------------------------------------------
-    {-d <- nestSnaplet "db" db sqliteInit-}
-    {-let c = sqliteConn $ d ^# snapletValue-}
-    {-liftIO $ withMVar c $ \conn -> createTables conn-}
+    -- Model.DbAdapter.Sqlite
+    d <- nestSnaplet "db" db sqliteInit
+    let c = sqliteConn $ d ^# snapletValue
+    liftIO $ withMVar c $ \conn -> createTables conn
 
     addRoutes routes
-    return $ App h
-
-------------------------------------------------------------------------------
--- To enable the Model.DbAdapter.Sqlite:
-------------------------------------------------------------------------------
-      {-d-}
+    return $ App h co gr en ta as ti so tu st d
     
   where
     config = mempty { hcInterpretedSplices = defaultInterpretedSplices }
+
+
+------------------------------------------------------------------------------
+-- To enable the Model.DbAdapter.IORef:
+------------------------------------------------------------------------------
+getNewIORef :: Initializer App App (IORef (Map Integer a))
+getNewIORef = liftIO . newIORef $ Map.fromList []

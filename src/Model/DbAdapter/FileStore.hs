@@ -213,7 +213,6 @@ createTaskInstance (assignment, student, desc, doc, solution, signature) =
 
 ------------------------------------------------------------------------------ 
 -- | Utils.
-
 listToMaybe :: [a] -> Maybe a
 listToMaybe [] = Nothing
 listToMaybe xs = Just $ last xs

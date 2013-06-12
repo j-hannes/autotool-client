@@ -7,25 +7,33 @@
 module Application where
 
 ------------------------------------------------------------------------------
+import           Data.IORef                (IORef)
+import           Data.Map                  (Map)
 import           Control.Lens
 ------------------------------------------------------------------------------
 import           Snap
 import           Snap.Snaplet.Heist
+import           Snap.Snaplet.SqliteSimple
+------------------------------------------------------------------------------
+import           Model.Types
 
-------------------------------------------------------------------------------
--- To enable the Model.DbAdapter.Sqlite:
-------------------------------------------------------------------------------
-{-import           Snap.Snaplet.SqliteSimple-}
 
 
 ------------------------------------------------------------------------------
 data App = App
     { _heist :: Snaplet (Heist App)
 
-------------------------------------------------------------------------------
--- To enable the Model.DbAdapter.Sqlite:
-------------------------------------------------------------------------------
-    {-, _db    :: Snaplet Sqlite-}
+    , _assignments   :: IORef (Map Integer Assignment)
+    , _courses       :: IORef (Map Integer Course)
+    , _enrollments   :: IORef (Map Integer Enrollment)
+    , _groups        :: IORef (Map Integer Group)
+    , _solutions     :: IORef (Map Integer Solution)
+    , _taskInstances :: IORef (Map Integer TaskInstance)
+    , _tasks         :: IORef (Map Integer Task)
+    , _tutors        :: IORef (Map Integer Tutor)
+    , _students      :: IORef (Map Integer Student)
+
+    , _db            :: Snaplet Sqlite
     
     }
 
@@ -34,11 +42,8 @@ makeLenses ''App
 instance HasHeist App where
     heistLens = subSnaplet heist
 
-------------------------------------------------------------------------------
--- To enable the Model.DbAdapter.Sqlite:
-------------------------------------------------------------------------------
-{-instance HasSqlite (Handler b App) where-}
-  {-getSqliteState = with db get-}
+instance HasSqlite (Handler b App) where
+   getSqliteState = with db get
 
 
 ------------------------------------------------------------------------------
