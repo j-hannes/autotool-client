@@ -18,8 +18,7 @@ import           Snap.Snaplet.Heist
 import           Application        (AppHandler)
 import qualified Model.Base         as Model
 import           Model.Types
-import           Utils.Render       (compareToNow, bestScore, translateScore)
-import           Utils.Render       (translateStatus, (|<), (|-))
+import           Utils.Render
 
 
 ------------------------------------------------------------------------------
@@ -66,12 +65,13 @@ renderAssignment assignment = do
     solutions <- lift $ Model.getSolutionsByAssignment
                           (assignmentId assignment)  
     I.runChildrenWith [
-        ("taskName",    taskName |- task)
-      , ("taskType",    taskType |- task)
-      , ("status",      translateStatus |- assignmentStatus assignment)
-      , ("timespan",    id              |- compareToNow now from to)
-      , ("submissions", length          |< solutions)
-      , ("bestscore"  , translateScore  |- bestScore task solutions)
+        ("taskName",     taskName              |- task)
+      , ("taskType",     taskType              |- task)
+      , ("status",       translateStatus       |- assignmentStatus assignment)
+      , ("timespan",     id                    |- compareToNow now from to)
+      , ("submissions",  length                |< solutions)
+      , ("bestscore"  ,  translateScore        |- bestScore task solutions)
+      , ("scoringOrder", translateScoringOrder |- taskScoringOrder task)
       ]
   where
     from = Just $ assignmentStart assignment

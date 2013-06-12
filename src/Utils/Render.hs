@@ -4,6 +4,7 @@ module Utils.Render
   ( compareToNow
   , translateStatus
   , translateScore
+  , translateScoringOrder
   , bestScore
   , doubleToInt
   , (|<)
@@ -45,6 +46,13 @@ translateStatus Optional  = "Zusätzlich"
 translateScore :: Maybe Int -> String
 translateScore Nothing  = "noch keine"
 translateScore (Just n) = show n
+
+------------------------------------------------------------------------------
+-- | 
+translateScoringOrder :: ScoringOrder -> String
+translateScoringOrder Decreasing = "absteigend"
+translateScoringOrder Increasing = "aufsteigend"
+translateScoringOrder None       = "keine"
 
 ------------------------------------------------------------------------------
 -- | 

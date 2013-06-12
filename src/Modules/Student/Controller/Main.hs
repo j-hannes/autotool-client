@@ -78,6 +78,7 @@ renderAssignment assignment = do
                              (assignmentId assignment)  
     mySolutions  <- lift $ Model.getSolutionsByTaskInstance
                              (taskInstanceId taskInstance)
+
     I.runChildrenWith [
         ("description",    taskName |- task)
       , ("status",         (translateStatus . assignmentStatus) |- assignment)
