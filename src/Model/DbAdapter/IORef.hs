@@ -1,4 +1,43 @@
-module Model.DbAdapter.IORef where
+module Model.DbAdapter.IORef (
+    -- ^ retrieve all
+    getAllCourses
+
+    -- ^ retrieve one by primary key
+  , getCourse
+  , getStudent
+  , getTask
+  , getTaskInstance
+  , getTutor
+
+    -- ^ retrieve many by primary jey 
+  , getGroups
+
+    -- ^ retrieve many by foreign key
+  , getAssignmentsByCourse
+  , getAssignmentsByTask
+  , getCoursesByTutor
+  , getEnrollmentsByStudent
+  , getGroupsByCourse
+  , getSolutionsByTaskInstance
+  , getTasksByTutor
+  , getTaskInstancesByAssignment
+
+    -- ^ create
+  , createAssignment
+  , createCourse
+  , createEnrollment
+  , createGroup
+  , createSolution
+  , createTask
+  , createTaskInstance
+
+    -- ^ other
+  , getLastSolutionsByTaskInstance
+
+    -- ^ helper
+  , createFiles
+
+  ) where
 
 ------------------------------------------------------------------------------
 import           Data.IORef           (IORef, readIORef, writeIORef)
@@ -27,8 +66,8 @@ list ioRef = do
     objectRef <- gets ioRef
     liftIO $ Map.elems <$> readIORef objectRef
 
-put :: (Indexable a) => (App -> IORef (Map Integer a)) -> a -> AppHandler a
-put ioRef object = do
+create :: (Indexable a) => (App -> IORef (Map Integer a)) -> a -> AppHandler a
+create ioRef object = do
     objectRef <- gets ioRef
     objects   <- liftIO $ readIORef objectRef
     let newObject   = constructOrCopy object objects
@@ -44,32 +83,32 @@ put ioRef object = do
 ------------------------------------------------------------------------------ 
 -- | Specific getters.
 
-getAssignment   :: Integer ->  AppHandler (Maybe Assignment)
-getAssignment   = get _assignments
+getAssignment :: Integer ->  AppHandler (Maybe Assignment)
+getAssignment = get _assignments
 
-getCourse       :: Integer -> AppHandler (Maybe Course)
-getCourse       = get _courses
+getCourse :: Integer -> AppHandler (Maybe Course)
+getCourse = get _courses
 
-getCourses      :: AppHandler [Course]
-getCourses      = list _courses
+getCourses :: AppHandler [Course]
+getCourses = list _courses
 
-getEnrollment   :: Integer -> AppHandler (Maybe Enrollment)
-getEnrollment   = get _enrollments
+getEnrollment :: Integer -> AppHandler (Maybe Enrollment)
+getEnrollment = get _enrollments
 
-getGroup        :: Integer -> AppHandler (Maybe Group)
-getGroup        = get _groups
+getGroup :: Integer -> AppHandler (Maybe Group)
+getGroup = get _groups
 
-getSolution     :: Integer -> AppHandler (Maybe Solution)
-getSolution     = get _solutions
+getSolution :: Integer -> AppHandler (Maybe Solution)
+getSolution = get _solutions
 
-getStudent        :: Integer -> AppHandler (Maybe Student)
-getStudent        = get _students
+getStudent :: Integer -> AppHandler (Maybe Student)
+getStudent = get _students
 
-getTask         :: Integer -> AppHandler (Maybe Task)
-getTask         = get _tasks
+getTask :: Integer -> AppHandler (Maybe Task)
+getTask = get _tasks
 
-getTutor        :: Integer -> AppHandler (Maybe Tutor)
-getTutor        = get _tutors
+getTutor :: Integer -> AppHandler (Maybe Tutor)
+getTutor = get _tutors
 
 getTaskInstance :: Integer -> AppHandler (Maybe TaskInstance)
 getTaskInstance = get _taskInstances
@@ -78,29 +117,29 @@ getTaskInstance = get _taskInstances
 ------------------------------------------------------------------------------ 
 -- | Specific setters.
 
-putAssignment   :: Assignment -> AppHandler Assignment
-putAssignment   = put _assignments
+createAssignment :: Assignment -> AppHandler Assignment
+createAssignment = create _assignments
 
-putCourse       :: Course -> AppHandler Course
-putCourse       = put _courses
+createCourse :: Course -> AppHandler Course
+createCourse = create _courses
 
-putEnrollment   :: Enrollment -> AppHandler Enrollment
-putEnrollment   = put _enrollments
+createEnrollment :: Enrollment -> AppHandler Enrollment
+createEnrollment = create _enrollments
 
-putGroup        :: Group -> AppHandler Group
-putGroup        = put _groups
+createGroup :: Group -> AppHandler Group
+createGroup = create _groups
 
-putSolution     :: Solution -> AppHandler Solution
-putSolution     = put _solutions
+createSolution :: Solution -> AppHandler Solution
+createSolution = create _solutions
 
-putStudent         :: Student -> AppHandler Student
-putStudent         = put _students
+createStudent :: Student -> AppHandler Student
+createStudent = create _students
 
-putTask         :: Task -> AppHandler Task
-putTask         = put _tasks
+createTask :: Task -> AppHandler Task
+createTask = create _tasks
 
-putTutor         :: Tutor -> AppHandler Tutor
-putTutor         = put _tutors
+createTutor :: Tutor -> AppHandler Tutor
+createTutor = create _tutors
 
-putTaskInstance :: TaskInstance -> AppHandler TaskInstance
-putTaskInstance = put _taskInstances
+createTaskInstance :: TaskInstance -> AppHandler TaskInstance
+createTaskInstance = create _taskInstances
