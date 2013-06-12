@@ -17,7 +17,6 @@
       <th>Name</th>
       <th>Aufgabentyp</th>
       <th>Art</th>
-      <th>Highscore</th>
       <th>Bearbeitungszeit</th>
       <th>Einsendungen</th>
       <th>Beste Bewertung</th>
@@ -27,7 +26,6 @@
       <td><taskName /></td>
       <td><taskType /></td>
       <td><status /></td>
-      <td><highscore /></td>
       <td><timespan /></td>
       <td><submissions /></td>
       <td><bestscore /></td>
