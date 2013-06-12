@@ -48,7 +48,6 @@ import           System.IO.Strict     (hGetContents)
 import           Snap                 (liftIO, (<$>))
 ------------------------------------------------------------------------------
 import           Application          (AppHandler)
-import           Model.DbAdapter.Base (getNextId)
 import           Model.Indexable
 import           Model.Types
 
@@ -217,6 +216,11 @@ listToMaybe :: [a] -> Maybe a
 listToMaybe [] = Nothing
 listToMaybe xs = Just $ last xs
 
+------------------------------------------------------------------------------
+-- | Return the highest found index (id) + 1 from a list of indexable DTs.
+getNextId :: (Indexable a) => Map Integer a -> Integer
+getNextId m | Map.null m = 1
+            | otherwise  = maximum (Map.keys m) + 1
 
 ------------------------------------------------------------------------------ 
 -- | Set up.

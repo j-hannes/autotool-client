@@ -47,7 +47,6 @@ import qualified Data.Map             as Map
 import           Snap                 (gets, liftIO, (<$>))
 ------------------------------------------------------------------------------
 import           Application          (App(..), AppHandler)
-import           Model.DbAdapter.Base (getNextId)
 import           Model.Indexable
 import           Model.Types
 
@@ -162,6 +161,12 @@ getTutor tid = Map.lookup tid <$> get _tutors
 listToMaybe :: [a] -> Maybe a
 listToMaybe [] = Nothing
 listToMaybe xs = Just $ last xs
+
+------------------------------------------------------------------------------
+-- | Return the highest found index (id) + 1 from a list of indexable DTs.
+getNextId :: (Indexable a) => Map Integer a -> Integer
+getNextId m | Map.null m = 1
+            | otherwise  = maximum (Map.keys m) + 1
 
 
 ------------------------------------------------------------------------------ 
