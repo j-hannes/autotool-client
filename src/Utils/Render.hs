@@ -70,10 +70,12 @@ compareToNow now (Just begin) (Just end)
 bestScore :: Task -> [Solution] -> Maybe Int
 bestScore _    []                         = Nothing
 bestScore task solutions
-    | taskScoringOrder task == Decreasing = maximum scores
-    | taskScoringOrder task == Increasing = minimum scores
+    | taskScoringOrder task == Decreasing = maximum $ map (fmap score) results
+    | taskScoringOrder task == Increasing = 
+        fmap ((*)(-1)) $ maximum $ map (fmap (((*)(-1)) . score)) results
     | otherwise                           = Nothing
-  where scores = map (fmap score . solutionResult) solutions
+  where
+    results = fmap solutionResult solutions
     
 
 

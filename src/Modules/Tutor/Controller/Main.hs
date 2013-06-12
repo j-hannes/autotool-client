@@ -64,6 +64,7 @@ renderAssignment assignment = do
     task <- fromJust <$> (lift $ Model.getTask (assignmentTask assignment))
     solutions <- lift $ Model.getSolutionsByAssignment
                           (assignmentId assignment)  
+
     I.runChildrenWith [
         ("taskName",     taskName              |- task)
       , ("taskType",     taskType              |- task)
