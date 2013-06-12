@@ -9,18 +9,15 @@ module Site
   ) where
 
 ------------------------------------------------------------------------------
-import           Control.Concurrent (withMVar)
 import           Data.ByteString       (ByteString)
 import           Data.Monoid
 ------------------------------------------------------------------------------
 import           Heist
 import           Snap
 import           Snap.Snaplet.Heist
-import           Snap.Snaplet.SqliteSimple
 import           Snap.Util.FileServe
 ------------------------------------------------------------------------------
 import           Application
-import           Model.DbAdapter.Sqlite (createTables)
 import           Modules.Student.Controller.Enrollment (handleEnrollment)
 import           Modules.Student.Controller.Enrollment (showEnrollments)
 import           Modules.Student.Controller.Main       (handleStudent)
@@ -32,6 +29,19 @@ import           Modules.Tutor.Controller.Tasks        (showTaskList)
 import           Modules.Tutor.Controller.Main         (handleTutor)
 import           Modules.Tutor.Controller.TaskConfig   (handleTaskConfig)
 import           Modules.Tutor.Controller.TaskTree     (handleTaskTree)
+
+------------------------------------------------------------------------------
+-- To enable the Model.DbAdapter.FileStore:
+------------------------------------------------------------------------------
+
+import          Model.DbAdapter.FileStore
+
+------------------------------------------------------------------------------
+-- To enable the Model.DbAdapter.Sqlite:
+------------------------------------------------------------------------------
+{-import           Control.Concurrent (withMVar)-}
+{-import           Snap.Snaplet.SqliteSimple-}
+{-import           Model.DbAdapter.Sqlite (createTables)-}
 
 
 ------------------------------------------------------------------------------
@@ -60,14 +70,27 @@ routes = [
 app :: SnapletInit App App
 app = makeSnaplet "app" "An snaplet example application." Nothing $ do
     h <- nestSnaplet "" heist $ heistInit' "templates" config
-    d <- nestSnaplet "db" db sqliteInit
+    
+------------------------------------------------------------------------------
+-- To set up the Model.DbAdapter.FileStore:
+------------------------------------------------------------------------------
 
-    -- Grab the DB connection pool from the sqlite snaplet and call
-    -- into the Model to create all the DB tables if necessary.
-    let c = sqliteConn $ d ^# snapletValue
-    liftIO $ withMVar c $ \conn -> createTables conn
+    liftIO createFiles  
+
+------------------------------------------------------------------------------
+-- To set up the Model.DbAdapter.Sqlite:
+------------------------------------------------------------------------------
+    {-d <- nestSnaplet "db" db sqliteInit-}
+    {-let c = sqliteConn $ d ^# snapletValue-}
+    {-liftIO $ withMVar c $ \conn -> createTables conn-}
 
     addRoutes routes
-    return $ App h d
+    return $ App h
+
+------------------------------------------------------------------------------
+-- To enable the Model.DbAdapter.Sqlite:
+------------------------------------------------------------------------------
+      {-d-}
+    
   where
     config = mempty { hcInterpretedSplices = defaultInterpretedSplices }

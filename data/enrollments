@@ -1,5 +1,1 @@
-(1,Enrollment {enrollmentId = 1, enrollmentGroupId = 1, enrollmentStudentId = 2, enrollmentTime = 2013-06-09 14:32:00.135019 UTC})
-(2,Enrollment {enrollmentId = 2, enrollmentGroupId = 1, enrollmentStudentId = 4, enrollmentTime = 2013-06-09 14:39:36.479571 UTC})
-(3,Enrollment {enrollmentId = 3, enrollmentGroupId = 1, enrollmentStudentId = 1, enrollmentTime = 2013-06-09 16:06:46.280982 UTC})
-(4,Enrollment {enrollmentId = 4, enrollmentGroupId = 3, enrollmentStudentId = 3, enrollmentTime = 2013-06-09 19:54:46.130778 UTC})
-(5,Enrollment {enrollmentId = 5, enrollmentGroupId = 4, enrollmentStudentId = 2, enrollmentTime = 2013-06-09 19:55:01.880824 UTC})
+(1,Enrollment {enrollmentId = 1, enrollmentGroup = 2, enrollmentStudent = 2, enrollmentTime = 2013-06-12 00:23:16.048533 UTC})

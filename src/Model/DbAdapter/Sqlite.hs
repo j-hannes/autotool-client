@@ -277,12 +277,16 @@ createTables conn = do
      , "INSERT INTO student (email) VALUES ('student3@student.com');"
      , "INSERT INTO student (email) VALUES ('student4@student.com')"]
 
+
+------------------------------------------------------------------------------ 
+-- | 
 createTableIfNotExists :: Connection -> String -> [Text] -> IO ()
 createTableIfNotExists conn tableName fields = do
   schemaCreated <- tableExists conn tableName
   unless schemaCreated . S.execute_ conn . Query $
        T.concat ["CREATE TABLE ", T.pack tableName,
                  " (id INTEGER PRIMARY KEY,", T.concat fields , ")"]
+
 
 ------------------------------------------------------------------------------ 
 -- | 

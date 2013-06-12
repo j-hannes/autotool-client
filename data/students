@@ -1,4 +1,4 @@
-(1,Student {studentId = 1, studentEnrollments = [3], studentTaskInstances = []})
-(2,Student {studentId = 2, studentEnrollments = [5], studentTaskInstances = []})
-(3,Student {studentId = 3, studentEnrollments = [4], studentTaskInstances = []})
-(4,Student {studentId = 4, studentEnrollments = [2], studentTaskInstances = []})
+(1,Student {studentId = 1, studentEmail = "student1@htwk-leipzig.de"})
+(2,Student {studentId = 2, studentEmail = "student2@htwk-leipzig.de"})
+(3,Student {studentId = 3, studentEmail = "student3@htwk-leipzig.de"})
+(4,Student {studentId = 4, studentEmail = "student4@htwk-leipzig.de"})

@@ -1,1 +1,2 @@
-(1,Tutor {tutorId = 1, tutorCourses = [2,1], tutorTasks = [2,1]})
+(1,Tutor {tutorId = 1, tutorEmail = "tutor1@htwk-leipzig.de"})
+(2,Tutor {tutorId = 2, tutorEmail = "tutor2@htwk-leipzig.de"})

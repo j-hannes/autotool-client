@@ -1,2 +1,1 @@
-(1,Assignment {assignmentId = 1, assignmentCourseId = 1, assignmentTaskId = 1, assignmentTaskInstances = [2,1], assignmentStatus = Mandatory, assignmentStart = 2013-06-10 14:32:20 UTC, assignmentEnd = 2013-06-11 14:32:20 UTC})
-(2,Assignment {assignmentId = 2, assignmentCourseId = 2, assignmentTaskId = 2, assignmentTaskInstances = [4,3], assignmentStatus = Mandatory, assignmentStart = 2013-06-18 20:50:18 UTC, assignmentEnd = 2013-06-13 20:50:18 UTC})
+(1,Assignment {assignmentId = 1, assignmentCourse = 1, assignmentTask = 1, assignmentStatus = Mandatory, assignmentStart = 2013-06-12 01:22:41 UTC, assignmentEnd = 2013-06-13 01:22:41 UTC})

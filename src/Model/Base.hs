@@ -34,19 +34,20 @@ module Model.Base (
   ) where
 
 ------------------------------------------------------------------------------
-import Control.Monad           (forM)
-import Data.Maybe              (fromJust)
-import Snap                    (liftIO, (<$>))
+import Control.Monad             (forM)
+import Data.Maybe                (fromJust)
+import Snap                      (liftIO, (<$>))
 ------------------------------------------------------------------------------
-import Application             (AppHandler)
-import Autotool.Client         as Autotool
+import Application               (AppHandler)
+import Autotool.Client           as Autotool
 ------------------------------------------------------------------------------
 import Model.Types
 
 ------------------------------------------------------------------------------
--- | Switch the according DB adater here:
-import Model.DbAdapter.Sqlite    as Db
+-- Switch between Model.DbAdapter:
 ------------------------------------------------------------------------------
+import Model.DbAdapter.FileStore as Db
+{-import Model.DbAdapter.Sqlite as Db-}
 
 
 ------------------------------------------------------------------------------
