@@ -1,3 +1,0 @@
-(1,Assignment {assignmentId = 1, assignmentCourse = 1, assignmentTask = 1, assignmentStatus = Mandatory, assignmentStart = 2013-06-12 01:22:41 UTC, assignmentEnd = 2013-06-13 01:22:41 UTC})
-(2,Assignment {assignmentId = 2, assignmentCourse = 1, assignmentTask = 2, assignmentStatus = Optional, assignmentStart = 2013-06-13 11:24:25 UTC, assignmentEnd = 2013-06-17 11:24:25 UTC})
-(3,Assignment {assignmentId = 3, assignmentCourse = 1, assignmentTask = 3, assignmentStatus = Mandatory, assignmentStart = 2013-06-13 12:04:29 UTC, assignmentEnd = 2013-06-17 12:04:29 UTC})
