@@ -9,15 +9,16 @@ module Site
   ) where
 
 ------------------------------------------------------------------------------
-import           Data.ByteString       (ByteString)
-import           Data.IORef (IORef, newIORef)
-import           Data.Map   (Map)
-import qualified Data.Map   as Map
+import           Data.ByteString           (ByteString)
+import           Data.IORef                (IORef, newIORef)
+import           Data.Map                  (Map)
+import qualified Data.Map                  as Map
 import           Data.Monoid
 import           Control.Concurrent        (withMVar)
 ------------------------------------------------------------------------------
 import           Heist
 import           Snap
+import           Snap.Snaplet.AcidState    (acidInit)
 import           Snap.Snaplet.Heist
 import           Snap.Snaplet.SqliteSimple
 import           Snap.Util.FileServe
@@ -86,11 +87,32 @@ app = makeSnaplet "app" "An snaplet example application." Nothing $ do
     let c = sqliteConn $ d ^# snapletValue
     liftIO $ withMVar c $ \conn -> createTables conn
 
+    au <- nestSnaplet "au" acid_tutors        $ initTutorStore
+    an <- nestSnaplet "as" acid_students      $ initStudentStore
+
+    ac <- nestSnaplet "ac" acid_courses       $ initCourseStore
+    ag <- nestSnaplet "ag" acid_groups        $ initGroupStore
+    ae <- nestSnaplet "ae" acid_enrollments   $ initEnrollmentStore
+
+    at <- nestSnaplet "at" acid_tasks         $ initTaskStore
+    aa <- nestSnaplet "aa" acid_assignments   $ initAssignmentStore
+    ai <- nestSnaplet "ai" acid_taskInstances $ initTaskInstanceStore
+    ao <- nestSnaplet "ao" acid_solutions     $ initSolutionStore
+
     addRoutes routes
-    return $ App h co gr en ta as ti so tu st d
+    return $ App h co gr en ta as ti so tu st d au an ac ag ae at aa ai ao
     
   where
     config = mempty { hcInterpretedSplices = defaultInterpretedSplices }
+    initAssignmentStore   = acidInit (AssignmentStore   $ Map.fromList [])
+    initCourseStore       = acidInit (CourseStore       $ Map.fromList [])
+    initEnrollmentStore   = acidInit (EnrollmentStore   $ Map.fromList [])
+    initGroupStore        = acidInit (GroupStore        $ Map.fromList [])
+    initSolutionStore     = acidInit (SolutionStore     $ Map.fromList [])
+    initTaskStore         = acidInit (TaskStore         $ Map.fromList [])
+    initTaskInstanceStore = acidInit (TaskInstanceStore $ Map.fromList [])
+    initTutorStore        = acidInit (TutorStore        $ Map.fromList [])
+    initStudentStore      = acidInit (StudentStore      $ Map.fromList [])
 
 
 ------------------------------------------------------------------------------

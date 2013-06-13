@@ -21,6 +21,7 @@ Executable autotool
   Build-depends:
     aeson                     >= 0.6.1.0,
     autotool-client           >= 0.1,
+    snaplet-acid-state        >= 0.2.3.1,
     base                      >= 4       && < 5,
     bytestring                >= 0.9.1   && < 0.11,
     containers                >= 0.4.2.1,
@@ -33,6 +34,7 @@ Executable autotool
     MonadCatchIO-transformers >= 0.2.1   && < 0.4,
     mtl                       >= 2       && < 3,
     old-locale                == 1.*,
+    safecopy                  >= 0.8.2,
     snap                      >= 0.10    && < 0.11,
     snap-core                 >= 0.9     && < 0.11,
     snap-server               >= 0.9     && < 0.11,

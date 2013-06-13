@@ -1,3 +1,4 @@
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 
@@ -43,6 +44,7 @@ module Model.Types (
 ------------------------------------------------------------------------------
 import           Control.Applicative ((<$>), (<*>))
 import           Data.Data
+import           Data.SafeCopy             (deriveSafeCopy, base)
 import qualified Data.Text as T
 import           Data.Time (UTCTime)
 import           Database.SQLite.Simple
@@ -51,47 +53,67 @@ import           Database.SQLite.Simple.ToField
 import           Database.SQLite.Simple.Internal
 import           Database.SQLite.Simple.Ok
 ------------------------------------------------------------------------------
--- import           Autotool.Client.Types.ScoringOrder
 import           Model.Indexable
 
 
 ------------------------------------------------------------------------------
--- |
-data Assignment = Assignment {
-    -- ^ Identifier
-    assignmentId     :: AssignmentId
-    -- ^ Relations
-  , assignmentCourse :: CourseId
-  , assignmentTask   :: TaskId
-    -- ^ Attributes
-  , assignmentStatus :: Status
-  , assignmentStart  :: UTCTime
-  , assignmentEnd    :: UTCTime
-  } deriving (Eq, Read, Show)
+-- | Id types
+------------------------------------------------------------------------------
 
-type AssignmentId = Integer
+type AssignmentId   = Integer
+type CourseId       = Integer
+type EnrollmentId   = Integer
+type GroupId        = Integer
+type SolutionId     = Integer
+type StudentId      = Integer
+type TaskId         = Integer
+type TaskInstanceId = Integer
+type TutorId        = Integer
 
-data Status = Mandatory
-            | Optional
-            deriving (Read, Show, Eq, Typeable)
-
-instance FromField Status where
-  fromField (Field (SQLText text) _) = Ok . read . T.unpack $ text
-  fromField f = returnError ConversionFailed f "expected text"
-
-instance ToField Status where
-  toField = SQLText . T.pack . show
-
-instance Indexable Assignment where
-  iid = assignmentId
-  setId assn idVal = assn { assignmentId = idVal }
-
-instance FromRow Assignment where
-  fromRow = Assignment <$> field <*> field <*> field <*> field <*> field
-                       <*> field
 
 ------------------------------------------------------------------------------
--- |
+-- | User types
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+-- | Tutor
+data Tutor = Tutor {
+    tutorId    :: TutorId
+  , tutorEmail :: String
+  } deriving (Eq, Read, Show, Typeable)
+
+instance Indexable Tutor where
+  iid = tutorId
+  setId assn idVal = assn { tutorId = idVal }
+
+instance FromRow Tutor where
+  fromRow = Tutor <$> field <*> field
+
+deriveSafeCopy 0 'base ''Tutor
+
+------------------------------------------------------------------------------
+-- | Student
+data Student = Student {
+    studentId    :: StudentId
+  , studentEmail :: String
+  } deriving (Eq, Read, Show, Typeable)
+
+instance Indexable Student where
+  iid = studentId
+  setId assn idVal = assn { studentId = idVal }
+
+instance FromRow Student where
+  fromRow = Student <$> field <*> field
+
+deriveSafeCopy 0 'base ''Student
+
+
+------------------------------------------------------------------------------
+-- | Organisation Types
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+-- | Course
 data Course = Course {
     -- ^ Identifier
     courseId             :: CourseId
@@ -103,9 +125,7 @@ data Course = Course {
   , courseEnrollmentFrom :: Maybe UTCTime
   , courseEnrollmentTo   :: Maybe UTCTime
   , coursePassCriteria   :: Double
-  } deriving (Eq, Read, Show)
-
-type CourseId = Integer
+  } deriving (Eq, Read, Show, Typeable)
 
 instance Indexable Course where
   iid = courseId
@@ -115,8 +135,31 @@ instance FromRow Course where
   fromRow = Course <$> field <*> field <*> field <*> field <*> field <*> field
                    <*> field
 
+deriveSafeCopy 0 'base ''Course
+
 ------------------------------------------------------------------------------
--- |
+-- | Group
+data Group = Group {
+    -- ^ Identifier
+    groupId          :: GroupId
+    -- ^ Relations
+  , groupCourse      :: CourseId
+    -- ^ Attributes
+  , groupDescription :: String
+  , groupCapacity    :: Int
+  } deriving (Eq, Read, Show, Typeable)
+
+instance Indexable Group where
+  iid = groupId
+  setId group idVal = group { groupId = idVal }
+
+instance FromRow Group where
+  fromRow = Group <$> field <*> field <*> field <*> field
+
+deriveSafeCopy 0 'base ''Group
+
+------------------------------------------------------------------------------
+-- | Enrollment
 data Enrollment = Enrollment {
     -- ^ Identifier
     enrollmentId      :: EnrollmentId
@@ -125,9 +168,9 @@ data Enrollment = Enrollment {
   , enrollmentStudent :: StudentId
     -- ^ Attributes
   , enrollmentTime    :: UTCTime
-  } deriving (Eq, Read, Show)
+  } deriving (Eq, Read, Show, Typeable)
 
-type EnrollmentId = Integer
+deriveSafeCopy 0 'base ''Enrollment
 
 instance Indexable Enrollment where
   iid = enrollmentId
@@ -138,42 +181,112 @@ instance FromRow Enrollment where
 
 
 ------------------------------------------------------------------------------
--- |
-data Group = Group {
-    -- ^ Identifier
-    groupId          :: GroupId
-    -- ^ Relations
-  , groupCourse      :: CourseId
-    -- ^ Attributes
-  , groupDescription :: String
-  , groupCapacity    :: Int
-  } deriving (Eq, Ord, Read, Show)
-
-type GroupId = Integer
-
-instance Indexable Group where
-  iid = groupId
-  setId group idVal = group { groupId = idVal }
-
-instance FromRow Group where
-  fromRow = Group <$> field <*> field <*> field <*> field
+-- | Operational types
+------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
--- |
-data Solution = Solution {
+-- | Task
+data ScoringOrder = Decreasing | Increasing | None
+    deriving (Eq, Read, Show, Typeable)
+
+instance FromField ScoringOrder where
+  fromField (Field (SQLText text) _) = Ok . read . T.unpack $ text
+  fromField f = returnError ConversionFailed f "expected text"
+
+instance ToField ScoringOrder where
+  toField = SQLText . T.pack . show
+
+deriveSafeCopy 0 'base ''ScoringOrder
+
+data Task = Task {
     -- ^ Identifier
-      solutionId           :: SolutionId
+      taskId           :: TaskId
     -- ^ Relations
-    , solutionTaskInstance :: TaskInstanceId
+    , taskTutor        :: TutorId
     -- ^ Attributes
-    , solutionContent      :: String
-    , solutionEvaluation   :: String
-    , solutionResult       :: Maybe Result
-    , solutionSubmission   :: UTCTime
-    } deriving (Read, Show)
+    , taskName         :: String
+    , taskType         :: String
+    , taskSignature    :: String
+    , taskScoringOrder :: ScoringOrder
+    , taskCreated      :: UTCTime
+    } deriving (Eq, Read, Show, Typeable)
 
-type SolutionId = Integer
+instance Indexable Task where
+  iid = taskId
+  setId taskconfig idVal = taskconfig { taskId = idVal }
 
+instance FromRow Task where
+  fromRow = Task <$> field <*> field <*> field <*> field <*> field <*> field
+                 <*> field
+
+deriveSafeCopy 0 'base ''Task
+
+------------------------------------------------------------------------------
+-- | Assignment
+data Status =
+    Mandatory
+  | Optional
+    deriving (Eq, Read, Show, Typeable)
+
+instance FromField Status where
+  fromField (Field (SQLText text) _) = Ok . read . T.unpack $ text
+  fromField f = returnError ConversionFailed f "expected text"
+
+instance ToField Status where
+  toField = SQLText . T.pack . show
+
+deriveSafeCopy 0 'base ''Status
+
+data Assignment = Assignment {
+    -- ^ Identifier
+    assignmentId     :: AssignmentId
+    -- ^ Relations
+  , assignmentCourse :: CourseId
+  , assignmentTask   :: TaskId
+    -- ^ Attributes
+  , assignmentStatus :: Status
+  , assignmentStart  :: UTCTime
+  , assignmentEnd    :: UTCTime
+  } deriving (Eq, Read, Show, Typeable)
+
+
+instance Indexable Assignment where
+  iid = assignmentId
+  setId assn idVal = assn { assignmentId = idVal }
+
+instance FromRow Assignment where
+  fromRow = Assignment <$> field <*> field <*> field <*> field <*> field
+                       <*> field
+
+deriveSafeCopy 0 'base ''Assignment
+
+------------------------------------------------------------------------------
+-- | TaskInstance
+data TaskInstance = TaskInstance {
+    -- ^ Identifier
+    taskInstanceId            :: TaskInstanceId
+    -- ^ Relations
+  , taskInstanceAssignment    :: AssignmentId
+  , taskInstanceStudentId     :: StudentId
+    -- ^ Attributes
+  , taskInstanceDescription   :: String
+  , taskInstanceDocumentation :: String
+  , taskInstanceSolution      :: String
+  , taskInstanceSignature     :: String
+  } deriving (Eq, Read, Show, Typeable)
+
+instance Indexable TaskInstance where
+  iid = taskInstanceId
+  setId assn idVal = assn { taskInstanceId = idVal }
+
+instance FromRow TaskInstance where
+  fromRow = TaskInstance <$> field <*> field <*> field <*> field <*> field
+                         <*> field <*> field
+
+deriveSafeCopy 0 'base ''TaskInstance
+
+------------------------------------------------------------------------------
+-- | Solution
 data Result = Result {
       score :: Int
     , size  :: Int
@@ -186,6 +299,20 @@ instance FromField Result where
 instance ToField Result where
   toField = SQLText . T.pack . show
 
+deriveSafeCopy 0 'base ''Result
+
+data Solution = Solution {
+    -- ^ Identifier
+      solutionId           :: SolutionId
+    -- ^ Relations
+    , solutionTaskInstance :: TaskInstanceId
+    -- ^ Attributes
+    , solutionContent      :: String
+    , solutionEvaluation   :: String
+    , solutionResult       :: Maybe Result
+    , solutionSubmission   :: UTCTime
+    } deriving (Eq, Read, Show, Typeable)
+
 instance Indexable Solution where
   iid = solutionId
   setId solutionconfig idVal = solutionconfig { solutionId = idVal }
@@ -194,102 +321,12 @@ instance FromRow Solution where
   fromRow = Solution <$> field <*> field <*> field <*> field <*> field
                      <*> field
 
-------------------------------------------------------------------------------
--- | User data types have not been implemented yet.
-data Student = Student {
-    studentId    :: StudentId
-  , studentEmail :: String
-  } deriving (Eq, Read, Show)
-
-type StudentId = Integer
-
-instance Indexable Student where
-  iid = studentId
-  setId assn idVal = assn { studentId = idVal }
-
-instance FromRow Student where
-  fromRow = Student <$> field <*> field
-
-------------------------------------------------------------------------------
--- |
-data Task = Task {
-    -- ^ Identifier
-      taskId           :: TaskId
-    -- ^ Relations
-    , taskTutor        :: TutorId
-    -- ^ Attributes
-    , taskName         :: String
-    , taskType         :: String
-    , taskSignature    :: String
-    , taskScoringOrder :: ScoringOrder
-    , taskCreated      :: UTCTime
-    } deriving (Read, Show)
-
-type TaskId = Integer
-
-data ScoringOrder = Decreasing | Increasing | None
-    deriving (Eq, Read, Show, Typeable)
-
-instance FromField ScoringOrder where
-  fromField (Field (SQLText text) _) = Ok . read . T.unpack $ text
-  fromField f = returnError ConversionFailed f "expected text"
-
-instance ToField ScoringOrder where
-  toField = SQLText . T.pack . show
-
-instance Indexable Task where
-  iid = taskId
-  setId taskconfig idVal = taskconfig { taskId = idVal }
-
-instance FromRow Task where
-  fromRow = Task <$> field <*> field <*> field <*> field <*> field <*> field
-                 <*> field
-
-------------------------------------------------------------------------------
--- |
-data TaskInstance = TaskInstance {
-    -- ^ Identifier
-    taskInstanceId            :: TaskInstanceId
-    -- ^ Relations
-  , taskInstanceAssignment    :: AssignmentId
-  , taskInstanceStudentId     :: StudentId
-    -- ^ Attributes
-  , taskInstanceDescription   :: String
-  , taskInstanceDocumentation :: String
-  , taskInstanceSolution      :: String
-  , taskInstanceSignature     :: String
-  } deriving (Eq, Read, Show)
-
-type TaskInstanceId = Integer
-
-instance Indexable TaskInstance where
-  iid = taskInstanceId
-  setId assn idVal = assn { taskInstanceId = idVal }
-
-instance FromRow TaskInstance where
-  fromRow = TaskInstance <$> field <*> field <*> field <*> field <*> field
-                         <*> field <*> field
-
-
-------------------------------------------------------------------------------
--- | User data types have not been implemented yet.
-data Tutor = Tutor {
-    tutorId    :: TutorId
-  , tutorEmail :: String
-  } deriving (Eq, Read, Show)
-
-type TutorId = Integer
-
-instance Indexable Tutor where
-  iid = tutorId
-  setId assn idVal = assn { tutorId = idVal }
-
-instance FromRow Tutor where
-  fromRow = Tutor <$> field <*> field
+deriveSafeCopy 0 'base ''Solution
 
 
 ------------------------------------------------------------------------------ 
--- | Value Types.
+-- | Value Types
+------------------------------------------------------------------------------ 
 
 type AssignmentValues =
        (CourseId, TaskId, Status, UTCTime, UTCTime)

@@ -144,7 +144,6 @@ createSolution :: String -> String -> Integer -> AppHandler ()
 createSolution cont response tiid = do
     now <- liftIO $ getCurrentTime
 
-    liftIO $ putStrLn response
     let (_:result) = splitOn ["Bewertung"] $ words response
     
     _ <- Model.createSolution
