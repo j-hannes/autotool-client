@@ -47,8 +47,9 @@ import Model.Types
 -- Switch between Model.DbAdapter:
 ------------------------------------------------------------------------------
 -- import Model.DbAdapter.IORef as Db
-import Model.DbAdapter.FileStore as Db
--- import Model.DbAdapter.Sqlite as Db
+-- import Model.DbAdapter.FileStore as Db
+import Model.DbAdapter.Sqlite as Db
+-- import Model.DbAdapter.AcidState as Db
 
 
 ------------------------------------------------------------------------------

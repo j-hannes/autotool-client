@@ -17,7 +17,7 @@ import           Control.Lens
 ------------------------------------------------------------------------------
 import           Snap
 import           Snap.Snaplet.AcidState    (Acid, makeAcidic)
--- import           Snap.Snaplet.AcidState    (HasAcid(getAcidStore))
+import           Snap.Snaplet.AcidState    (HasAcid(getAcidStore))
 import           Snap.Snaplet.Heist
 import           Snap.Snaplet.SqliteSimple hiding (Query)
 ------------------------------------------------------------------------------
@@ -109,7 +109,6 @@ deriveSafeCopy 0 'base ''TaskInstanceStore
 deriveSafeCopy 0 'base ''TutorStore
 deriveSafeCopy 0 'base ''StudentStore
 
-makeAcidic ''AssignmentStore []
 makeAcidic ''CourseStore []
 makeAcidic ''EnrollmentStore []
 makeAcidic ''GroupStore []
@@ -121,8 +120,8 @@ makeAcidic ''StudentStore []
 
 makeLenses ''App
 
--- instance HasAcid App AssignmentStore where
-    -- getAcidStore  = view (acid_assignments . snapletValue)
+instance HasAcid App AssignmentStore where
+    getAcidStore  = view (acid_assignments . snapletValue)
 
 -- instance HasAcid App CourseStore where
     -- getAcidStore  = view (acid_courses . snapletValue)
