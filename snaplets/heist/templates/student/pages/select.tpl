@@ -14,7 +14,7 @@
   </bind>
 
   <div class="container">
-    <h1>Select Student</h1>
+    <h1>Bitte Auswählen</h1>
     <div class="row select-student">
       <div class="span3">
         <a href="/student/1" class="hero-unit">
