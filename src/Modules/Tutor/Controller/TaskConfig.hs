@@ -21,7 +21,7 @@ import           Application             (AppHandler)
 import qualified Autotool.Client         as Autotool
 import qualified Autotool.Client.Types.ScoringOrder as SO
 import qualified Autotool.Mock           as AutotoolMock
-import qualified Database.Switch         as Model
+import qualified Database.Switch         as Database
 import           Model.Types
 import           Utils.Form              (renderForm, notEmpty)
 import qualified Modules.Tutor.View.Task as View
@@ -131,5 +131,5 @@ createTask :: String -> String -> String -> ScoringOrder -> AppHandler ()
 createTask taskname tasktitle signature so = do
     tid <- return "51c8235ef4d13fc80f76c462"
     now <- liftIO $ getCurrentTime
-    _   <- Model.createTask (tid, tasktitle, taskname, signature, so, now)
+    _   <- Database.createTask (tid, tasktitle, taskname, signature, so, now)
     redirect "/tutor"

@@ -19,7 +19,7 @@ import           Snap                  (getParam)
 import           Snap.Snaplet.Heist    (heistLocal, render)
 ------------------------------------------------------------------------------
 import           Application           (AppHandler)
-import qualified Database.Switch       as Model
+import qualified Database.Switch       as Database
 import           Model.Types
 import           Utils.Auth            (getStudentId)
 import           Utils.Render          ((|-))
@@ -30,11 +30,11 @@ import           Utils.Render          ((|-))
 showEnrollments :: AppHandler ()
 showEnrollments = do
   sid      <- getStudentId
-  mStudent <- Model.getStudent sid
+  mStudent <- Database.getStudent sid
   case mStudent of
     Nothing      -> redirect "/404"
     Just student -> do
-      courses <- Model.getEnrollableCourses student
+      courses <- Database.getEnrollableCourses student
       let splices = [
               ("studentId", I.textSplice . T.pack $ sid)
             , ("courses",   I.mapSplices renderCourse courses)
@@ -43,7 +43,7 @@ showEnrollments = do
 
 renderCourse :: Course -> Splice AppHandler
 renderCourse course = do
-    groups <- lift $ Model.getGroupsByCourse (courseId course)
+    groups <- lift $ Database.getGroupsByCourse (courseId course)
     I.runChildrenWith [
         ("courseName", courseName |- course)
       , ("groups",     I.mapSplices renderGroup groups)
@@ -60,11 +60,11 @@ renderGroup group =
 handleEnrollment :: AppHandler ()
 handleEnrollment = do
     sid      <- getStudentId
-    mStudent <- Model.getStudent sid
+    mStudent <- Database.getStudent sid
     case mStudent of
       Nothing -> redirect "/404"
       Just _  -> do
         gid <- BS.unpack <$> fromMaybe "0" <$> getParam "groupId"
         now <- liftIO getCurrentTime
-        _   <- Model.createEnrollment (gid, sid, now)
+        _   <- Database.createEnrollment (gid, sid, now)
         redirect (BS.pack ("/student/" ++ sid))

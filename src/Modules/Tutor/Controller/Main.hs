@@ -16,7 +16,7 @@ import           Snap               (ifTop, lift, liftIO, (<$>), redirect)
 import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
 import           Application        (AppHandler)
-import qualified Database.Switch    as Model
+import qualified Database.Switch    as Database
 import           Model.Types
 import           Utils.Render
 
@@ -25,13 +25,13 @@ import           Utils.Render
 -- | Renders the landing page with an overview over courses and assignments.
 handleTutor :: AppHandler ()
 handleTutor = ifTop $ do
-    mTutor <- Model.getTutor "51c8235ef4d13fc80f76c462"
+    mTutor <- Database.getTutor "51c8235ef4d13fc80f76c462"
     case mTutor of
       Nothing -> redirect "/404"
       Just tutor -> continueWith tutor
   where
     continueWith tutor = do
-      courses <- Model.getCoursesByTutor (tutorId tutor)
+      courses <- Database.getCoursesByTutor (tutorId tutor)
       let splice = I.mapSplices renderCourse courses
       heistLocal (I.bindSplice "courses" splice) $ render "tutor/index"
 
@@ -42,7 +42,7 @@ handleTutor = ifTop $ do
 renderCourse :: Course -> Splice AppHandler
 renderCourse course = do
     now         <- liftIO getCurrentTime
-    assignments <- lift $ Model.getAssignmentsByCourse (courseId course)
+    assignments <- lift $ Database.getAssignmentsByCourse (courseId course)
     I.runChildrenWith [
         ("courseId",      courseId           |< course)
       , ("passCriteria",  coursePassCriteria |< course)
@@ -61,8 +61,8 @@ renderCourse course = do
 renderAssignment :: Assignment -> Splice AppHandler
 renderAssignment assignment = do
     now  <- liftIO getCurrentTime
-    task <- fromJust <$> (lift $ Model.getTask (assignmentTask assignment))
-    solutions <- lift $ Model.getSolutionsByAssignment
+    task <- fromJust <$> (lift $ Database.getTask (assignmentTask assignment))
+    solutions <- lift $ Database.getSolutionsByAssignment
                           (assignmentId assignment)  
 
     I.runChildrenWith [

@@ -21,7 +21,7 @@ import           Text.Digestive.Snap             hiding (method)
 ------------------------------------------------------------------------------
 import           Application                     (AppHandler)
 import qualified Autotool.Client                 as Autotool
-import qualified Database.Switch                 as Model
+import qualified Database.Switch                 as Database
 import           Model.Types
 import           Utils.Auth                      (getStudentId)
 import           Utils.Form                      (renderForm, notEmpty)
@@ -38,11 +38,11 @@ showSolveTaskForm :: AppHandler ()
 showSolveTaskForm = do
     sid  <- getStudentId
     tiid <- fmap BS.unpack $ fromMaybe "" <$> getParam "taskInstanceId"
-    mTaskInstance <- Model.getTaskInstance tiid
+    mTaskInstance <- Database.getTaskInstance tiid
     case mTaskInstance of
       Nothing           -> redirect "/404"
       Just taskInstance -> do
-        lastSolution    <- Model.getLastSolutionByTaskInstance
+        lastSolution    <- Database.getLastSolutionByTaskInstance
                              (taskInstanceId taskInstance)
         let (errEva, succEva) = determineResult lastSolution
             solutionText = fromMaybe
@@ -147,7 +147,7 @@ createSolution cont response tiid = do
     liftIO $ putStrLn response
     let (_:result) = splitOn ["Bewertung"] $ words response
     
-    _ <- Model.createSolution
+    _ <- Database.createSolution
            (tiid, cont, format response, getResult result, now)
 
     return ()

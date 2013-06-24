@@ -15,7 +15,7 @@ import           Text.Digestive.Form    (Form, choice, text, (.:), check)
 import           Text.Digestive.Snap    (runForm)
 ------------------------------------------------------------------------------
 import           Application            (AppHandler)
-import qualified Database.Switch        as Model
+import qualified Database.Switch        as Database
 import           Model.Types
 import           Utils.Form             (renderForm, convertDate)
 
@@ -24,9 +24,9 @@ import           Utils.Form             (renderForm, convertDate)
 -- | Handler to assign a task to a course.
 handleAssignTask :: AppHandler ()
 handleAssignTask = do
-  tutor   <- fromJust <$> Model.getTutor "51c8235ef4d13fc80f76c462"
-  courses <- Model.getCoursesByTutor (tutorId tutor)
-  tasks   <- Model.getTasksByTutor (tutorId tutor)
+  tutor   <- fromJust <$> Database.getTutor "51c8235ef4d13fc80f76c462"
+  courses <- Database.getCoursesByTutor (tutorId tutor)
+  tasks   <- Database.getTasksByTutor (tutorId tutor)
   let courseIds = map (tupleIdName courseId courseName) courses
       taskIds   = map (tupleIdName taskId taskName) tasks
   (view, assignData) <- runForm "form" (assignForm courseIds taskIds)
@@ -77,7 +77,7 @@ notEmpty t = t /= ""
 -- | Create an assignment if all teh data is collected.
 createAssignment :: AssignmentData -> AppHandler()
 createAssignment ad = do
-    _ <- Model.createAssignment (cid, tid, sts, start, end)
+    _ <- Database.createAssignment (cid, tid, sts, start, end)
     redirect "/tutor"
   where
     cid   =                          formCourseId ad
