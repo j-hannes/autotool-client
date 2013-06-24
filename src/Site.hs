@@ -25,9 +25,9 @@ import           Snap.Snaplet.SqliteSimple
 import           Snap.Util.FileServe
 ------------------------------------------------------------------------------
 import           Application
-import           Model.DatabaseAdapter.FileStore
-import           Model.DatabaseAdapter.IORef           (initUsers)
-import           Model.DatabaseAdapter.Sqlite          (createTables)
+import           Database.Adapter.FileStore
+import           Database.Adapter.IORef           (initUsers)
+import           Database.Adapter.Sqlite          (createTables)
 import           Modules.Student.Controller.Enrollment (handleEnrollment)
 import           Modules.Student.Controller.Enrollment (showEnrollments)
 import           Modules.Student.Controller.Main       (handleStudent)
@@ -68,7 +68,7 @@ app :: SnapletInit App App
 app = makeSnaplet "app" "An snaplet example application." Nothing $ do
     h <- nestSnaplet "" heist $ heistInit' "templates" config
     
-    -- Model.DatabaseAdapter.IORef
+    -- Database.Adapter.IORef
     co <- getNewIORef
     gr <- getNewIORef
     en <- getNewIORef
@@ -80,15 +80,15 @@ app = makeSnaplet "app" "An snaplet example application." Nothing $ do
     st <- getNewIORef
     liftIO $ initUsers tu st
 
-    -- Model.DatabaseAdapter.FileStore
+    -- Database.Adapter.FileStore
     liftIO createFiles  
 
-    -- Model.DatabaseAdapter.Sqlite
+    -- Database.Adapter.Sqlite
     d <- nestSnaplet "db" db sqliteInit
     let c = sqliteConn $ d ^# snapletValue
     liftIO $ withMVar c $ \conn -> createTables conn
 
-    -- Model.DatabaseAdapter.MongoDB
+    -- Database.Adapter.MongoDB
     d2 <- nestSnaplet "database" db2 $ mongoDBInit 10 (host "127.0.0.1")
                      "autotool"
     -- liftIO $ createTables
@@ -101,7 +101,7 @@ app = makeSnaplet "app" "An snaplet example application." Nothing $ do
 
 
 ------------------------------------------------------------------------------
--- To enable the Model.DatabaseAdapter.IORef:
+-- To enable the Database.Adapter.IORef:
 ------------------------------------------------------------------------------
 getNewIORef :: Initializer App App (IORef (Map String a))
 getNewIORef = liftIO . newIORef $ Map.fromList []

@@ -44,12 +44,12 @@ import Autotool.Client           as Autotool
 import Model.Types
 
 ------------------------------------------------------------------------------
--- Switch between Model.DatabaseAdapter:
+-- Switch between Database.Adapter:
 ------------------------------------------------------------------------------
--- import Model.DatabaseAdapter.IORef as Db
-import Model.DatabaseAdapter.MongoDB as Db
--- import Model.DatabaseAdapter.FileStore as Db
--- import Model.DatabaseAdapter.Sqlite as Db
+-- import Database.Adapter.IORef as Db
+import Database.Adapter.MongoDB as Db
+-- import Database.Adapter.FileStore as Db
+-- import Database.Adapter.Sqlite as Db
 
 
 ------------------------------------------------------------------------------
