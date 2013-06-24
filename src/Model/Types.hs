@@ -397,3 +397,99 @@ type TaskValues =
 
 type TaskInstanceValues =
        (AssignmentId, StudentId, String, String, String, String)
+
+------------------------------------------------------------------------------ 
+-- | Instances for SQLite
+
+instance FromRow Assignment where
+  fromRow = Assignment
+              <$> field
+              <*> field
+              <*> field
+              <*> field
+              <*> field
+              <*> field
+
+instance FromRow Course where
+  fromRow = Course
+              <$> field
+              <*> field
+              <*> field
+              <*> field
+              <*> field
+              <*> field
+              <*> field
+
+instance FromRow Enrollment where
+  fromRow = Enrollment
+              <$> field
+              <*> field
+              <*> field
+              <*> field
+
+instance FromRow Group where
+  fromRow = Group
+              <$> field
+              <*> field
+              <*> field
+              <*> field
+
+instance FromRow Solution where
+  fromRow = Solution
+              <$> field
+              <*> field
+              <*> field
+              <*> field
+              <*> field
+              <*> field
+
+instance FromRow Student where
+  fromRow = Student
+              <$> field
+              <*> field
+
+instance FromRow Task where
+  fromRow = Task
+              <$> field
+              <*> field
+              <*> field
+              <*> field
+              <*> field
+              <*> field
+              <*> field
+
+instance FromRow TaskInstance where
+  fromRow = TaskInstance
+              <$> field
+              <*> field
+              <*> field
+              <*> field
+              <*> field
+              <*> field
+              <*> field
+
+instance FromRow Tutor where
+  fromRow = Tutor
+              <$> field
+              <*> field
+
+instance FromField Result where
+  fromField (Field (SQLText text) _) = Ok . read . T.unpack $ text
+  fromField f = returnError ConversionFailed f "expected text"
+
+instance FromField Status where
+  fromField (Field (SQLText text) _) = Ok . read . T.unpack $ text
+  fromField f = returnError ConversionFailed f "expected text"
+
+instance FromField ScoringOrder where
+  fromField (Field (SQLText text) _) = Ok . read . T.unpack $ text
+  fromField f = returnError ConversionFailed f "expected text"
+
+instance ToField Result where
+  toField = SQLText . T.pack . show
+
+instance ToField Status where
+  toField = SQLText . T.pack . show
+
+instance ToField ScoringOrder where
+  toField = SQLText . T.pack . show
