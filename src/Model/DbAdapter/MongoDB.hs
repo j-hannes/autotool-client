@@ -42,12 +42,9 @@ module Model.DbAdapter.MongoDB (
 
   ) where
 
-import Snap
 ------------------------------------------------------------------------------
-import Data.Text (Text)
 import           Data.Maybe (catMaybes)
 import           Database.MongoDB          hiding (Group, lookup, group)
-import qualified Database.MongoDB as Mongo
 
 ------------------------------------------------------------------------------
 import           Snap.Snaplet.MongoDB
@@ -58,10 +55,10 @@ import           Model.Types
 
 ------------------------------------------------------------------------------ 
 -- | Generic getters.
-getOne :: (MongoIO a) => Collection -> String -> AppHandler (Maybe a)
+getOne :: (MongoIO a, Show a) => Collection -> String -> AppHandler (Maybe a)
 getOne name _id = do
     result <- eitherWithDB $ rest =<<
-              find (select ["_id" =: _id] name)
+              find (select ["_id" =: (read _id :: ObjectId)] name)
     let records = either (const []) id result
     return $ if null records
                 then Nothing
@@ -72,13 +69,7 @@ getMany name condition = do
     result <- eitherWithDB $ rest =<<
               find (select condition name)
     let records = either (const []) id result
-    let f = head records
-    liftIO $ print f
-    let g = Mongo.lookup "_id" f :: Maybe ObjectId
-    liftIO $ print g
-    let r = retrieve f
-    liftIO $ print r
-    return $ catMaybes [r]
+    return . catMaybes $ map retrieve records
 
 ------------------------------------------------------------------------------ 
 -- | Retrieve.
@@ -158,9 +149,8 @@ getTutor = getOne "tutor"
 ------------------------------------------------------------------------------ 
 -- | Generic create function.
 create :: (MongoIO a) => Collection -> a -> AppHandler String
-create name object = 
-    fmap (either (const "0") (show))
-         (eitherWithDB $ insert name $ new object)
+create name object =
+    fmap (either (const "") show) (eitherWithDB $ insert name $ new object)
 
 ------------------------------------------------------------------------------ 
 -- | Specific setters.
@@ -183,8 +173,8 @@ createGroup (course, description, capacity)=
     create "courseGroup" $ Group "" course description capacity
 
 createSolution :: SolutionValues -> AppHandler SolutionId
-createSolution (task_instance, content, evaluation, result, submission) =
-    create "solution" $ Solution "" task_instance content evaluation result
+createSolution (taskInstance, content, evaluation, result, submission) =
+    create "solution" $ Solution "" taskInstance content evaluation result
                                   submission
 
 createTask :: TaskValues -> AppHandler TaskId
@@ -193,7 +183,7 @@ createTask (tutor, name, type_, signature, scoring_order, created) =
 
 createTaskInstance :: TaskInstanceValues -> AppHandler TaskInstanceId
 createTaskInstance (assignment, student, desc, doc, solution, signature) =
-    create "task_instance" $ TaskInstance "" assignment student desc doc
+    create "taskInstance" $ TaskInstance "" assignment student desc doc
                                            solution signature
 
 

@@ -129,7 +129,7 @@ tso SO.None       = None
 -- | Create a new task from the entered data.
 createTask :: String -> String -> String -> ScoringOrder -> AppHandler ()
 createTask taskname tasktitle signature so = do
-    tid <- return "1"
+    tid <- return "51c8235ef4d13fc80f76c462"
     now <- liftIO $ getCurrentTime
     _   <- Model.createTask (tid, tasktitle, taskname, signature, so, now)
     redirect "/tutor"

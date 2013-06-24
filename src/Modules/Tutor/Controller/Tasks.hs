@@ -24,7 +24,7 @@ import           Model.Types
 -- | Renders the task page with a list of all tasks of the logged in tutor.
 showTaskList :: AppHandler ()
 showTaskList = ifTop $ do
-    tutor <- fromJust <$> Model.getTutor "1"
+    tutor <- fromJust <$> Model.getTutor "51c8235ef4d13fc80f76c462"
     tasks <- Model.getTasksWithAssignmentCount tutor
     let splices = [("tasks", I.mapSplices renderTasks tasks)]
     heistLocal (I.bindSplices splices) $ render "tutor/pages/tasks"

@@ -96,7 +96,7 @@ getCachedTaskInstance assignment student = do
       then do
         task <- fromJust <$> Db.getTask (assignmentTask assignment)
         (desc, sol, doc, sig) <- liftIO $ Autotool.getTaskInstance
-                                            (taskSignature task) (show sid)
+                                            (taskSignature task) sid
         tid <- Db.createTaskInstance
                  (assignmentId assignment, sid, desc, show doc, sol, sig)
         fromJust <$> Db.getTaskInstance tid

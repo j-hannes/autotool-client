@@ -48,7 +48,7 @@ bindFormSplices sid taskDescription doc eva err =
       , ("taskDocumentation", taskDocumentationSplice doc)
       , ("verificationError", verificationErrorSplice err)
       , ("evaluation",        evaluationSplice eva)
-      , ("studentId",         I.textSplice . T.pack $ show sid)
+      , ("studentId",         I.textSplice $ T.pack sid)
       ]
 
 

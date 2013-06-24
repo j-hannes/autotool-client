@@ -64,7 +64,7 @@ createCourse cfd = do
     _   <- Model.createGroup  (cid, g2n, g2c)
     redirect "/tutor"
   where
-    tid      = "1"
+    tid      = "51c8235ef4d13fc80f76c462"
     name     = T.unpack    $ formCourseName         cfd
     sem      = "SS13"
     enrStart = convertDate $ formEnrollmentOpening  cfd

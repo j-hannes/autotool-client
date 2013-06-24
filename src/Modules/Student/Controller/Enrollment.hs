@@ -22,7 +22,7 @@ import           Application           (AppHandler)
 import qualified Model.Base            as Model
 import           Model.Types
 import           Utils.Auth            (getStudentId)
-import           Utils.Render          ((|<), (|-))
+import           Utils.Render          ((|-))
 
 
 ------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ showEnrollments = do
     Just student -> do
       courses <- Model.getEnrollableCourses student
       let splices = [
-              ("studentId", I.textSplice . T.pack $ show sid)
+              ("studentId", I.textSplice . T.pack $ sid)
             , ("courses",   I.mapSplices renderCourse courses)
             ]  
       heistLocal (I.bindSplices splices) $ render "student/pages/enrollment"
@@ -52,7 +52,7 @@ renderCourse course = do
 renderGroup :: Group -> Splice AppHandler
 renderGroup group =
     I.runChildrenWith [
-        ("groupId",          groupId          |< group)
+        ("groupId",          groupId          |- group)
       , ("groupDescription", groupDescription |- group)
       ] 
 
@@ -66,5 +66,5 @@ handleEnrollment = do
       Just _  -> do
         gid <- BS.unpack <$> fromMaybe "0" <$> getParam "groupId"
         now <- liftIO getCurrentTime
-        _   <- Model.createEnrollment (read gid, sid, now)
-        redirect (BS.pack ("/student/" ++ show sid))
+        _   <- Model.createEnrollment (gid, sid, now)
+        redirect (BS.pack ("/student/" ++ sid))

@@ -41,7 +41,7 @@ handleStudent = ifTop $ do
       Just student -> do
         groups <- Model.getEnrolledGroups student
         let splices = [
-                ("studentId", studentId |< student)
+                ("studentId", studentId |- student)
               , ("groups",    I.mapSplices renderGroup groups) 
               ]
         heistLocal (I.bindSplices splices) $ render "student/index"
@@ -72,19 +72,21 @@ renderAssignment assignment = do
     task         <- fromJust <$> (lift $ Model.getTask
                                            (assignmentTask assignment))
     sid          <- lift getStudentId
+    liftIO $ putStrLn sid
     student      <- fromJust <$> (lift $ Model.getStudent sid)
+    liftIO $ print student
     taskInstance <- lift $ Model.getCachedTaskInstance assignment student
+    liftIO $ print taskInstance
     solutions    <- lift $ Model.getSolutionsByAssignment
                              (assignmentId assignment)  
     mySolutions  <- lift $ Model.getSolutionsByTaskInstance
                              (taskInstanceId taskInstance)
-
     I.runChildrenWith [
         ("description",    taskName |- task)
       , ("status",         (translateStatus . assignmentStatus) |- assignment)
       , ("submissionTime", id |- (compareToNow now from to))
       , ("submissions"   , id |< (length mySolutions))
-      , ("taskInstanceId", taskInstanceId |< taskInstance)
+      , ("taskInstanceId", taskInstanceId |- taskInstance)
       , ("bestscore"  ,    translateScore  |- bestScore task solutions)
       , ("mybestscore"  ,  translateScore  |- bestScore task mySolutions)
       ] 

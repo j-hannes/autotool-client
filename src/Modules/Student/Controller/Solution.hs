@@ -38,7 +38,7 @@ showSolveTaskForm :: AppHandler ()
 showSolveTaskForm = do
     sid  <- getStudentId
     tiid <- fmap BS.unpack $ fromMaybe "" <$> getParam "taskInstanceId"
-    mTaskInstance <- Model.getTaskInstance (read tiid)
+    mTaskInstance <- Model.getTaskInstance tiid
     case mTaskInstance of
       Nothing           -> redirect "/404"
       Just taskInstance -> do
@@ -56,7 +56,7 @@ showSolveTaskForm = do
                       (taskInstanceDocumentation taskInstance)
                       succEva
                       errEva)
-          <|> method POST (handleFormSubmit taskInstance)
+          <|> method POST (handleFormSubmit sid taskInstance)
 
 determineResult :: Maybe Solution -> (Maybe String, Maybe String)
 determineResult Nothing = (Nothing, Nothing)
@@ -102,11 +102,12 @@ solutionForm exampleSolution = SolutionFormData
 -- | Handler that checks if the reset button has been clicked. If so it
 -- redirects to the form page with initial values otherwise it continues with
 -- the passed handler.
-handleFormSubmit :: TaskInstance -> AppHandler ()
-handleFormSubmit taskInstance = do
+handleFormSubmit :: StudentId -> TaskInstance -> AppHandler ()
+handleFormSubmit sid taskInstance = do
     reset <- getParam "btn_reset"
     if isJust reset
-      then redirect . BS.pack $ "/student/solve/" ++ (show $ taskInstanceId taskInstance)
+      then redirect . BS.pack $ "/student/" ++ sid ++ "/solve/" ++
+                                taskInstanceId taskInstance
       else handleFormVerification taskInstance
 
 
@@ -131,8 +132,7 @@ handleFormVerification taskInstance = do
     case result of
       (Right signature) -> do
         createSolution sol signature tiid
-        redirect $ BS.concat [ "/student/" , BS.pack $ show sid , "/solve/"
-                             , BS.pack $ show tiid ]
+        redirect $ BS.concat ["/student/", BS.pack sid, "/solve/", BS.pack tiid]
       (Left  errormsg)  -> do
         createSolution sol errormsg tiid
         handleForm sid desc sol doc Nothing (Just $ format errormsg)

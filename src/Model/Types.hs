@@ -54,7 +54,7 @@ import           Database.MongoDB hiding (Group, group, lookup)
 import qualified Database.MongoDB as Mongo
 ------------------------------------------------------------------------------
 -- import           Autotool.Client.Types.ScoringOrder
-import           Model.Indexable
+-- import           Model.Indexable
 
 
 ------------------------------------------------------------------------------
@@ -63,6 +63,17 @@ class MongoIO a where
   new :: a -> [Field]
   retrieve :: [Field] -> (Maybe a)
 
+------------------------------------------------------------------------------ 
+-- | Id Types.
+type AssignmentId   = String
+type CourseId       = String
+type EnrollmentId   = String
+type GroupId        = String
+type SolutionId     = String
+type StudentId      = String
+type TaskId         = String
+type TaskInstanceId = String
+type TutorId        = String
 
 ------------------------------------------------------------------------------
 -- |
@@ -78,8 +89,6 @@ data Assignment = Assignment {
   , assignmentEnd    :: UTCTime
   } deriving (Eq, Read, Show)
 
-type AssignmentId = String
-
 instance MongoIO Assignment where
   new t = [
       "course" =: assignmentCourse t
@@ -89,7 +98,7 @@ instance MongoIO Assignment where
     , "end"    =: assignmentEnd t
     ]
   retrieve d = Assignment
-    <$> Mongo.lookup "_id" d
+    <$> (show <$> ((Mongo.lookup "_id" d) :: Maybe ObjectId))
     <*> Mongo.lookup "course" d
     <*> Mongo.lookup "task" d
     <*> Mongo.lookup "status" d
@@ -105,9 +114,9 @@ instance Val Status where
     cast' (String x) = Just (read $ T.unpack x)
     cast' _ = Nothing
 
-instance Indexable Assignment where
-  iid = assignmentId
-  setId assn idVal = assn { assignmentId = idVal }
+-- instance Indexable Assignment where
+  -- iid = assignmentId
+  -- setId assn idVal = assn { assignmentId = idVal }
 
 ------------------------------------------------------------------------------
 -- |
@@ -124,11 +133,9 @@ data Course = Course {
   , coursePassCriteria   :: Double
   } deriving (Eq, Read, Show)
 
-type CourseId = String
-
-instance Indexable Course where
-  iid = courseId
-  setId assn idVal = assn { courseId = idVal }
+-- instance Indexable Course where
+  -- iid = courseId
+  -- setId assn idVal = assn { courseId = idVal }
 
 instance MongoIO Course where
   new t = [
@@ -140,7 +147,7 @@ instance MongoIO Course where
     , "passCriteria" =: coursePassCriteria t
     ]
   retrieve d = Course
-    <$> Mongo.lookup "_id" d
+    <$> (show <$> ((Mongo.lookup "_id" d) :: Maybe ObjectId))
     <*> Mongo.lookup "tutor" d
     <*> Mongo.lookup "name" d
     <*> Mongo.lookup "semester" d
@@ -160,8 +167,6 @@ data Enrollment = Enrollment {
   , enrollmentTime    :: UTCTime
   } deriving (Eq, Read, Show)
 
-type EnrollmentId = String
-
 instance MongoIO Enrollment where
   new t = [
       "courseGroup" =: enrollmentGroup t
@@ -169,14 +174,14 @@ instance MongoIO Enrollment where
     , "time"        =: enrollmentTime t
     ]
   retrieve d = Enrollment
-    <$> Mongo.lookup "_id" d
+    <$> (show <$> ((Mongo.lookup "_id" d) :: Maybe ObjectId))
     <*> Mongo.lookup "courseGroup" d
     <*> Mongo.lookup "student" d
     <*> Mongo.lookup "time" d
 
-instance Indexable Enrollment where
-  iid = enrollmentId
-  setId assn idVal = assn { enrollmentId = idVal }
+-- instance Indexable Enrollment where
+  -- iid = enrollmentId
+  -- setId assn idVal = assn { enrollmentId = idVal }
 
 ------------------------------------------------------------------------------
 -- |
@@ -190,8 +195,6 @@ data Group = Group {
   , groupCapacity    :: Int
   } deriving (Eq, Ord, Read, Show)
 
-type GroupId = String
-
 instance MongoIO Group where
   new g = [
       "course"      =: groupCourse g
@@ -199,14 +202,14 @@ instance MongoIO Group where
     , "capacity"    =: groupCapacity g
     ]
   retrieve d = Group
-    <$> Mongo.lookup "_id" d
+    <$> (show <$> ((Mongo.lookup "_id" d) :: Maybe ObjectId))
     <*> Mongo.lookup "course" d
     <*> Mongo.lookup "description" d
     <*> Mongo.lookup "capacity" d
 
-instance Indexable Group where
-  iid = groupId
-  setId group idVal = group { groupId = idVal }
+-- instance Indexable Group where
+  -- iid = groupId
+  -- setId group idVal = group { groupId = idVal }
 
 ------------------------------------------------------------------------------
 -- |
@@ -222,8 +225,6 @@ data Solution = Solution {
     , solutionSubmission   :: UTCTime
     } deriving (Read, Show)
 
-type SolutionId = String
-
 instance MongoIO Solution where
   new s = [
       "taskInstance" =: solutionTaskInstance s
@@ -233,7 +234,7 @@ instance MongoIO Solution where
     , "submission"   =: solutionSubmission s
     ]
   retrieve d = Solution
-    <$> Mongo.lookup "_id" d
+    <$> (show <$> ((Mongo.lookup "_id" d) :: Maybe ObjectId))
     <*> Mongo.lookup "taskInstance" d
     <*> Mongo.lookup "content" d
     <*> Mongo.lookup "evaluation" d
@@ -250,9 +251,9 @@ instance Val Result where
     cast' (String x) = Just (read $ T.unpack x)
     cast' _ = Nothing
 
-instance Indexable Solution where
-  iid = solutionId
-  setId solutionconfig idVal = solutionconfig { solutionId = idVal }
+-- instance Indexable Solution where
+  -- iid = solutionId
+  -- setId solutionconfig idVal = solutionconfig { solutionId = idVal }
 
 ------------------------------------------------------------------------------
 -- | User data types have not been implemented yet.
@@ -261,18 +262,16 @@ data Student = Student {
   , studentEmail :: String
   } deriving (Eq, Read, Show)
 
-type StudentId = String
-
 instance MongoIO Student where
   new t = [
     "email" =: studentEmail t]
   retrieve d = Student
-    <$> Mongo.lookup "_id" d
+    <$> (show <$> ((Mongo.lookup "_id" d) :: Maybe ObjectId))
     <*> Mongo.lookup "email" d
 
-instance Indexable Student where
-  iid = studentId
-  setId assn idVal = assn { studentId = idVal }
+-- instance Indexable Student where
+  -- iid = studentId
+  -- setId assn idVal = assn { studentId = idVal }
 
 ------------------------------------------------------------------------------
 -- |
@@ -289,8 +288,6 @@ data Task = Task {
     , taskCreated      :: UTCTime
     } deriving (Read, Show)
 
-type TaskId = String
-
 instance MongoIO Task where
   new t = [
       "tutor"        =: taskTutor t
@@ -301,7 +298,7 @@ instance MongoIO Task where
     , "created"      =: taskCreated t
     ]
   retrieve d = Task
-    <$> Mongo.lookup "_id" d
+    <$> (show <$> ((Mongo.lookup "_id" d) :: Maybe ObjectId))
     <*> Mongo.lookup "tutor" d
     <*> Mongo.lookup "name" d
     <*> Mongo.lookup "type" d
@@ -317,9 +314,9 @@ instance Val ScoringOrder where
     cast' (String x) = Just (read $ T.unpack x)
     cast' _ = Nothing
 
-instance Indexable Task where
-  iid = taskId
-  setId taskconfig idVal = taskconfig { taskId = idVal }
+-- instance Indexable Task where
+  -- iid = taskId
+  -- setId taskconfig idVal = taskconfig { taskId = idVal }
 
 ------------------------------------------------------------------------------
 -- |
@@ -336,8 +333,6 @@ data TaskInstance = TaskInstance {
   , taskInstanceSignature     :: String
   } deriving (Eq, Read, Show)
 
-type TaskInstanceId = String
-
 instance MongoIO TaskInstance where
   new t = [
       "assignment"    =: taskInstanceAssignment t
@@ -347,18 +342,18 @@ instance MongoIO TaskInstance where
     , "solution"      =: taskInstanceSolution t
     , "signature"     =: taskInstanceSignature t
     ]
-  retrieve t = TaskInstance
-    <$> Mongo.lookup "_id" t
-    <*> Mongo.lookup "assignment" t
-    <*> Mongo.lookup "student" t
-    <*> Mongo.lookup "description" t
-    <*> Mongo.lookup "documentation" t
-    <*> Mongo.lookup "solution" t
-    <*> Mongo.lookup "signature" t
+  retrieve d = TaskInstance
+    <$> (show <$> ((Mongo.lookup "_id" d) :: Maybe ObjectId))
+    <*> Mongo.lookup "assignment" d
+    <*> Mongo.lookup "student" d
+    <*> Mongo.lookup "description" d
+    <*> Mongo.lookup "documentation" d
+    <*> Mongo.lookup "solution" d
+    <*> Mongo.lookup "signature" d
 
-instance Indexable TaskInstance where
-  iid = taskInstanceId
-  setId assn idVal = assn { taskInstanceId = idVal }
+-- instance Indexable TaskInstance where
+  -- iid = taskInstanceId
+  -- setId assn idVal = assn { taskInstanceId = idVal }
 
 ------------------------------------------------------------------------------
 -- | User data types have not been implemented yet.
@@ -367,18 +362,16 @@ data Tutor = Tutor {
   , tutorEmail :: String
   } deriving (Eq, Read, Show)
 
-type TutorId = String
-
 instance MongoIO Tutor where
   new t = [
     "email" =: tutorEmail t]
   retrieve d = Tutor
-    <$> Mongo.lookup "_id" d
+    <$> (show <$> ((Mongo.lookup "_id" d) :: Maybe ObjectId))
     <*> Mongo.lookup "email" d
 
-instance Indexable Tutor where
-  iid = tutorId
-  setId assn idVal = assn { tutorId = idVal }
+-- instance Indexable Tutor where
+  -- iid = tutorId
+  -- setId assn idVal = assn { tutorId = idVal }
 
 
 ------------------------------------------------------------------------------ 

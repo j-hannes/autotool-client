@@ -24,7 +24,7 @@ import           Utils.Form             (renderForm, convertDate)
 -- | Handler to assign a task to a course.
 handleAssignTask :: AppHandler ()
 handleAssignTask = do
-  tutor   <- fromJust <$> Model.getTutor "1"
+  tutor   <- fromJust <$> Model.getTutor "51c8235ef4d13fc80f76c462"
   courses <- Model.getCoursesByTutor (tutorId tutor)
   tasks   <- Model.getTasksByTutor (tutorId tutor)
   let courseIds = map (tupleIdName courseId courseName) courses

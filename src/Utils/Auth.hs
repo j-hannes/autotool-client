@@ -18,9 +18,9 @@ import           Model.Types
 ------------------------------------------------------------------------------
 -- | Read the student id from query params.
 getStudentId :: AppHandler StudentId
-getStudentId = read <$> BS.unpack <$> fromMaybe "0" <$> getParam "studentId"
+getStudentId = BS.unpack <$> fromMaybe "" <$> getParam "studentId"
 
 ------------------------------------------------------------------------------
 -- | Read the tutor id from query params.
 getTutorId :: AppHandler TutorId
-getTutorId = read <$> BS.unpack <$> fromMaybe "0" <$> getParam "tutorId"
+getTutorId = BS.unpack <$> fromMaybe "0" <$> getParam "tutorId"
