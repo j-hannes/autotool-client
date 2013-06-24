@@ -17,7 +17,7 @@ import           Text.Digestive.Form (Form, (.:), check, stringRead, text)
 import           Text.Digestive.Snap
 ------------------------------------------------------------------------------
 import           Application
-import qualified Model.Base          as Model
+import qualified Model.Switch        as Model
 import           Utils.Form
 
 

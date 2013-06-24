@@ -15,7 +15,7 @@ import           Text.Digestive.Form    (Form, choice, text, (.:), check)
 import           Text.Digestive.Snap    (runForm)
 ------------------------------------------------------------------------------
 import           Application            (AppHandler)
-import qualified Model.Base             as Model
+import qualified Model.Switch           as Model
 import           Model.Types
 import           Utils.Form             (renderForm, convertDate)
 

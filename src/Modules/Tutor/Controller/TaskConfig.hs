@@ -21,7 +21,7 @@ import           Application             (AppHandler)
 import qualified Autotool.Client         as Autotool
 import qualified Autotool.Client.Types.ScoringOrder as SO
 import qualified Autotool.Mock           as AutotoolMock
-import qualified Model.Base              as Model
+import qualified Model.Switch            as Model
 import           Model.Types
 import           Utils.Form              (renderForm, notEmpty)
 import qualified Modules.Tutor.View.Task as View

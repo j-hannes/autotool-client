@@ -1,4 +1,4 @@
-module Model.Base (
+module Model.Switch (
     -- ^ retrieve one by pk
     Db.getCourse
   , Db.getStudent
@@ -56,7 +56,7 @@ import Model.DatabaseAdapter.MongoDB as Db
 
 getEnrollableCourses :: Student -> AppHandler [Course]
 getEnrollableCourses student = do
-    groups      <- Model.Base.getEnrolledGroups student
+    groups      <- Model.Switch.getEnrolledGroups student
     courses     <- Db.getAllCourses
     return $ filter (\c -> not $ courseId c `elem` (map groupCourse groups))
                courses

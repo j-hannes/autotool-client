@@ -16,7 +16,7 @@ import           Snap                   (ifTop, (<$>))
 import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
 import           Application            (AppHandler)
-import qualified Model.Base             as Model
+import qualified Model.Switch           as Model
 import           Model.Types
 
 
