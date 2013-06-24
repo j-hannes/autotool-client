@@ -41,7 +41,7 @@ import Snap                      (liftIO, (<$>))
 import Application               (AppHandler)
 import Autotool.Client           as Autotool
 ------------------------------------------------------------------------------
-import Model
+import           Model.Datatypes
 
 ------------------------------------------------------------------------------
 -- Switch between Database.Adapter:

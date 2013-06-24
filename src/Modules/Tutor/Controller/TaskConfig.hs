@@ -22,7 +22,7 @@ import qualified Autotool.Client         as Autotool
 import qualified Autotool.Client.Types.ScoringOrder as SO
 import qualified Autotool.Mock           as AutotoolMock
 import qualified Database.Switch         as Database
-import           Model
+import           Model.Datatypes
 import           Utils.Form              (renderForm, notEmpty)
 import qualified Modules.Tutor.View.Task as View
 

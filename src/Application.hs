@@ -16,7 +16,7 @@ import           Snap.Snaplet.Heist
 import           Snap.Snaplet.MongoDB
 import           Snap.Snaplet.SqliteSimple
 ------------------------------------------------------------------------------
-import           Model
+import           Model.Datatypes
 
 
 

@@ -18,7 +18,7 @@ import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
 import           Application        (AppHandler)
 import qualified Database.Switch    as Database
-import           Model
+import           Model.Datatypes
 import           Utils.Auth         (getStudentId)
 import           Utils.Render       (bestScore, translateScore)
 import           Utils.Render       (compareToNow, translateStatus, (|<), (|-))
