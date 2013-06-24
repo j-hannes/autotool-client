@@ -32,7 +32,7 @@ module Model.DbAdapter.FileStore (
   , createTaskInstance
 
     -- ^ other
-  , getLastSolutionsByTaskInstance
+  , getLastSolutionByTaskInstance
 
     -- ^ helper
   , createFiles
@@ -48,7 +48,6 @@ import           System.IO.Strict     (hGetContents)
 import           Snap                 (liftIO, (<$>))
 ------------------------------------------------------------------------------
 import           Application          (AppHandler)
-import           Model.Indexable
 import           Model.Types
 
 
@@ -58,7 +57,7 @@ datafile :: String -> String
 datafile name = "data/" ++ name
 
 
-loadMap :: (Read a) => String -> IO (Map Integer a)
+loadMap :: (Read a) => String -> IO (Map String a)
 loadMap name = do
     handle   <- liftIO $ openFile (datafile name) ReadMode
     contents <- liftIO $ hGetContents handle
@@ -67,7 +66,7 @@ loadMap name = do
 
 ------------------------------------------------------------------------------ 
 -- | Generic getter and setter.
-get :: (Read a) => String -> Integer -> AppHandler (Maybe a)
+get :: (Read a) => String -> String -> AppHandler (Maybe a)
 get name oid = do
     objectMap <- liftIO $ loadMap name
     return $ Map.lookup oid objectMap
@@ -81,7 +80,7 @@ list name = do
 
 ------------------------------------------------------------------------------
 -- | Determine the next free index and store the record in a file.
-create :: (Read a, Show a, Indexable a) => String -> a -> AppHandler Integer
+create :: (Read a, Show a, Indexable a) => String -> a -> AppHandler String
 create name object = do
     objectMap <- liftIO $ loadMap name
     let newObject  = constructOrCopy object objectMap
@@ -92,8 +91,8 @@ create name object = do
     return $ iid newObject
   where
     constructOrCopy obj objs
-      | iid object == 0 = setId object (getNextId objs)
-      | otherwise       = obj
+      | iid object == "" = setId object (getNextId objs)
+      | otherwise        = obj
 
 
 ------------------------------------------------------------------------------ 
@@ -109,7 +108,7 @@ getAssignmentsByTask tid =
 
 ------------------------------------------------------------------------------ 
 
-getCourse :: Integer -> AppHandler (Maybe Course)
+getCourse :: CourseId -> AppHandler (Maybe Course)
 getCourse = get "courses"
 
 getCoursesByTutor :: TutorId -> AppHandler [Course]
@@ -141,19 +140,19 @@ getSolutionsByTaskInstance :: TaskInstanceId -> AppHandler [Solution]
 getSolutionsByTaskInstance tid =
     filter (\s -> solutionTaskInstance s == tid) <$> list "solutions"
 
-getLastSolutionsByTaskInstance :: TaskInstanceId -> AppHandler (Maybe Solution)
-getLastSolutionsByTaskInstance tid =
+getLastSolutionByTaskInstance :: TaskInstanceId -> AppHandler (Maybe Solution)
+getLastSolutionByTaskInstance tid =
     listToMaybe <$>
     filter (\s -> solutionTaskInstance s == tid) <$> list "solutions"
 
 ------------------------------------------------------------------------------ 
 
-getStudent :: Integer -> AppHandler (Maybe Student)
+getStudent :: StudentId -> AppHandler (Maybe Student)
 getStudent = get "students"
 
 ------------------------------------------------------------------------------ 
 
-getTask :: Integer -> AppHandler (Maybe Task)
+getTask :: TaskId -> AppHandler (Maybe Task)
 getTask = get "tasks"
 
 getTasksByTutor :: TutorId -> AppHandler [Task]
@@ -162,12 +161,12 @@ getTasksByTutor tid = do
 
 ------------------------------------------------------------------------------ 
 
-getTutor :: Integer -> AppHandler (Maybe Tutor)
+getTutor :: TutorId -> AppHandler (Maybe Tutor)
 getTutor = get "tutors"
 
 ------------------------------------------------------------------------------ 
 
-getTaskInstance :: Integer -> AppHandler (Maybe TaskInstance)
+getTaskInstance :: TaskInstanceId -> AppHandler (Maybe TaskInstance)
 getTaskInstance = get "task_instances"
 
 getTaskInstancesByAssignment :: AssignmentId -> AppHandler [TaskInstance]
@@ -180,33 +179,33 @@ getTaskInstancesByAssignment aid =
 
 createAssignment :: AssignmentValues -> AppHandler AssignmentId
 createAssignment (course, task, status, start, end) =
-    create "assignments" $ Assignment 0 course task status start end
+    create "assignments" $ Assignment "" course task status start end
 
 createCourse :: CourseValues -> AppHandler CourseId
 createCourse (tutor, name, semester, enrol_from, enrol_to, pass_criteria) =
-    create "courses" $ Course 0 tutor name semester enrol_from enrol_to
+    create "courses" $ Course "" tutor name semester enrol_from enrol_to
                               pass_criteria
 
 createEnrollment :: EnrollmentValues -> AppHandler EnrollmentId
 createEnrollment (group, student, time) =
-    create "enrollments" $ Enrollment 0 group student time
+    create "enrollments" $ Enrollment "" group student time
 
 createGroup :: GroupValues -> AppHandler GroupId
 createGroup (course, description, capacity)=
-    create "groups" $ Group 0 course description capacity
+    create "groups" $ Group "" course description capacity
 
 createSolution :: SolutionValues -> AppHandler SolutionId
 createSolution (task_instance, content, evaluation, result, submission) =
-    create "solutions" $ Solution 0 task_instance content evaluation result
+    create "solutions" $ Solution "" task_instance content evaluation result
                                   submission
 
 createTask :: TaskValues -> AppHandler TaskId
 createTask (tutor, name, type_, signature, scoring_order, created) =
-    create "tasks" $ Task 0 tutor name type_ signature scoring_order created
+    create "tasks" $ Task "" tutor name type_ signature scoring_order created
 
 createTaskInstance :: TaskInstanceValues -> AppHandler TaskInstanceId
 createTaskInstance (assignment, student, desc, doc, solution, signature) =
-    create "task_instances" $ TaskInstance 0 assignment student desc doc
+    create "task_instances" $ TaskInstance "" assignment student desc doc
                                            solution signature
 
 
@@ -218,9 +217,9 @@ listToMaybe xs = Just $ last xs
 
 ------------------------------------------------------------------------------
 -- | Return the highest found index (id) + 1 from a list of indexable DTs.
-getNextId :: (Indexable a) => Map Integer a -> Integer
-getNextId m | Map.null m = 1
-            | otherwise  = maximum (Map.keys m) + 1
+getNextId :: (Indexable a) => Map String a -> String
+getNextId m | Map.null m = "1"
+            | otherwise  = show $ maximum ((map read (Map.keys m))::[Int]) + 1
 
 ------------------------------------------------------------------------------ 
 -- | Set up.
@@ -238,23 +237,26 @@ createFiles = do
   appendFile "data/students"      ""
 
   tutors <- loadMap "tutors"
-  case Map.lookup 1 tutors of
+  case Map.lookup "51c8235ef4d13fc80f76c462" tutors of
     (Just (Tutor _ _)) -> return ()
     Nothing            -> do
       appendFile "data/tutors" $
-        show (1::Int, Tutor 1 "tutor1@htwk-leipzig.de") ++ "\n"
-      appendFile "data/tutors" $
-        show (2::Int, Tutor 2 "tutor2@htwk-leipzig.de")
+        show ("51c8235ef4d13fc80f76c462", Tutor "51c8235ef4d13fc80f76c462"
+                                                "prof@htwk-leipzig.de") ++ "\n"
 
   students <- loadMap "students"
-  case Map.lookup 1 students of
+  case Map.lookup "51c83fd80e19e3dfb1bca0ae" students of
     (Just (Student _ _)) -> return ()
     Nothing              -> do
       appendFile "data/students" $
-        show (1::Int, Student 1 "student1@htwk-leipzig.de") ++ "\n"
+        show ("51c83fd80e19e3dfb1bca0ae", Student "51c83fd80e19e3dfb1bca0ae"
+                                                  "stud1@htwk.de") ++ "\n"
       appendFile "data/students" $
-        show (2::Int, Student 2 "student2@htwk-leipzig.de") ++ "\n"
+        show ("51c83fd80e19e3dfb1bca0af", Student "51c83fd80e19e3dfb1bca0af"
+                                                  "stud2@htwk.de") ++ "\n"
       appendFile "data/students" $
-        show (3::Int, Student 3 "student3@htwk-leipzig.de") ++ "\n"
+        show ("51c83fd80e19e3dfb1bca0b0", Student "51c83fd80e19e3dfb1bca0b0"
+                                                  "stud3@htwk.de") ++ "\n"
       appendFile "data/students" $
-        show (4::Int, Student 4 "student4@htwk-leipzig.de")
+        show ("51c83fd80e19e3dfb1bca0b1", Student "51c83fd80e19e3dfb1bca0b1"
+                                                  "stud4@htwk.de")

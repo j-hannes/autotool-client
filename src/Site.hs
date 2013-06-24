@@ -25,7 +25,7 @@ import           Snap.Snaplet.MongoDB
 import           Snap.Util.FileServe
 ------------------------------------------------------------------------------
 import           Application
--- import           Model.DbAdapter.FileStore
+import           Model.DbAdapter.FileStore
 -- import           Model.DbAdapter.IORef                 (initUsers)
 -- import           Model.DbAdapter.MongoDB
 -- import           Model.DbAdapter.Sqlite                (createTables)
@@ -84,7 +84,7 @@ app = makeSnaplet "app" "An snaplet example application." Nothing $ do
     -}
 
     -- Model.DbAdapter.FileStore
-    -- liftIO createFiles  
+    liftIO createFiles  
 
     -- Model.DbAdapter.Sqlite
     {-
