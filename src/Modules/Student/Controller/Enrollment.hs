@@ -19,7 +19,7 @@ import           Snap                  (getParam)
 import           Snap.Snaplet.Heist    (heistLocal, render)
 ------------------------------------------------------------------------------
 import           Application           (AppHandler)
-import qualified Model.Switch          as Model
+import qualified Database.Switch       as Model
 import           Model.Types
 import           Utils.Auth            (getStudentId)
 import           Utils.Render          ((|-))

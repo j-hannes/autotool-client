@@ -16,7 +16,7 @@ import           Snap               (ifTop, lift, liftIO, (<$>), redirect)
 import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
 import           Application        (AppHandler)
-import qualified Model.Switch       as Model
+import qualified Database.Switch    as Model
 import           Model.Types
 import           Utils.Render
 

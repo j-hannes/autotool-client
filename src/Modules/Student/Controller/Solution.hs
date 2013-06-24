@@ -21,7 +21,7 @@ import           Text.Digestive.Snap             hiding (method)
 ------------------------------------------------------------------------------
 import           Application                     (AppHandler)
 import qualified Autotool.Client                 as Autotool
-import qualified Model.Switch                    as Model
+import qualified Database.Switch                 as Model
 import           Model.Types
 import           Utils.Auth                      (getStudentId)
 import           Utils.Form                      (renderForm, notEmpty)
