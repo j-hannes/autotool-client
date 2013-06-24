@@ -7,8 +7,8 @@
 module Application where
 
 ------------------------------------------------------------------------------
--- import           Data.IORef                (IORef)
--- import           Data.Map                  (Map)
+import           Data.IORef                (IORef)
+import           Data.Map                  (Map)
 import           Control.Lens
 ------------------------------------------------------------------------------
 import           Snap
@@ -16,7 +16,7 @@ import           Snap.Snaplet.Heist
 import           Snap.Snaplet.MongoDB
 import           Snap.Snaplet.SqliteSimple
 ------------------------------------------------------------------------------
--- import           Model.Types
+import           Model.Types
 
 
 
@@ -24,17 +24,15 @@ import           Snap.Snaplet.SqliteSimple
 data App = App
     { _heist :: Snaplet (Heist App)
 
-{-
-    , _assignments   :: IORef (Map Integer Assignment)
-    , _courses       :: IORef (Map Integer Course)
-    , _enrollments   :: IORef (Map Integer Enrollment)
-    , _groups        :: IORef (Map Integer Group)
-    , _solutions     :: IORef (Map Integer Solution)
-    , _taskInstances :: IORef (Map Integer TaskInstance)
-    , _tasks         :: IORef (Map Integer Task)
-    , _tutors        :: IORef (Map Integer Tutor)
-    , _students      :: IORef (Map Integer Student)
--}
+    , _assignments   :: IORef (Map String Assignment)
+    , _courses       :: IORef (Map String Course)
+    , _enrollments   :: IORef (Map String Enrollment)
+    , _groups        :: IORef (Map String Group)
+    , _solutions     :: IORef (Map String Solution)
+    , _taskInstances :: IORef (Map String TaskInstance)
+    , _tasks         :: IORef (Map String Task)
+    , _tutors        :: IORef (Map String Tutor)
+    , _students      :: IORef (Map String Student)
 
     , _db            :: Snaplet Sqlite
     , _db2           :: Snaplet MongoDB

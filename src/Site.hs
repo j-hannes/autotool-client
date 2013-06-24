@@ -10,9 +10,9 @@ module Site
 
 ------------------------------------------------------------------------------
 import           Data.ByteString       (ByteString)
--- import           Data.IORef (IORef, newIORef)
--- import           Data.Map   (Map)
--- import qualified Data.Map   as Map
+import           Data.IORef (IORef, newIORef)
+import           Data.Map   (Map)
+import qualified Data.Map   as Map
 import           Data.Monoid
 import           Control.Concurrent        (withMVar)
 ------------------------------------------------------------------------------
@@ -26,7 +26,7 @@ import           Snap.Util.FileServe
 ------------------------------------------------------------------------------
 import           Application
 import           Model.DbAdapter.FileStore
--- import           Model.DbAdapter.IORef                 (initUsers)
+import           Model.DbAdapter.IORef                 (initUsers)
 import           Model.DbAdapter.Sqlite                (createTables)
 import           Modules.Student.Controller.Enrollment (handleEnrollment)
 import           Modules.Student.Controller.Enrollment (showEnrollments)
@@ -69,7 +69,6 @@ app = makeSnaplet "app" "An snaplet example application." Nothing $ do
     h <- nestSnaplet "" heist $ heistInit' "templates" config
     
     -- Model.DbAdapter.IORef
-    {-
     co <- getNewIORef
     gr <- getNewIORef
     en <- getNewIORef
@@ -80,7 +79,6 @@ app = makeSnaplet "app" "An snaplet example application." Nothing $ do
     tu <- getNewIORef
     st <- getNewIORef
     liftIO $ initUsers tu st
-    -}
 
     -- Model.DbAdapter.FileStore
     liftIO createFiles  
@@ -96,7 +94,7 @@ app = makeSnaplet "app" "An snaplet example application." Nothing $ do
     -- liftIO $ createTables
 
     addRoutes routes
-    return $ App h {-co gr en ta as ti so tu st-} d d2
+    return $ App h co gr en ta as ti so tu st d d2
     
   where
     config = mempty { hcInterpretedSplices = defaultInterpretedSplices }
@@ -105,5 +103,5 @@ app = makeSnaplet "app" "An snaplet example application." Nothing $ do
 ------------------------------------------------------------------------------
 -- To enable the Model.DbAdapter.IORef:
 ------------------------------------------------------------------------------
--- getNewIORef :: Initializer App App (IORef (Map Integer a))
--- getNewIORef = liftIO . newIORef $ Map.fromList []
+getNewIORef :: Initializer App App (IORef (Map String a))
+getNewIORef = liftIO . newIORef $ Map.fromList []

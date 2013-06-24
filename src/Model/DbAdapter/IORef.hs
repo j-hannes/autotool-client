@@ -32,7 +32,7 @@ module Model.DbAdapter.IORef (
   , createTaskInstance
 
     -- ^ other
-  , getLastSolutionsByTaskInstance
+  , getLastSolutionByTaskInstance
 
     -- ^ helper
   , initUsers
@@ -47,23 +47,22 @@ import qualified Data.Map             as Map
 import           Snap                 (gets, liftIO, (<$>))
 ------------------------------------------------------------------------------
 import           Application          (App(..), AppHandler)
-import           Model.Indexable
 import           Model.Types
 
 
 ------------------------------------------------------------------------------ 
 -- | Generic getter and setter.
 
-get :: (App -> IORef (Map Integer a)) -> AppHandler (Map Integer a)
+get :: (App -> IORef (Map String a)) -> AppHandler (Map String a)
 get ioRef = do
     objectRef <- gets ioRef
     liftIO $ readIORef objectRef
 
-list :: (App -> IORef (Map Integer a)) -> AppHandler [a]
+list :: (App -> IORef (Map String a)) -> AppHandler [a]
 list = fmap Map.elems . get
 
-create :: (Indexable a) => (App -> IORef (Map Integer a)) -> a
-       -> AppHandler Integer
+create :: (Indexable a) => (App -> IORef (Map String a)) -> a
+       -> AppHandler String
 create ioRef object = do
     objectRef <- gets ioRef
     objects   <- liftIO $ readIORef objectRef
@@ -73,9 +72,9 @@ create ioRef object = do
     return $ iid newObject
   where
     constructOrCopy obj objs
-      | iid object == 0 = setId object (getNextId objs)
-      | otherwise       = obj
-
+      | iid object == "" = setId object (getNextId objs)
+      | otherwise        = obj
+ 
 
 ------------------------------------------------------------------------------ 
 -- | Retrieve.
@@ -122,8 +121,8 @@ getSolutionsByTaskInstance :: TaskInstanceId -> AppHandler [Solution]
 getSolutionsByTaskInstance tid =
     filter (\s -> solutionTaskInstance s == tid) <$> list _solutions
 
-getLastSolutionsByTaskInstance :: TaskInstanceId -> AppHandler (Maybe Solution)
-getLastSolutionsByTaskInstance tid =
+getLastSolutionByTaskInstance :: TaskInstanceId -> AppHandler (Maybe Solution)
+getLastSolutionByTaskInstance tid =
     listToMaybe <$> filter (\s -> solutionTaskInstance s == tid)
                 <$> list _solutions
 
@@ -164,9 +163,9 @@ listToMaybe xs = Just $ last xs
 
 ------------------------------------------------------------------------------
 -- | Return the highest found index (id) + 1 from a list of indexable DTs.
-getNextId :: (Indexable a) => Map Integer a -> Integer
-getNextId m | Map.null m = 1
-            | otherwise  = maximum (Map.keys m) + 1
+getNextId :: (Indexable a) => Map String a -> String
+getNextId m | Map.null m = "1"
+            | otherwise  = show $ maximum (map read (Map.keys m)::[Int]) + 1
 
 
 ------------------------------------------------------------------------------ 
@@ -174,51 +173,55 @@ getNextId m | Map.null m = 1
 
 createAssignment :: AssignmentValues -> AppHandler AssignmentId
 createAssignment (course, task, status, start, end) =
-    create _assignments $ Assignment 0 course task status start end
+    create _assignments $ Assignment "" course task status start end
 
 createCourse :: CourseValues -> AppHandler CourseId
 createCourse (tutor, name, semester, enrol_from, enrol_to, pass_criteria) =
-    create _courses $ Course 0 tutor name semester enrol_from enrol_to
+    create _courses $ Course "" tutor name semester enrol_from enrol_to
                               pass_criteria
 
 createEnrollment :: EnrollmentValues -> AppHandler EnrollmentId
 createEnrollment (group, student, time) =
-    create _enrollments $ Enrollment 0 group student time
+    create _enrollments $ Enrollment "" group student time
 
 createGroup :: GroupValues -> AppHandler GroupId
 createGroup (course, description, capacity)=
-    create _groups $ Group 0 course description capacity
+    create _groups $ Group "" course description capacity
 
 createSolution :: SolutionValues -> AppHandler SolutionId
 createSolution (task_instance, content, evaluation, result, submission) =
-    create _solutions $ Solution 0 task_instance content evaluation result
+    create _solutions $ Solution "" task_instance content evaluation result
                                   submission
 
 createTask :: TaskValues -> AppHandler TaskId
 createTask (tutor, name, type_, signature, scoring_order, created) =
-    create _tasks $ Task 0 tutor name type_ signature scoring_order created
+    create _tasks $ Task "" tutor name type_ signature scoring_order created
 
 createTaskInstance :: TaskInstanceValues -> AppHandler TaskInstanceId
 createTaskInstance (assignment, student, desc, doc, solution, signature) =
-    create _taskInstances $ TaskInstance 0 assignment student desc doc
-                                           solution signature
+    create _taskInstances $ TaskInstance "" assignment student desc doc
+                                            solution signature
 
 
 ------------------------------------------------------------------------------ 
 -- | Set up.
-initUsers :: (IORef (Map Integer Tutor)) -> (IORef (Map Integer Student))
+initUsers :: (IORef (Map String Tutor)) -> (IORef (Map String Student))
           -> IO ()
 initUsers tutorRef studentRef = do
     writeIORef tutorRef tutors
     writeIORef studentRef students
   where
     tutors = Map.fromList [
-        (1, Tutor 1 "tutor1@htwk-leipzig.de")
-      , (2, Tutor 2 "tutor2@htwk-leipzig.de")
+        ("51c8235ef4d13fc80f76c462"
+        , Tutor "51c8235ef4d13fc80f76c462" "tutor1@htwk-leipzig.de")
       ]
     students = Map.fromList [
-        (1, Student 1 "student1@htwk-leipzig.de")
-      , (2, Student 2 "student2@htwk-leipzig.de")
-      , (3, Student 3 "student3@htwk-leipzig.de")
-      , (4, Student 4 "student4@htwk-leipzig.de")
+        ("51c83fd80e19e3dfb1bca0ae"
+        , Student "51c83fd80e19e3dfb1bca0ae" "student1@htwk-leipzig.de")
+      , ("51c83fd80e19e3dfb1bca0af"
+        , Student "51c83fd80e19e3dfb1bca0af" "student2@htwk-leipzig.de")
+      , ("51c83fd80e19e3dfb1bca0b0"
+        , Student "51c83fd80e19e3dfb1bca0b0" "student3@htwk-leipzig.de")
+      , ("51c83fd80e19e3dfb1bca0b1"
+        , Student "51c83fd80e19e3dfb1bca0b1" "student4@htwk-leipzig.de")
       ]
