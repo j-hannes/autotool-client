@@ -16,7 +16,7 @@ import           Text.Digestive.Snap    (runForm)
 ------------------------------------------------------------------------------
 import           Application            (AppHandler)
 import qualified Database.Switch        as Database
-import           Model.Types
+import           Model
 import           Utils.Form             (renderForm, convertDate)
 
 

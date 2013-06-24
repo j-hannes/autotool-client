@@ -13,7 +13,7 @@ import           Data.Maybe            (fromMaybe)
 import           Snap                  ((<$>), getParam)
 ------------------------------------------------------------------------------
 import           Application
-import           Model.Types
+import           Model
 
 ------------------------------------------------------------------------------
 -- | Read the student id from query params.

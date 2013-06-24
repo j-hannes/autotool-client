@@ -18,7 +18,7 @@ import           Heist.Interpreted              (Splice)
 import qualified Text.XmlHtml                   as X
 ------------------------------------------------------------------------------
 import           Application
-import           Model.Types
+import           Model
 
 
 ------------------------------------------------------------------------------

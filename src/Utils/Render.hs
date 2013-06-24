@@ -21,7 +21,7 @@ import           Heist.Interpreted (Splice)
 import qualified Heist.Interpreted as I
 ------------------------------------------------------------------------------
 import           Application       (AppHandler)
-import           Model.Types
+import           Model
 
 ------------------------------------------------------------------------------
 -- | Some syntactic sugar.

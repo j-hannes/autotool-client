@@ -22,7 +22,7 @@ import           Text.Digestive.Snap             hiding (method)
 import           Application                     (AppHandler)
 import qualified Autotool.Client                 as Autotool
 import qualified Database.Switch                 as Database
-import           Model.Types
+import           Model
 import           Utils.Auth                      (getStudentId)
 import           Utils.Form                      (renderForm, notEmpty)
 import qualified Modules.Student.View.Solution   as View
