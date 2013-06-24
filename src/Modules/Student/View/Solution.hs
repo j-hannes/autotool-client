@@ -18,6 +18,7 @@ import           Heist.Interpreted              (Splice)
 import qualified Text.XmlHtml                   as X
 ------------------------------------------------------------------------------
 import           Application
+import           Model.Types
 
 
 ------------------------------------------------------------------------------
@@ -35,7 +36,7 @@ solutionFormTemplate = "student/forms/create_solution"
 ------------------------------------------------------------------------------
 -- | Binds a splice to the handlers heist state which renders a list of solution
 -- trees into a html template.
-bindFormSplices :: Integer
+bindFormSplices :: StudentId
                 -> String
                 -> [(String, String)]
                 -> Maybe String

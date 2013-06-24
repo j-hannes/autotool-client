@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 
@@ -38,6 +39,10 @@ module Model.Types (
   , TaskValues
   , TaskInstanceValues
 
+  , MongoIO
+  , new
+  , retrieve
+
   ) where
 
 ------------------------------------------------------------------------------
@@ -45,14 +50,18 @@ import           Control.Applicative ((<$>), (<*>))
 import           Data.Data
 import qualified Data.Text as T
 import           Data.Time (UTCTime)
-import           Database.SQLite.Simple
-import           Database.SQLite.Simple.FromField
-import           Database.SQLite.Simple.ToField
-import           Database.SQLite.Simple.Internal
-import           Database.SQLite.Simple.Ok
+import           Database.MongoDB hiding (Group, group, lookup)
+import qualified Database.MongoDB as Mongo
 ------------------------------------------------------------------------------
 -- import           Autotool.Client.Types.ScoringOrder
 import           Model.Indexable
+
+
+------------------------------------------------------------------------------
+-- | Class to convert MongoDB records into Haskell datatypes.
+class MongoIO a where
+  new :: a -> [Field]
+  retrieve :: [Field] -> (Maybe a)
 
 
 ------------------------------------------------------------------------------
@@ -69,26 +78,36 @@ data Assignment = Assignment {
   , assignmentEnd    :: UTCTime
   } deriving (Eq, Read, Show)
 
-type AssignmentId = Integer
+type AssignmentId = String
+
+instance MongoIO Assignment where
+  new t = [
+      "course" =: assignmentCourse t
+    , "task"   =: assignmentTask t
+    , "status" =: assignmentStatus t
+    , "start"  =: assignmentStart t
+    , "end"    =: assignmentEnd t
+    ]
+  retrieve d = Assignment
+    <$> Mongo.lookup "_id" d
+    <*> Mongo.lookup "course" d
+    <*> Mongo.lookup "task" d
+    <*> Mongo.lookup "status" d
+    <*> Mongo.lookup "start" d
+    <*> Mongo.lookup "end" d
 
 data Status = Mandatory
             | Optional
             deriving (Read, Show, Eq, Typeable)
 
-instance FromField Status where
-  fromField (Field (SQLText text) _) = Ok . read . T.unpack $ text
-  fromField f = returnError ConversionFailed f "expected text"
-
-instance ToField Status where
-  toField = SQLText . T.pack . show
+instance Val Status where
+    val = String . T.pack . show
+    cast' (String x) = Just (read $ T.unpack x)
+    cast' _ = Nothing
 
 instance Indexable Assignment where
   iid = assignmentId
   setId assn idVal = assn { assignmentId = idVal }
-
-instance FromRow Assignment where
-  fromRow = Assignment <$> field <*> field <*> field <*> field <*> field
-                       <*> field
 
 ------------------------------------------------------------------------------
 -- |
@@ -105,15 +124,29 @@ data Course = Course {
   , coursePassCriteria   :: Double
   } deriving (Eq, Read, Show)
 
-type CourseId = Integer
+type CourseId = String
 
 instance Indexable Course where
   iid = courseId
-  setId course idVal = course { courseId = idVal }
+  setId assn idVal = assn { courseId = idVal }
 
-instance FromRow Course where
-  fromRow = Course <$> field <*> field <*> field <*> field <*> field <*> field
-                   <*> field
+instance MongoIO Course where
+  new t = [
+      "tutor"        =: courseTutor t
+    , "name"         =: courseName t
+    , "semester"     =: courseSemester t
+    , "enrollFrom"   =: courseEnrollmentFrom t
+    , "enrollTo"     =: courseEnrollmentTo t
+    , "passCriteria" =: coursePassCriteria t
+    ]
+  retrieve d = Course
+    <$> Mongo.lookup "_id" d
+    <*> Mongo.lookup "tutor" d
+    <*> Mongo.lookup "name" d
+    <*> Mongo.lookup "semester" d
+    <*> Mongo.lookup "enrollFrom" d
+    <*> Mongo.lookup "enrollTo" d
+    <*> Mongo.lookup "passCriteria" d
 
 ------------------------------------------------------------------------------
 -- |
@@ -127,15 +160,23 @@ data Enrollment = Enrollment {
   , enrollmentTime    :: UTCTime
   } deriving (Eq, Read, Show)
 
-type EnrollmentId = Integer
+type EnrollmentId = String
+
+instance MongoIO Enrollment where
+  new t = [
+      "courseGroup" =: enrollmentGroup t
+    , "student"     =: enrollmentStudent t
+    , "time"        =: enrollmentTime t
+    ]
+  retrieve d = Enrollment
+    <$> Mongo.lookup "_id" d
+    <*> Mongo.lookup "courseGroup" d
+    <*> Mongo.lookup "student" d
+    <*> Mongo.lookup "time" d
 
 instance Indexable Enrollment where
   iid = enrollmentId
   setId assn idVal = assn { enrollmentId = idVal }
-
-instance FromRow Enrollment where
-  fromRow = Enrollment <$> field <*> field <*> field <*> field
-
 
 ------------------------------------------------------------------------------
 -- |
@@ -149,14 +190,23 @@ data Group = Group {
   , groupCapacity    :: Int
   } deriving (Eq, Ord, Read, Show)
 
-type GroupId = Integer
+type GroupId = String
+
+instance MongoIO Group where
+  new g = [
+      "course"      =: groupCourse g
+    , "description" =: groupDescription g
+    , "capacity"    =: groupCapacity g
+    ]
+  retrieve d = Group
+    <$> Mongo.lookup "_id" d
+    <*> Mongo.lookup "course" d
+    <*> Mongo.lookup "description" d
+    <*> Mongo.lookup "capacity" d
 
 instance Indexable Group where
   iid = groupId
   setId group idVal = group { groupId = idVal }
-
-instance FromRow Group where
-  fromRow = Group <$> field <*> field <*> field <*> field
 
 ------------------------------------------------------------------------------
 -- |
@@ -172,27 +222,37 @@ data Solution = Solution {
     , solutionSubmission   :: UTCTime
     } deriving (Read, Show)
 
-type SolutionId = Integer
+type SolutionId = String
+
+instance MongoIO Solution where
+  new s = [
+      "taskInstance" =: solutionTaskInstance s
+    , "content"      =: solutionContent s
+    , "evaluation"   =: solutionEvaluation s
+    , "result"       =: solutionResult s
+    , "submission"   =: solutionSubmission s
+    ]
+  retrieve d = Solution
+    <$> Mongo.lookup "_id" d
+    <*> Mongo.lookup "taskInstance" d
+    <*> Mongo.lookup "content" d
+    <*> Mongo.lookup "evaluation" d
+    <*> Mongo.lookup "result" d
+    <*> Mongo.lookup "submission" d
 
 data Result = Result {
       score :: Int
     , size  :: Int
     } deriving (Eq, Read, Show, Typeable)
 
-instance FromField Result where
-  fromField (Field (SQLText text) _) = Ok . read . T.unpack $ text
-  fromField f = returnError ConversionFailed f "expected text"
-
-instance ToField Result where
-  toField = SQLText . T.pack . show
+instance Val Result where
+    val = String . T.pack . show
+    cast' (String x) = Just (read $ T.unpack x)
+    cast' _ = Nothing
 
 instance Indexable Solution where
   iid = solutionId
   setId solutionconfig idVal = solutionconfig { solutionId = idVal }
-
-instance FromRow Solution where
-  fromRow = Solution <$> field <*> field <*> field <*> field <*> field
-                     <*> field
 
 ------------------------------------------------------------------------------
 -- | User data types have not been implemented yet.
@@ -201,14 +261,18 @@ data Student = Student {
   , studentEmail :: String
   } deriving (Eq, Read, Show)
 
-type StudentId = Integer
+type StudentId = String
+
+instance MongoIO Student where
+  new t = [
+    "email" =: studentEmail t]
+  retrieve d = Student
+    <$> Mongo.lookup "_id" d
+    <*> Mongo.lookup "email" d
 
 instance Indexable Student where
   iid = studentId
   setId assn idVal = assn { studentId = idVal }
-
-instance FromRow Student where
-  fromRow = Student <$> field <*> field
 
 ------------------------------------------------------------------------------
 -- |
@@ -225,25 +289,37 @@ data Task = Task {
     , taskCreated      :: UTCTime
     } deriving (Read, Show)
 
-type TaskId = Integer
+type TaskId = String
+
+instance MongoIO Task where
+  new t = [
+      "tutor"        =: taskTutor t
+    , "name"         =: taskName t
+    , "type"         =: taskType t
+    , "signature"    =: taskSignature t
+    , "scoringOrder" =: taskScoringOrder t
+    , "created"      =: taskCreated t
+    ]
+  retrieve d = Task
+    <$> Mongo.lookup "_id" d
+    <*> Mongo.lookup "tutor" d
+    <*> Mongo.lookup "name" d
+    <*> Mongo.lookup "type" d
+    <*> Mongo.lookup "signature" d
+    <*> Mongo.lookup "scoringOrder" d
+    <*> Mongo.lookup "created" d
 
 data ScoringOrder = Decreasing | Increasing | None
     deriving (Eq, Read, Show, Typeable)
 
-instance FromField ScoringOrder where
-  fromField (Field (SQLText text) _) = Ok . read . T.unpack $ text
-  fromField f = returnError ConversionFailed f "expected text"
-
-instance ToField ScoringOrder where
-  toField = SQLText . T.pack . show
+instance Val ScoringOrder where
+    val = String . T.pack . show
+    cast' (String x) = Just (read $ T.unpack x)
+    cast' _ = Nothing
 
 instance Indexable Task where
   iid = taskId
   setId taskconfig idVal = taskconfig { taskId = idVal }
-
-instance FromRow Task where
-  fromRow = Task <$> field <*> field <*> field <*> field <*> field <*> field
-                 <*> field
 
 ------------------------------------------------------------------------------
 -- |
@@ -252,7 +328,7 @@ data TaskInstance = TaskInstance {
     taskInstanceId            :: TaskInstanceId
     -- ^ Relations
   , taskInstanceAssignment    :: AssignmentId
-  , taskInstanceStudentId     :: StudentId
+  , taskInstanceStudent       :: StudentId
     -- ^ Attributes
   , taskInstanceDescription   :: String
   , taskInstanceDocumentation :: String
@@ -260,16 +336,29 @@ data TaskInstance = TaskInstance {
   , taskInstanceSignature     :: String
   } deriving (Eq, Read, Show)
 
-type TaskInstanceId = Integer
+type TaskInstanceId = String
+
+instance MongoIO TaskInstance where
+  new t = [
+      "assignment"    =: taskInstanceAssignment t
+    , "student"       =: taskInstanceStudent t
+    , "description"   =: taskInstanceDescription t
+    , "documentation" =: taskInstanceDocumentation t
+    , "solution"      =: taskInstanceSolution t
+    , "signature"     =: taskInstanceSignature t
+    ]
+  retrieve t = TaskInstance
+    <$> Mongo.lookup "_id" t
+    <*> Mongo.lookup "assignment" t
+    <*> Mongo.lookup "student" t
+    <*> Mongo.lookup "description" t
+    <*> Mongo.lookup "documentation" t
+    <*> Mongo.lookup "solution" t
+    <*> Mongo.lookup "signature" t
 
 instance Indexable TaskInstance where
   iid = taskInstanceId
   setId assn idVal = assn { taskInstanceId = idVal }
-
-instance FromRow TaskInstance where
-  fromRow = TaskInstance <$> field <*> field <*> field <*> field <*> field
-                         <*> field <*> field
-
 
 ------------------------------------------------------------------------------
 -- | User data types have not been implemented yet.
@@ -278,14 +367,18 @@ data Tutor = Tutor {
   , tutorEmail :: String
   } deriving (Eq, Read, Show)
 
-type TutorId = Integer
+type TutorId = String
+
+instance MongoIO Tutor where
+  new t = [
+    "email" =: tutorEmail t]
+  retrieve d = Tutor
+    <$> Mongo.lookup "_id" d
+    <*> Mongo.lookup "email" d
 
 instance Indexable Tutor where
   iid = tutorId
   setId assn idVal = assn { tutorId = idVal }
-
-instance FromRow Tutor where
-  fromRow = Tutor <$> field <*> field
 
 
 ------------------------------------------------------------------------------ 

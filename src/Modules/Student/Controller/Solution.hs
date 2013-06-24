@@ -42,7 +42,7 @@ showSolveTaskForm = do
     case mTaskInstance of
       Nothing           -> redirect "/404"
       Just taskInstance -> do
-        lastSolution    <- Model.getLastSolutionsByTaskInstance
+        lastSolution    <- Model.getLastSolutionByTaskInstance
                              (taskInstanceId taskInstance)
         let (errEva, succEva) = determineResult lastSolution
             solutionText = fromMaybe
@@ -69,7 +69,7 @@ determineResult (Just sol)
 -- | Read the solution name from the url query (GET parameter) and ask the
 -- autotool backend server for an example configuration, documentation and
 -- solution description.
-handleForm :: Integer
+handleForm :: StudentId
            -> String
            -> String
            -> String
@@ -140,7 +140,7 @@ handleFormVerification taskInstance = do
 
 ------------------------------------------------------------------------------
 -- | Create a new solution from the entered data.
-createSolution :: String -> String -> Integer -> AppHandler ()
+createSolution :: String -> String -> TaskInstanceId -> AppHandler ()
 createSolution cont response tiid = do
     now <- liftIO $ getCurrentTime
 

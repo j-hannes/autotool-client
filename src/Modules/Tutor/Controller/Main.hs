@@ -25,7 +25,7 @@ import           Utils.Render
 -- | Renders the landing page with an overview over courses and assignments.
 handleTutor :: AppHandler ()
 handleTutor = ifTop $ do
-    mTutor <- Model.getTutor 1
+    mTutor <- Model.getTutor "1"
     case mTutor of
       Nothing -> redirect "/404"
       Just tutor -> continueWith tutor

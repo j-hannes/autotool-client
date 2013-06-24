@@ -29,7 +29,7 @@ module Model.Base (
   , getCachedTaskInstance    
 
     -- ^ other
-  , Db.getLastSolutionsByTaskInstance
+  , Db.getLastSolutionByTaskInstance
 
   ) where
 
@@ -47,7 +47,8 @@ import Model.Types
 -- Switch between Model.DbAdapter:
 ------------------------------------------------------------------------------
 -- import Model.DbAdapter.IORef as Db
-import Model.DbAdapter.FileStore as Db
+-- import Model.DbAdapter.FileStore as Db
+import Model.DbAdapter.MongoDB as Db
 -- import Model.DbAdapter.Sqlite as Db
 
 
@@ -103,4 +104,4 @@ getCachedTaskInstance assignment student = do
         return $ head taskInstances'
   where
     sid             = studentId student
-    filterInstances = filter (\ti -> taskInstanceStudentId ti == sid)
+    filterInstances = filter (\ti -> taskInstanceStudent ti == sid)

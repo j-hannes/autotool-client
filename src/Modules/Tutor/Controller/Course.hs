@@ -59,12 +59,12 @@ data CourseFormData = CourseFormData
 createCourse :: CourseFormData -> AppHandler ()
 createCourse cfd = do
     cid <- Model.createCourse (tid, name, sem, enrStart, enrEnd, pc)
+    -- liftIO $ print cid
     _   <- Model.createGroup  (cid, g1n, g1c)
     _   <- Model.createGroup  (cid, g2n, g2c)
-
     redirect "/tutor"
   where
-    tid      = 1
+    tid      = "1"
     name     = T.unpack    $ formCourseName         cfd
     sem      = "SS13"
     enrStart = convertDate $ formEnrollmentOpening  cfd

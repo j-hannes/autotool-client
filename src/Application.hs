@@ -7,15 +7,16 @@
 module Application where
 
 ------------------------------------------------------------------------------
-import           Data.IORef                (IORef)
-import           Data.Map                  (Map)
+-- import           Data.IORef                (IORef)
+-- import           Data.Map                  (Map)
 import           Control.Lens
 ------------------------------------------------------------------------------
 import           Snap
 import           Snap.Snaplet.Heist
-import           Snap.Snaplet.SqliteSimple
+import           Snap.Snaplet.MongoDB
+-- import           Snap.Snaplet.SqliteSimple
 ------------------------------------------------------------------------------
-import           Model.Types
+-- import           Model.Types
 
 
 
@@ -23,6 +24,7 @@ import           Model.Types
 data App = App
     { _heist :: Snaplet (Heist App)
 
+{-
     , _assignments   :: IORef (Map Integer Assignment)
     , _courses       :: IORef (Map Integer Course)
     , _enrollments   :: IORef (Map Integer Enrollment)
@@ -34,6 +36,8 @@ data App = App
     , _students      :: IORef (Map Integer Student)
 
     , _db            :: Snaplet Sqlite
+-}
+    , _db            :: Snaplet MongoDB
     
     }
 
@@ -42,9 +46,13 @@ makeLenses ''App
 instance HasHeist App where
     heistLens = subSnaplet heist
 
+{-
 instance HasSqlite (Handler b App) where
    getSqliteState = with db get
+-}
 
+instance HasMongoDB App where
+   getMongoDB app = view snapletValue (view db app)
 
 ------------------------------------------------------------------------------
 type AppHandler = Handler App App

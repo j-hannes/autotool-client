@@ -24,7 +24,7 @@ import           Utils.Form             (renderForm, convertDate)
 -- | Handler to assign a task to a course.
 handleAssignTask :: AppHandler ()
 handleAssignTask = do
-  tutor   <- fromJust <$> Model.getTutor 1
+  tutor   <- fromJust <$> Model.getTutor "1"
   courses <- Model.getCoursesByTutor (tutorId tutor)
   tasks   <- Model.getTasksByTutor (tutorId tutor)
   let courseIds = map (tupleIdName courseId courseName) courses
@@ -35,15 +35,15 @@ handleAssignTask = do
 
 ------------------------------------------------------------------------------
 -- | Converts an object that has id and name attributes into a tuple of those.
-tupleIdName :: (a -> Integer) -> (a -> String) -> a -> (Integer, Text)
+tupleIdName :: (a -> String) -> (a -> String) -> a -> (String, Text)
 tupleIdName idFn nameFn obj = (idFn obj, T.pack $ nameFn obj)
 
 
 ------------------------------------------------------------------------------
 -- | Data type for assignment form.
 data AssignmentData = AssignmentData
-  { formCourseId :: Integer
-  , formTaskId   :: Integer
+  { formCourseId :: CourseId
+  , formTaskId   :: TaskId
   , formStatus   :: Status
   , formStart    :: Text
   , formEnd      :: Text
@@ -53,7 +53,7 @@ data AssignmentData = AssignmentData
 ------------------------------------------------------------------------------
 -- | The form to create an assignment, filles with courses and tasks to
 -- select.
-assignForm :: [(Integer, Text)] -> [(Integer, Text)]
+assignForm :: [(CourseId, Text)] -> [(TaskId, Text)]
            -> Form Text AppHandler AssignmentData
 assignForm courses tasks = AssignmentData
     <$> "course" .: choice courses Nothing

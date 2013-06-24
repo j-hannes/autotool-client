@@ -10,22 +10,25 @@ module Site
 
 ------------------------------------------------------------------------------
 import           Data.ByteString       (ByteString)
-import           Data.IORef (IORef, newIORef)
-import           Data.Map   (Map)
-import qualified Data.Map   as Map
+-- import           Data.IORef (IORef, newIORef)
+-- import           Data.Map   (Map)
+-- import qualified Data.Map   as Map
 import           Data.Monoid
-import           Control.Concurrent        (withMVar)
+-- import           Control.Concurrent        (withMVar)
 ------------------------------------------------------------------------------
+import           Database.MongoDB
 import           Heist
 import           Snap
 import           Snap.Snaplet.Heist
-import           Snap.Snaplet.SqliteSimple
+import           Snap.Snaplet.MongoDB
+-- import           Snap.Snaplet.SqliteSimple
 import           Snap.Util.FileServe
 ------------------------------------------------------------------------------
 import           Application
-import           Model.DbAdapter.FileStore
-import           Model.DbAdapter.IORef                 (initUsers)
-import           Model.DbAdapter.Sqlite                (createTables)
+-- import           Model.DbAdapter.FileStore
+-- import           Model.DbAdapter.IORef                 (initUsers)
+-- import           Model.DbAdapter.MongoDB
+-- import           Model.DbAdapter.Sqlite                (createTables)
 import           Modules.Student.Controller.Enrollment (handleEnrollment)
 import           Modules.Student.Controller.Enrollment (showEnrollments)
 import           Modules.Student.Controller.Main       (handleStudent)
@@ -46,15 +49,15 @@ routes = [
     ("/",                                         ifTop $ render "index")
   , ("/tutor",                                    handleTutor)
   , ("/tutor/tasks",                              showTaskList)
+  , ("/course/create",                            handleCourseForm)
+  , ("/assign_task",                              handleAssignTask)
+  , ("/task/select",                              handleTaskTree)
+  , ("/task/configure/:taskname",                 handleTaskConfig)
   , ("/student/select",                           handleStudentSelection)
   , ("/student/:studentId",                       handleStudent)
   , ("/student/:studentId/enroll/:groupId",       handleEnrollment)
   , ("/student/:studentId/enrollments",           showEnrollments)
   , ("/student/:studentId/solve/:taskInstanceId", showSolveTaskForm)
-  , ("/course/create",                            handleCourseForm)
-  , ("/assign_task",                              handleAssignTask)
-  , ("/task/select",                              handleTaskTree)
-  , ("/task/configure/:taskname",                 handleTaskConfig)
   , ("/404",                                      render "404")
   , ("",                                          serveDirectory "static")
   ]
@@ -67,6 +70,7 @@ app = makeSnaplet "app" "An snaplet example application." Nothing $ do
     h <- nestSnaplet "" heist $ heistInit' "templates" config
     
     -- Model.DbAdapter.IORef
+    {-
     co <- getNewIORef
     gr <- getNewIORef
     en <- getNewIORef
@@ -77,17 +81,23 @@ app = makeSnaplet "app" "An snaplet example application." Nothing $ do
     tu <- getNewIORef
     st <- getNewIORef
     liftIO $ initUsers tu st
+    -}
 
     -- Model.DbAdapter.FileStore
-    liftIO createFiles  
+    -- liftIO createFiles  
 
     -- Model.DbAdapter.Sqlite
+    {-
     d <- nestSnaplet "db" db sqliteInit
     let c = sqliteConn $ d ^# snapletValue
     liftIO $ withMVar c $ \conn -> createTables conn
+    -}
+    d <- nestSnaplet "database" db $ mongoDBInit 10 (host "127.0.0.1")
+                     "autotool"
+    -- liftIO $ createTables
 
     addRoutes routes
-    return $ App h co gr en ta as ti so tu st d
+    return $ App h {-co gr en ta as ti so tu st-} d
     
   where
     config = mempty { hcInterpretedSplices = defaultInterpretedSplices }
@@ -96,5 +106,5 @@ app = makeSnaplet "app" "An snaplet example application." Nothing $ do
 ------------------------------------------------------------------------------
 -- To enable the Model.DbAdapter.IORef:
 ------------------------------------------------------------------------------
-getNewIORef :: Initializer App App (IORef (Map Integer a))
-getNewIORef = liftIO . newIORef $ Map.fromList []
+-- getNewIORef :: Initializer App App (IORef (Map Integer a))
+-- getNewIORef = liftIO . newIORef $ Map.fromList []
