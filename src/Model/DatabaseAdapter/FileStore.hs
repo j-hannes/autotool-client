@@ -1,4 +1,4 @@
-module Model.DbAdapter.FileStore (
+module Model.DatabaseAdapter.FileStore (
     -- ^ retrieve all
     getAllCourses
 

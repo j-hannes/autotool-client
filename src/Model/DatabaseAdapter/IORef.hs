@@ -1,4 +1,4 @@
-module Model.DbAdapter.IORef (
+module Model.DatabaseAdapter.IORef (
     -- ^ retrieve all
     getAllCourses
 

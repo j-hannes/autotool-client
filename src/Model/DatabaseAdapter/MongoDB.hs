@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 -- {-# LANGUAGE ScopedTypeVariables #-}
 
-module Model.DbAdapter.MongoDB (
+module Model.DatabaseAdapter.MongoDB (
     -- ^ retrieve all
     getAllCourses
 

@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Model.DbAdapter.Sqlite (
+module Model.DatabaseAdapter.Sqlite (
     -- ^ retrieve all
     getAllCourses
 
