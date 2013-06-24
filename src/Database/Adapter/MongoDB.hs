@@ -51,6 +51,7 @@ import           Snap.Snaplet.MongoDB
 ------------------------------------------------------------------------------
 import           Application               (AppHandler)
 import           Model.Datatypes
+import           Model.Extensions.MongoIO
 
 
 ------------------------------------------------------------------------------ 

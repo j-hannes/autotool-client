@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# OPTIONS_GHC -fno-warn-unused-imports #-}
 
 module Database.Adapter.Sqlite (
     -- ^ retrieve all
@@ -46,15 +47,16 @@ module Database.Adapter.Sqlite (
 import           Control.Monad             (unless)
 import           Data.Text                 (Text)
 import qualified Data.Text                 as T
+------------------------------------------------------------------------------
 import           Database.SQLite.Simple    (Only(Only), Query(Query))
 import           Database.SQLite.Simple    (Connection)
 import qualified Database.SQLite.Simple    as S
-------------------------------------------------------------------------------
 import           Snap                      ((<$>))
 import           Snap.Snaplet.SqliteSimple (query, query_, execute,withSqlite)
 ------------------------------------------------------------------------------
 import           Application               (AppHandler)
 import           Model.Datatypes
+import           Model.Extensions.Relational
 
 
 ------------------------------------------------------------------------------ 
