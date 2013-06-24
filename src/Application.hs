@@ -14,7 +14,7 @@ import           Control.Lens
 import           Snap
 import           Snap.Snaplet.Heist
 import           Snap.Snaplet.MongoDB
--- import           Snap.Snaplet.SqliteSimple
+import           Snap.Snaplet.SqliteSimple
 ------------------------------------------------------------------------------
 -- import           Model.Types
 
@@ -34,10 +34,10 @@ data App = App
     , _tasks         :: IORef (Map Integer Task)
     , _tutors        :: IORef (Map Integer Tutor)
     , _students      :: IORef (Map Integer Student)
+-}
 
     , _db            :: Snaplet Sqlite
--}
-    , _db            :: Snaplet MongoDB
+    , _db2           :: Snaplet MongoDB
     
     }
 
@@ -46,13 +46,11 @@ makeLenses ''App
 instance HasHeist App where
     heistLens = subSnaplet heist
 
-{-
 instance HasSqlite (Handler b App) where
    getSqliteState = with db get
--}
 
 instance HasMongoDB App where
-   getMongoDB app = view snapletValue (view db app)
+   getMongoDB app = view snapletValue (view db2 app)
 
 ------------------------------------------------------------------------------
 type AppHandler = Handler App App

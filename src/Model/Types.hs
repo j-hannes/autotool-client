@@ -275,16 +275,16 @@ instance Indexable Tutor where
 
 instance FromRow Assignment where
   fromRow = Assignment
-              <$> field
-              <*> field
-              <*> field
+              <$> (fmap show (field :: RowParser Int))
+              <*> (fmap show (field :: RowParser Int))
+              <*> (fmap show (field :: RowParser Int))
               <*> field
               <*> field
               <*> field
 
 instance FromRow Course where
   fromRow = Course
-              <$> field
+              <$> (fmap show (field :: RowParser Int))
               <*> field
               <*> field
               <*> field
@@ -294,22 +294,22 @@ instance FromRow Course where
 
 instance FromRow Enrollment where
   fromRow = Enrollment
-              <$> field
-              <*> field
+              <$> (fmap show (field :: RowParser Int))
+              <*> (fmap show (field :: RowParser Int))
               <*> field
               <*> field
 
 instance FromRow Group where
   fromRow = Group
-              <$> field
-              <*> field
+              <$> (fmap show (field :: RowParser Int))
+              <*> (fmap show (field :: RowParser Int))
               <*> field
               <*> field
 
 instance FromRow Solution where
   fromRow = Solution
-              <$> field
-              <*> field
+              <$> (fmap show (field :: RowParser Int))
+              <*> (fmap show (field :: RowParser Int))
               <*> field
               <*> field
               <*> field
@@ -322,7 +322,7 @@ instance FromRow Student where
 
 instance FromRow Task where
   fromRow = Task
-              <$> field
+              <$> (fmap show (field :: RowParser Int))
               <*> field
               <*> field
               <*> field
@@ -332,8 +332,8 @@ instance FromRow Task where
 
 instance FromRow TaskInstance where
   fromRow = TaskInstance
-              <$> field
-              <*> field
+              <$> (fmap show (field :: RowParser Int))
+              <*> (fmap show (field :: RowParser Int))
               <*> field
               <*> field
               <*> field

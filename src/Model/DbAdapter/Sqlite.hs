@@ -35,7 +35,7 @@ module Model.DbAdapter.Sqlite (
   , createTaskInstance
 
     -- ^ other
-  , getLastSolutionsByTaskInstance
+  , getLastSolutionByTaskInstance
 
     -- ^ helper
   , createTables
@@ -62,17 +62,20 @@ import           Model.Types
 
 getAssignmentsByCourse :: CourseId -> AppHandler [Assignment]
 getAssignmentsByCourse cid =
-    query "SELECT * FROM assignment WHERE course = ?" (Only cid)
+    query "SELECT * FROM assignment WHERE course = ?"
+          (Only $ (read cid::Integer))
 
 getAssignmentsByTask :: TaskId -> AppHandler [Assignment]
 getAssignmentsByTask tid =
-    query "SELECT * FROM assignment WHERE task = ?" (Only tid)
+    query "SELECT * FROM assignment WHERE task = ?"
+          (Only $ (read tid::Integer))
 
 ------------------------------------------------------------------------------ 
 
 getCourse :: CourseId -> AppHandler (Maybe Course)
 getCourse cid =
-    listToMaybe <$> query "SELECT * FROM course WHERE id = ?" (Only cid)
+    listToMaybe <$> query "SELECT * FROM course WHERE id = ?"
+                          (Only $ (read cid::Integer))
 
 getAllCourses :: AppHandler [Course]
 getAllCourses =
@@ -80,7 +83,7 @@ getAllCourses =
 
 getCoursesByTutor :: TutorId -> AppHandler [Course]
 getCoursesByTutor tid =
-  query "SELECT * FROM course WHERE tutor = ?" (Only tid)
+  query "SELECT * FROM course WHERE tutor = ?" (Only  tid)
 
 ------------------------------------------------------------------------------ 
 
@@ -96,19 +99,21 @@ getGroups gids = do
 
 getGroupsByCourse :: CourseId -> AppHandler [Group]
 getGroupsByCourse tid =
-    query "SELECT * FROM group_ WHERE course = ?" (Only tid)
+    query "SELECT * FROM group_ WHERE course = ?"
+          (Only $ (read tid::Integer))
 
 ------------------------------------------------------------------------------ 
 
 getSolutionsByTaskInstance :: TaskInstanceId -> AppHandler [Solution]
 getSolutionsByTaskInstance tid =
-    query "SELECT * FROM solution WHERE task_instance = ?" (Only tid)
+    query "SELECT * FROM solution WHERE task_instance = ?"
+          (Only $ (read tid::Integer))
 
-getLastSolutionsByTaskInstance :: TaskInstanceId -> AppHandler (Maybe Solution)
-getLastSolutionsByTaskInstance tid =
+getLastSolutionByTaskInstance :: TaskInstanceId -> AppHandler (Maybe Solution)
+getLastSolutionByTaskInstance tid =
     listToMaybe <$> query (Query $ T.concat [
         "SELECT * FROM solution WHERE task_instance = ? "
-      , "ORDER BY submission DESC"]) (Only tid)
+      , "ORDER BY submission DESC"]) (Only $ (read tid::Integer))
 
 ------------------------------------------------------------------------------ 
 
@@ -120,7 +125,8 @@ getStudent sid =
 
 getTask :: TaskId -> AppHandler (Maybe Task)
 getTask tid =
-    listToMaybe <$> query "SELECT * FROM task WHERE id = ?" (Only tid)
+    listToMaybe <$> query "SELECT * FROM task WHERE id = ?"
+                          (Only $ (read tid::Integer))
 
 getTasksByTutor :: TutorId -> AppHandler [Task]
 getTasksByTutor tid =
@@ -131,26 +137,26 @@ getTasksByTutor tid =
 getTaskInstance :: TaskInstanceId -> AppHandler (Maybe TaskInstance)
 getTaskInstance tid =
     listToMaybe <$> query "SELECT * FROM task_instance WHERE id = ?"
-                          (Only tid)
+                          (Only $ (read tid::Integer))
 
 getTaskInstancesByAssignment :: AssignmentId -> AppHandler [TaskInstance]
 getTaskInstancesByAssignment aid =
-    query "SELECT * FROM task_instance WHERE assignment = ?" (Only aid)
+    query "SELECT * FROM task_instance WHERE assignment = ?"
+          (Only $ (read aid::Integer))
 
 ------------------------------------------------------------------------------ 
 
-getTutor :: Integer -> AppHandler (Maybe Tutor)
+getTutor :: TutorId -> AppHandler (Maybe Tutor)
 getTutor tid =
     listToMaybe <$> query "SELECT * FROM tutor WHERE id = ?" (Only tid)
 
 
-
 ------------------------------------------------------------------------------ 
 -- | Generic create function.
-create  :: (S.ToRow a) => String -> a -> AppHandler Integer
+create  :: (S.ToRow a) => String -> a -> AppHandler String
 create insertQuery values = do
     _ <- flip execute values $ Query $ T.pack insertQuery
-    fromIntegral <$> (withSqlite S.lastInsertRowId)
+    show <$> (withSqlite S.lastInsertRowId)
 
 
 ------------------------------------------------------------------------------ 
@@ -219,7 +225,7 @@ createTables conn = do
     , "end"]
 
   createTableIfNotExists conn "course" [
-      "tutor INTEGER,"
+      "tutor,"
     , "name,"
     , "semester,"
     , "enrollment_from,"
@@ -228,11 +234,11 @@ createTables conn = do
 
   createTableIfNotExists conn "enrollment" [
       "group_ INTEGER,"
-    , "student INTEGER,"
+    , "student,"
     , "time"]
 
   createTableIfNotExists conn "group_" [
-      "course INEGER,"
+      "course INTEGER,"
     , "description,"
     , "capacity INTEGER"]
 
@@ -244,7 +250,7 @@ createTables conn = do
     , "submission"]
 
   createTableIfNotExists conn "task" [
-      "tutor INTEGER,"
+      "tutor,"
     , "name,"
     , "type,"
     , "signature,"
@@ -253,7 +259,7 @@ createTables conn = do
 
   createTableIfNotExists conn "task_instance" [
       "assignment INTEGER,"
-    , "student INTEGER,"
+    , "student,"
     , "description,"
     , "documentation,"
     , "solution,"
@@ -264,29 +270,30 @@ createTables conn = do
       "email"]
 
   unless tutorCreated . S.execute_ conn . Query $ T.concat [
-      "INSERT INTO tutor (email) VALUES ('tutor1@tutor.com');"
-    , "INSERT INTO tutor (email) VALUES ('tutor2@tutor.com')"]
+      "INSERT INTO tutor VALUES ('51c8235ef4d13fc80f76c462', 'prof@htwk.de')"]
 
   studentCreated <- tableExists conn "student"
   createTableIfNotExists conn "student" [
       "email"]
 
   unless studentCreated . S.execute_ conn . Query $ T.concat [
-       "INSERT INTO student (email) VALUES ('student1@student.com');"
-     , "INSERT INTO student (email) VALUES ('student2@student.com');"
-     , "INSERT INTO student (email) VALUES ('student3@student.com');"
-     , "INSERT INTO student (email) VALUES ('student4@student.com')"]
-
+       "INSERT INTO student VALUES ('51c83fd80e19e3dfb1bca0ae', 'stu@htwk.de');"
+     , "INSERT INTO student VALUES ('51c83fd80e19e3dfb1bca0af', 'stu@htwk.de');"
+     , "INSERT INTO student VALUES ('51c83fd80e19e3dfb1bca0b0', 'stu@htwk.de');"
+     , "INSERT INTO student VALUES ('51c83fd80e19e3dfb1bca0b1', 'stu@htwk.de')"]
 
 ------------------------------------------------------------------------------ 
--- | 
+-- | Creates the table schema. Tables student and user are the exception of the
+-- rule here and have no integer but text type on the id attribute.
 createTableIfNotExists :: Connection -> String -> [Text] -> IO ()
 createTableIfNotExists conn tableName fields = do
   schemaCreated <- tableExists conn tableName
+  let autoInc = if tableName `elem` ["student", "tutor"]
+        then ""
+        else " INTEGER PRIMARY KEY AUTOINCREMENT"
   unless schemaCreated . S.execute_ conn . Query $
        T.concat ["CREATE TABLE ", T.pack tableName,
-                 " (id INTEGER PRIMARY KEY,", T.concat fields , ")"]
-
+                 " (id", autoInc, ",", T.concat fields , ")"]
 
 ------------------------------------------------------------------------------ 
 -- | 

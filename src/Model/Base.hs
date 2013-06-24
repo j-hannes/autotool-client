@@ -48,8 +48,8 @@ import Model.Types
 ------------------------------------------------------------------------------
 -- import Model.DbAdapter.IORef as Db
 -- import Model.DbAdapter.MongoDB as Db
-import Model.DbAdapter.FileStore as Db
--- import Model.DbAdapter.Sqlite as Db
+-- import Model.DbAdapter.FileStore as Db
+import Model.DbAdapter.Sqlite as Db
 
 
 ------------------------------------------------------------------------------

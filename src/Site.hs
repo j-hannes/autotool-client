@@ -14,21 +14,20 @@ import           Data.ByteString       (ByteString)
 -- import           Data.Map   (Map)
 -- import qualified Data.Map   as Map
 import           Data.Monoid
--- import           Control.Concurrent        (withMVar)
+import           Control.Concurrent        (withMVar)
 ------------------------------------------------------------------------------
 import           Database.MongoDB
 import           Heist
 import           Snap
 import           Snap.Snaplet.Heist
 import           Snap.Snaplet.MongoDB
--- import           Snap.Snaplet.SqliteSimple
+import           Snap.Snaplet.SqliteSimple
 import           Snap.Util.FileServe
 ------------------------------------------------------------------------------
 import           Application
 import           Model.DbAdapter.FileStore
 -- import           Model.DbAdapter.IORef                 (initUsers)
--- import           Model.DbAdapter.MongoDB
--- import           Model.DbAdapter.Sqlite                (createTables)
+import           Model.DbAdapter.Sqlite                (createTables)
 import           Modules.Student.Controller.Enrollment (handleEnrollment)
 import           Modules.Student.Controller.Enrollment (showEnrollments)
 import           Modules.Student.Controller.Main       (handleStudent)
@@ -87,17 +86,17 @@ app = makeSnaplet "app" "An snaplet example application." Nothing $ do
     liftIO createFiles  
 
     -- Model.DbAdapter.Sqlite
-    {-
     d <- nestSnaplet "db" db sqliteInit
     let c = sqliteConn $ d ^# snapletValue
     liftIO $ withMVar c $ \conn -> createTables conn
-    -}
-    d <- nestSnaplet "database" db $ mongoDBInit 10 (host "127.0.0.1")
+
+    -- Model.DbAdapter.MongoDB
+    d2 <- nestSnaplet "database" db2 $ mongoDBInit 10 (host "127.0.0.1")
                      "autotool"
     -- liftIO $ createTables
 
     addRoutes routes
-    return $ App h {-co gr en ta as ti so tu st-} d
+    return $ App h {-co gr en ta as ti so tu st-} d d2
     
   where
     config = mempty { hcInterpretedSplices = defaultInterpretedSplices }
