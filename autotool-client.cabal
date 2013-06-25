@@ -1,5 +1,5 @@
-Name:                autotool
-Version:             0.1
+Name:                autotool-client
+Version:             0.2
 Synopsis:            Project Synopsis Here
 Description:         Project Description Here
 License:             AllRightsReserved
@@ -14,7 +14,7 @@ Flag development
   Description: Whether to build the server in development (interpreted) mode
   Default: False
 
-Executable autotool
+Executable autotool-client
   hs-source-dirs: src
   main-is: Main.hs
 
