@@ -1,2 +1,1 @@
-Assignment {assignmentId = 2, assignmentCourseId = 2, assignmentTaskId = 2, assignmentStatus = Optional, assignmentStart = 2013-05-07 19:17:04 UTC, assignmentEnd = 2013-05-23 19:17:04 UTC}
-Assignment {assignmentId = 1, assignmentCourseId = 1, assignmentTaskId = 1, assignmentStatus = Mandatory, assignmentStart = 2013-05-08 12:00:00 UTC, assignmentEnd = 2013-05-14 20:00:00 UTC}
+("1",Assignment {assignmentId = "1", assignmentCourse = "1", assignmentTask = "1", assignmentStatus = Mandatory, assignmentStart = 2013-06-24 16:44:13 UTC, assignmentEnd = 2013-06-26 16:44:13 UTC})

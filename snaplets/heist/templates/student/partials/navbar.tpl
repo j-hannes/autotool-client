@@ -3,11 +3,11 @@
     <div class="container">
       <a class="brand" href="/student/${studentId}">autotool'</a>
       <ul class="nav">
-        <li><a href="#">SS13</a></li>
+        <li><a class="mock" href="">SS13</a></li>
       </ul>
       <ul class="nav pull-right">
         <li>
-          <a href="/student/enrollments">
+          <a href="/student/${studentId}/enrollments">
             Einschreibung
           </a>
         </li>
@@ -20,3 +20,9 @@
     </div>
   </div>
 </div>
+
+<script>
+  $('a.mock').click(function(e) {
+    e.preventDefault();
+  });
+</script>

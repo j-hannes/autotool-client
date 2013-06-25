@@ -1,2 +1,1 @@
-Enrollment {enrollmentId = 2, enrollmentGroupId = 3, enrollmentStudentId = 1, enrollmentTime = 2013-05-07 18:17:33.445312 UTC}
-Enrollment {enrollmentId = 1, enrollmentGroupId = 2, enrollmentStudentId = 1, enrollmentTime = 2013-05-04 11:37:47.449588 UTC}
+("1",Enrollment {enrollmentId = "1", enrollmentGroup = "1", enrollmentStudent = "51c83fd80e19e3dfb1bca0ae", enrollmentTime = 2013-06-24 14:44:29.626608 UTC})

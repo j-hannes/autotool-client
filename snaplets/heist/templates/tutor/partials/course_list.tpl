@@ -17,22 +17,22 @@
       <th>Name</th>
       <th>Aufgabentyp</th>
       <th>Art</th>
-      <th>Highscore</th>
       <th>Bearbeitungszeit</th>
       <th>Einsendungen</th>
       <th>Beste Bewertung</th>
+      <th>Bewertungsreihenfolge</th>
     </tr>
-    <assignedtasks>
+    <assignedTasks>
     <tr>
-      <td><taskname /></td>
-      <td><tasktype /></td>
+      <td><taskName /></td>
+      <td><taskType /></td>
       <td><status /></td>
-      <td><highscore /></td>
       <td><timespan /></td>
       <td><submissions /></td>
       <td><bestscore /></td>
+      <td><scoringOrder /></td>
     </tr>
-    </assignedtasks>
+    </assignedTasks>
   </table> 
   <hr>
 </courses>

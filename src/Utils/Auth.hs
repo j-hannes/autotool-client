@@ -3,19 +3,24 @@
 ------------------------------------------------------------------------------
 module Utils.Auth
   ( getStudentId
+  , getTutorId
   ) where
 
 ------------------------------------------------------------------------------
 import qualified Data.ByteString.Char8 as BS
 import           Data.Maybe            (fromMaybe)
-
-import           Application
+------------------------------------------------------------------------------
 import           Snap                  ((<$>), getParam)
+------------------------------------------------------------------------------
+import           Application
+import           Model.Datatypes
 
 ------------------------------------------------------------------------------
--- | 
-getStudentId :: AppHandler Integer
-getStudentId = do
-    studentId <- BS.unpack <$> fromMaybe "0" <$> getParam "studentId"
-    return $ read studentId
+-- | Read the student id from query params.
+getStudentId :: AppHandler StudentId
+getStudentId = BS.unpack <$> fromMaybe "" <$> getParam "studentId"
 
+------------------------------------------------------------------------------
+-- | Read the tutor id from query params.
+getTutorId :: AppHandler TutorId
+getTutorId = BS.unpack <$> fromMaybe "0" <$> getParam "tutorId"

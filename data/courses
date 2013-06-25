@@ -1,2 +1,1 @@
-Course {courseId = 2, courseTutorId = 1, courseName = "Fookurs", courseSemester = "SS13", courseEnrollmentFrom = Just 2013-05-07 18:15:57 UTC, courseEnrollmentTo = Just 2013-05-17 19:15:57 UTC, coursePassCriteria = 20.0}
-Course {courseId = 1, courseTutorId = 1, courseName = "Compilerbau", courseSemester = "SS13", courseEnrollmentFrom = Just 2013-05-04 18:00:00 UTC, courseEnrollmentTo = Just 2013-05-07 05:00:00 UTC, coursePassCriteria = 65.0}
+("1",Course {courseId = "1", courseTutor = "51c8235ef4d13fc80f76c462", courseName = "Compilerbau", courseSemester = "SS13", courseEnrollmentFrom = Just 2013-06-24 14:38:49 UTC, courseEnrollmentTo = Just 2013-06-25 16:38:49 UTC, coursePassCriteria = 40.0})
