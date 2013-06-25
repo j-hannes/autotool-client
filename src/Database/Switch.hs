@@ -39,7 +39,7 @@ import Data.Maybe                (fromJust)
 import Snap                      (liftIO, (<$>))
 ------------------------------------------------------------------------------
 import Application               (AppHandler)
-import Autotool.Client           as Autotool
+import Autotool.XmlRpc           as Autotool
 ------------------------------------------------------------------------------
 import           Model.Datatypes
 

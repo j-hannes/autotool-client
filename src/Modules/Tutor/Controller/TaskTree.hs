@@ -12,7 +12,7 @@ import           Snap
 import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
 import           Application             (AppHandler)
-import qualified Autotool.Client         as Autotool
+import qualified Autotool.XmlRpc         as Autotool
 import qualified Autotool.Mock           as AutotoolMock
 import qualified Modules.Tutor.View.Task as View
 

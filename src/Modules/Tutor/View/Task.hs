@@ -20,7 +20,7 @@ import           Heist.Interpreted
 import qualified Text.XmlHtml                   as X
 ------------------------------------------------------------------------------
 import           Application
-import           Autotool.Client.Types.TaskTree
+import           Autotool.XmlRpc.Types.TaskTree
 
 
 ------------------------------------------------------------------------------

@@ -18,8 +18,8 @@ import           Text.Digestive.Form
 import           Text.Digestive.Snap     hiding (method)
 ------------------------------------------------------------------------------
 import           Application             (AppHandler)
-import qualified Autotool.Client         as Autotool
-import qualified Autotool.Client.Types.ScoringOrder as SO
+import qualified Autotool.XmlRpc         as Autotool
+import qualified Autotool.XmlRpc.Types.ScoringOrder as SO
 import qualified Autotool.Mock           as AutotoolMock
 import qualified Database.Switch         as Database
 import           Model.Datatypes
