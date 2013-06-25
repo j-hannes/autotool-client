@@ -90,8 +90,7 @@ app = makeSnaplet "app" "An snaplet example application." Nothing $ do
 
     -- Database.Adapter.MongoDB
     d2 <- nestSnaplet "database" db2 $ mongoDBInit 10 (host "127.0.0.1")
-                     "autotool"
-    -- liftIO $ createTables
+                      "autotool"
 
     addRoutes routes
     return $ App h co gr en ta as ti so tu st d d2

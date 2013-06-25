@@ -279,10 +279,13 @@ createTables conn = do
       "email"]
 
   unless studentCreated . S.execute_ conn . Query $ T.concat [
-       "INSERT INTO student VALUES ('51c83fd80e19e3dfb1bca0ae', 'stu@htwk.de');"
-     , "INSERT INTO student VALUES ('51c83fd80e19e3dfb1bca0af', 'stu@htwk.de');"
-     , "INSERT INTO student VALUES ('51c83fd80e19e3dfb1bca0b0', 'stu@htwk.de');"
-     , "INSERT INTO student VALUES ('51c83fd80e19e3dfb1bca0b1', 'stu@htwk.de')"]
+       "INSERT INTO student VALUES ('51c83fd80e19e3dfb1bca0ae', 'stu@htwk.de')"]
+  unless studentCreated . S.execute_ conn . Query $ T.concat [
+       "INSERT INTO student VALUES ('51c83fd90e19e3dfb1bca0af', 'stu@htwk.de')"]
+  unless studentCreated . S.execute_ conn . Query $ T.concat [
+       "INSERT INTO student VALUES ('51c83fda0e19e3dfb1bca0b0', 'stu@htwk.de')"]
+  unless studentCreated . S.execute_ conn . Query $ T.concat [
+       "INSERT INTO student VALUES ('51c83fda0e19e3dfb1bca0b1', 'stu@htwk.de')"]
 
 ------------------------------------------------------------------------------ 
 -- | Creates the table schema. Tables student and user are the exception of the

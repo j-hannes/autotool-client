@@ -253,11 +253,11 @@ createFiles = do
         show ("51c83fd80e19e3dfb1bca0ae", Student "51c83fd80e19e3dfb1bca0ae"
                                                   "stud1@htwk.de") ++ "\n"
       appendFile "data/students" $
-        show ("51c83fd80e19e3dfb1bca0af", Student "51c83fd80e19e3dfb1bca0af"
+        show ("51c83fd90e19e3dfb1bca0af", Student "51c83fd90e19e3dfb1bca0af"
                                                   "stud2@htwk.de") ++ "\n"
       appendFile "data/students" $
-        show ("51c83fd80e19e3dfb1bca0b0", Student "51c83fd80e19e3dfb1bca0b0"
+        show ("51c83fda0e19e3dfb1bca0b0", Student "51c83fda0e19e3dfb1bca0b0"
                                                   "stud3@htwk.de") ++ "\n"
       appendFile "data/students" $
-        show ("51c83fd80e19e3dfb1bca0b1", Student "51c83fd80e19e3dfb1bca0b1"
+        show ("51c83fda0e19e3dfb1bca0b1", Student "51c83fda0e19e3dfb1bca0b1"
                                                   "stud4@htwk.de")
