@@ -72,11 +72,8 @@ renderAssignment assignment = do
     task         <- fromJust <$> (lift $ Database.getTask
                                            (assignmentTask assignment))
     sid          <- lift getStudentId
-    liftIO $ putStrLn sid
     student      <- fromJust <$> (lift $ Database.getStudent sid)
-    liftIO $ print student
     taskInstance <- lift $ Database.getCachedTaskInstance assignment student
-    liftIO $ print taskInstance
     solutions    <- lift $ Database.getSolutionsByAssignment
                              (assignmentId assignment)  
     mySolutions  <- lift $ Database.getSolutionsByTaskInstance

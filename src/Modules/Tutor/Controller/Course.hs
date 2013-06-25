@@ -59,7 +59,6 @@ data CourseFormData = CourseFormData
 createCourse :: CourseFormData -> AppHandler ()
 createCourse cfd = do
     cid <- Database.createCourse (tid, name, sem, enrStart, enrEnd, pc)
-    -- liftIO $ print cid
     _   <- Database.createGroup  (cid, g1n, g1c)
     _   <- Database.createGroup  (cid, g2n, g2c)
     redirect "/tutor"
