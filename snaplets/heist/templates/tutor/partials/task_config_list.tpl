@@ -1,4 +1,3 @@
-<form>
   <table class="table table-bordered table-striped">
     <thead>
       <tr>
@@ -29,4 +28,3 @@
       </tasks>
     </tbody>
   </table>
-</form>

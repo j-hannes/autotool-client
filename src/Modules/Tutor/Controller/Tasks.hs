@@ -16,7 +16,7 @@ import           Snap                   (ifTop, (<$>))
 import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
 import           Application            (AppHandler)
-import qualified Database.Switch        as Database
+import qualified Model.Base             as Model
 import           Model.Datatypes
 
 
@@ -24,8 +24,8 @@ import           Model.Datatypes
 -- | Renders the task page with a list of all tasks of the logged in tutor.
 showTaskList :: AppHandler ()
 showTaskList = ifTop $ do
-    tutor <- fromJust <$> Database.getTutor "51c8235ef4d13fc80f76c462"
-    tasks <- Database.getTasksWithAssignmentCount tutor
+    tutor <- fromJust <$> Model.getTutor "51c8235ef4d13fc80f76c462"
+    tasks <- Model.getTasksWithAssignmentCount tutor
     let splices = [("tasks", I.mapSplices renderTasks tasks)]
     heistLocal (I.bindSplices splices) $ render "tutor/pages/tasks"
 

@@ -17,7 +17,7 @@ import           Text.Digestive.Form (Form, (.:), check, stringRead, text)
 import           Text.Digestive.Snap
 ------------------------------------------------------------------------------
 import           Application
-import qualified Database.Switch     as Database
+import qualified Model.Base          as Model
 import           Utils.Form
 
 
@@ -58,9 +58,9 @@ data CourseFormData = CourseFormData
 -- displayed on the main page instead of displaying a separate page.
 createCourse :: CourseFormData -> AppHandler ()
 createCourse cfd = do
-    cid <- Database.createCourse (tid, name, sem, enrStart, enrEnd, pc)
-    _   <- Database.createGroup  (cid, g1n, g1c)
-    _   <- Database.createGroup  (cid, g2n, g2c)
+    cid <- Model.createCourse (tid, name, sem, enrStart, enrEnd, pc)
+    _   <- Model.createGroup  (cid, g1n, g1c)
+    _   <- Model.createGroup  (cid, g2n, g2c)
     redirect "/tutor"
   where
     tid      = "51c8235ef4d13fc80f76c462"

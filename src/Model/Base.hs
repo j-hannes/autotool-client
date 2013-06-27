@@ -1,4 +1,4 @@
-module Database.Switch (
+module Model.Base (
     -- ^ retrieve one by pk
     Db.getCourse
   , Db.getStudent

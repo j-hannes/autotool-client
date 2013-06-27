@@ -17,7 +17,7 @@ import           Snap               (ifTop, lift, liftIO, (<$>), redirect)
 import           Snap.Snaplet.Heist
 ------------------------------------------------------------------------------
 import           Application        (AppHandler)
-import qualified Database.Switch    as Database
+import qualified Model.Base         as Model
 import           Model.Datatypes
 import           Utils.Auth         (getStudentId)
 import           Utils.Render       (bestScore, translateScore)
@@ -35,11 +35,11 @@ handleStudentSelection = do
 handleStudent :: AppHandler ()
 handleStudent = ifTop $ do
     sid      <- getStudentId
-    mStudent <- Database.getStudent sid
+    mStudent <- Model.getStudent sid
     case mStudent of
       Nothing      -> redirect "/404"
       Just student -> do
-        groups <- Database.getEnrolledGroups student
+        groups <- Model.getEnrolledGroups student
         let splices = [
                 ("studentId", studentId |- student)
               , ("groups",    I.mapSplices renderGroup groups) 
@@ -52,8 +52,8 @@ handleStudent = ifTop $ do
 -- details into the template.
 renderGroup :: Group -> Splice AppHandler
 renderGroup group = do
-    course      <- fromJust <$> (lift $ Database.getCourse (groupCourse group))
-    assignments <- lift $ Database.getAssignmentsByCourse (courseId course)
+    course      <- fromJust <$> (lift $ Model.getCourse (groupCourse group))
+    assignments <- lift $ Model.getAssignmentsByCourse (courseId course)
     I.runChildrenWith [
         ("groupDescription", groupDescription   |- group)
       , ("groupId",          groupId            |< group)
@@ -69,14 +69,14 @@ renderGroup group = do
 renderAssignment :: Assignment -> Splice AppHandler
 renderAssignment assignment = do
     now          <- liftIO getCurrentTime
-    task         <- fromJust <$> (lift $ Database.getTask
+    task         <- fromJust <$> (lift $ Model.getTask
                                            (assignmentTask assignment))
     sid          <- lift getStudentId
-    student      <- fromJust <$> (lift $ Database.getStudent sid)
-    taskInstance <- lift $ Database.getCachedTaskInstance assignment student
-    solutions    <- lift $ Database.getSolutionsByAssignment
+    student      <- fromJust <$> (lift $ Model.getStudent sid)
+    taskInstance <- lift $ Model.getCachedTaskInstance assignment student
+    solutions    <- lift $ Model.getSolutionsByAssignment
                              (assignmentId assignment)  
-    mySolutions  <- lift $ Database.getSolutionsByTaskInstance
+    mySolutions  <- lift $ Model.getSolutionsByTaskInstance
                              (taskInstanceId taskInstance)
     I.runChildrenWith [
         ("description",    taskName |- task)

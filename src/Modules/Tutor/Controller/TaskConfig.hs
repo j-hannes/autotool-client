@@ -21,7 +21,7 @@ import           Application             (AppHandler)
 import qualified Autotool.XmlRpc         as Autotool
 import qualified Autotool.XmlRpc.Types.ScoringOrder as SO
 import qualified Autotool.Mock           as AutotoolMock
-import qualified Database.Switch         as Database
+import qualified Model.Base              as Model
 import           Model.Datatypes
 import           Utils.Form              (renderForm, notEmpty)
 import qualified Modules.Tutor.View.Task as View
@@ -131,5 +131,5 @@ createTask :: String -> String -> String -> ScoringOrder -> AppHandler ()
 createTask taskname tasktitle signature so = do
     tid <- return "51c8235ef4d13fc80f76c462"
     now <- liftIO $ getCurrentTime
-    _   <- Database.createTask (tid, tasktitle, taskname, signature, so, now)
+    _   <- Model.createTask (tid, tasktitle, taskname, signature, so, now)
     redirect "/tutor"
