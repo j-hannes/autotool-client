@@ -47,9 +47,9 @@ import           Model.Datatypes
 -- Switch between Database.Adapter:
 ------------------------------------------------------------------------------
 -- import Database.Adapter.IORef as Db
--- import Database.Adapter.MongoDB as Db
 -- import Database.Adapter.FileStore as Db
 import Database.Adapter.Sqlite as Db
+-- import Database.Adapter.MongoDB as Db
 
 
 ------------------------------------------------------------------------------
